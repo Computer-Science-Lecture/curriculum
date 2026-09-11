@@ -34,6 +34,7 @@
       <div class="grade"><b>D+</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>12</b> 치명적</a><a class="chip s-major" href="#f01"><b>13</b> 중대</a><a class="chip s-minor" href="#f01"><b>4</b> 경미</a><span class="total">합계 29</span></div>
 
   <!-- ============ 총평 ============ -->
   <section>
@@ -76,8 +77,8 @@
     <p class="prose">해싱(분리 연쇄법) 과제다. 레포에서 유일하게 <strong>컴파일 단계에서 실패하는 파일</strong>이고, 2016-05-18 <code>Update struct type C89</code> 커밋 이후 지금까지 그 상태로 master에 남아 있다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>t-&gt;zsize</code>라는 멤버는 존재하지 않는다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>t-&gt;zsize</code>라는 멤버는 존재하지 않는다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>struct Table</code>의 멤버는 <code>size</code>다. <code>destroy()</code>는 <code>zsize</code>를 읽는다. 오타 하나지만 결과는 절대적이다 — 이 파일은 어떤 C 컴파일러로도 빌드되지 않는다. 즉 <strong>저자는 이 소스를 마지막으로 고친 뒤 단 한 번도 빌드하지 않고 커밋했다.</strong> 커밋 메시지가 <code>Update struct type C89</code>인 것으로 보아 구조체 선언을 손보다가 멤버명을 건드렸고, 그대로 push한 것으로 보인다.</p>
         </div>
@@ -94,8 +95,8 @@ void destroy(table t)
         <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/CSE2010/blob/HEAD/lab11/p11.c" target="_blank" rel="noopener"><b>gcc -Wall -Wextra -fsanitize=address lab11/p11.c</b></a></div><pre><span class="hl">lab11/p11.c:58:20: error: no member named 'zsize' in 'struct Table'</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>체인에 매달린 노드는 전부 누수된다</h3></header>
+      <article class="finding" id="f02" data-sev="major">
+        <header><span class="tier">중대</span><h3>체인에 매달린 노드는 전부 누수된다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>zsize</code>를 <code>size</code>로 고쳐 컴파일되게 만들어도 <code>destroy()</code>는 각 버킷의 <strong>헤드 센티널 하나만</strong> 해제한다. <code>insert()</code>가 <code>list-&gt;next</code>에 이어붙인 실제 데이터 노드는 한 개도 해제되지 않는다. 분리 연쇄법 해시 테이블에서 해제해야 할 것의 대부분이 곧 체인인데, 그 체인을 순회하는 루프가 아예 없다.</p>
           <p>같은 함수 안에 버킷 배열 할당 버그도 있다. <code>t-&gt;lists</code>는 <code>node*</code>(포인터 배열)인데 <code>sizeof(struct Node)</code>로 크기를 잡았다 — 64비트에서 포인터당 8바이트면 되는 자리에 16바이트씩 잡는다. 크래시는 안 나지만 타입을 이해하지 못한 채 쓴 <code>sizeof</code>다.</p>
@@ -113,8 +114,8 @@ void destroy(table t)
     <p class="prose">Lab04는 중위식을 후위식으로 바꾼 뒤 평가하고, Lab06은 후위식을 직접 평가한다. <code>lab06/p6.c</code>는 <code>lab04/p4.c</code>와 <code>main()</code>을 제외한 164행이 완전히 동일하다 — 스택 ADT, <code>calc()</code>, <code>oper()</code>가 글자 하나 다르지 않게 복사되어 있다. 따라서 Lab04의 평가 버그는 Lab06에 그대로 상속된다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>후위식 평가에서 피연산자 순서가 뒤집힌다</h3></header>
+      <article class="finding" id="f03" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>후위식 평가에서 피연산자 순서가 뒤집힌다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>oper(e, pop(number), pop(number))</code>는 C 표준에서 <strong>인자 평가 순서가 미지정(unspecified)</strong>이다. 두 <code>pop</code> 중 어느 쪽이 먼저 실행될지 컴파일러가 정한다. clang에서 실행한 결과 <code>first</code>에 스택 최상단(= 후위식의 오른쪽 피연산자)이 들어가, 프로그램은 <code>right OP left</code>를 계산한다. <code>-</code>, <code>/</code>, <code>%</code>처럼 교환법칙이 성립하지 않는 연산자 전부가 반대로 계산된다.</p>
           <p>저자의 gcc 5.2.1에서는 반대 순서로 평가되어 우연히 맞는 답이 나왔을 수도 있다. 그것이 더 나쁘다 — 컴파일러가 버그를 가려준 것이지 코드가 맞은 게 아니기 때문이다.</p>
@@ -136,8 +137,8 @@ $ echo '8/2' | ./p4 -   →  result: <span class="hl">0</span>#    <span class="
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>숫자 <code>0</code>은 피연산자로 인식되지 않는다</h3></header>
+      <article class="finding" id="f04" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>숫자 <code>0</code>은 피연산자로 인식되지 않는다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>토크나이저가 <code>&gt;=</code> 대신 <code>&gt;</code>를 썼다. <code>'0'</code>은 조건을 통과하지 못하고 <code>else</code>의 <code>switch</code>로 떨어지는데 거기에도 <code>case '0'</code>이 없다. 결과적으로 <strong>입력에서 조용히 사라진다.</strong></p>
         </div>
@@ -152,8 +153,8 @@ result: 6#</pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>empty()</code>는 항상 마지막 노드를 놓친다</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>empty()</code>는 항상 마지막 노드를 놓친다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>루프가 <code>tmp</code>를 한 칸 뒤처져 따라가며 해제하는데, 종료 시점에 <code>tmp</code>는 마지막 실제 노드를 가리키고 <code>ptr</code>은 <code>NULL</code>이다. 그리고 루프 밖에서 해제하는 것은 <code>tmp</code>가 아니라 <code>ptr</code> — 즉 <code>free(NULL)</code>이다. 저자가 꼬리 노드를 해제하려 한 의도는 명확하지만 변수를 잘못 골랐다. 호출할 때마다 노드 하나씩 누수된다.</p>
           <p>여기에 더해 <code>calc()</code>가 내부에 만드는 <code>number</code> 리스트는 어디에서도 해제되지 않는다.</p>
@@ -167,8 +168,8 @@ result: 6#</pre>
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>죽은 함수와 반환값 없는 함수</h3></header>
+      <article class="finding" id="f06" data-sev="minor">
+        <header><span class="tier">경미</span><h3>죽은 함수와 반환값 없는 함수</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>back()</code>(:58)과 <code>pop_back()</code>(:74)은 정의만 되고 호출되지 않는다. 둘 다 빈 리스트에서 널 역참조하는 버그를 품고 있으나 호출되지 않아 드러나지 않는다. <code>getOper()</code>(:10–26)는 <code>switch</code>의 모든 <code>case</code>를 벗어나면 반환값 없이 함수를 이탈한다 — <code>-Wreturn-type</code>이 잡는다. <code>main</code>의 <code>op</code>(:164), <code>calc</code>의 <code>first</code>/<code>second</code>(:105)는 선언만 되고 쓰이지 않는다.</p>
         </div>
@@ -183,8 +184,8 @@ result: 6#</pre>
     <p class="prose">README에 적힌 주제는 <strong>R-B tree deletion</strong>이다. 삭제 알고리즘(<code>removeNode</code>, <code>removeUtil</code>, 총 85행)은 실제로 구현되어 있다. 그런데 그 코드에 도달하는 경로가 커밋된 입력으로는 절대 열리지 않는다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>삽입/삭제 모드 전환 조건이 <code>\r</code>이다</h3></header>
+      <article class="finding" id="f07" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>삽입/삭제 모드 전환 조건이 <code>\r</code>이다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main</code>은 읽은 문자가 <code>13</code>(캐리지 리턴)일 때 삭제 모드로 전환한다. 그런데 함께 커밋된 <code>lab10/input</code>은 LF(<code>0x0a</code>)로 개행된 순수 Unix 텍스트다 — 파일 어디에도 <code>0x0d</code>가 없다. README는 <em>"compile@Linux Ubuntu Gnome 15.10"</em>이라고 적혀 있으니, <strong>저자가 명시한 바로 그 환경에서도 이 조건은 영원히 거짓이다.</strong></p>
           <p>결과: 두 번째 줄의 <code>21 3 5 11 23</code>은 삭제 대상이 아니라 <em>추가 삽입</em>된다. 삭제 단계 진입을 알리는 <code>printf("start delete\n")</code>는 출력에 나타나지 않는다.</p>
@@ -212,8 +213,8 @@ for (int ch = 0, chk = 0; !(chk &lt; 0); inorderPrint(&amp;tree))
 <span class="cm">// 0x0d는 한 바이트도 없다</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>EOF에서 마지막 값이 한 번 더 삽입된다</h3></header>
+      <article class="finding" id="f08" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>EOF에서 마지막 값이 한 번 더 삽입된다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>루프가 <code>fscanf</code>의 반환값 <code>chk</code>를 검사하기 <em>전에</em> <code>insertNode</code>를 호출한다. EOF에 도달하면 두 <code>fscanf</code>가 모두 실패하고 <code>ch</code>는 직전 값을 그대로 유지하는데, 그 값이 다시 삽입된 뒤에야 루프 조건이 평가된다.</p>
           <p>이 버그는 입력 파일이 개행으로 끝나느냐에 따라 나타났다 사라진다. <code>lab09/input</code>은 개행 없이 끝나 Lab09에서는 증상이 없고, <code>lab10/input</code>은 개행으로 끝나 증상이 나타난다. Lab08·Lab09는 <code>if (chk &lt; 0) break;</code>를 작업 <em>앞에</em> 두는 올바른 패턴을 쓴다. <strong>Lab10에서 오히려 퇴행했다.</strong></p>
@@ -234,8 +235,8 @@ for (int ch = 0, chk = 0; !(chk &lt; 0); inorderPrint(&amp;tree))
 	insert(&amp;tree, ch);</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>출처가 다른 509행짜리 두 번째 R-B 트리가 동봉되어 있다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3>출처가 다른 509행짜리 두 번째 R-B 트리가 동봉되어 있다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>lab10/p10-test.c</code>는 <code>p10.c</code>와 아무 관계가 없는 <strong>완전히 독립적인 R-B 트리 구현</strong>이다. 전역 <code>root</code>, <code>struct rbNode { int data, color; struct rbNode *link[2]; }</code>의 배열형 자식 포인터, <code>stack[98]</code>/<code>dir[98]</code> 고정 배열을 쓴 반복적 삽입, 그리고 ASCII 아트로 회전을 그려 놓은 <code>/* */</code> 주석 스타일 — <strong>이 네 가지 특징은 레포의 나머지 22개 소스 어디에도 나타나지 않는다.</strong> 저자 본인의 코드는 일관되게 <code>typedef</code>한 포인터, <code>left</code>/<code>right</code> 명명, <code>#if defined(_WIN32) &amp;&amp; defined(_MSC_VER)</code> 가드를 쓴다.</p>
           <p>이 파일의 3행은 그 가드 없이 <code>#pragma warning (disable :4996)</code>를 노출한 채 시작한다 — 저자가 모든 파일에 붙이던 가드를 유독 여기만 빠뜨렸다. <strong>외부에서 가져온 코드로 강하게 추정된다</strong>(단정은 하지 않는다 — 원출처를 확인하지 못했다). 어느 쪽이든 빌드에도, 보고서에도 쓰이지 않는 파일이 master에 남아 있다. Lab12에서는 같은 성격의 <code>p12-test.c</code>를 삭제하는 커밋(<code>b294387</code>)을 남겼으면서 이건 정리하지 않았다.</p>
@@ -264,8 +265,8 @@ struct rbNode {
     <p class="prose">세 과제가 서로 다른 방식으로 같은 부류의 실수를 한다. 모두 ASan이 즉시 잡아내는 힙 경계 밖 쓰기이고, 모두 <code>gcc -fsanitize=address</code>로 한 번만 돌려봤으면 드러났을 것들이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Lab03: 모든 노드가 포인터 크기만큼만 할당된다</h3></header>
+      <article class="finding" id="f10" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Lab03: 모든 노드가 포인터 크기만큼만 할당된다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>List</code>는 <code>struct Node *</code>의 <code>typedef</code>다. 따라서 <code>sizeof(List)</code>는 <strong>포인터 크기(8바이트)</strong>이지 <code>struct Node</code>의 크기(16바이트)가 아니다. <code>makeList()</code>와 <code>Create()</code> 모두 이 값으로 <code>malloc</code>하므로, 리스트에 들어가는 <strong>모든 노드가 필요한 크기의 절반만 할당</strong>된다. <code>next</code> 필드(오프셋 8)에 쓰는 순간 힙 경계를 넘는다.</p>
           <p>연결 리스트 과제에서 노드 할당 크기를 틀렸다는 것은, 자료구조의 가장 기본이 되는 한 줄이 틀렸다는 뜻이다. 32비트에서도 마찬가지로 절반만 잡힌다 — 우연히 맞을 플랫폼이 없다.</p>
@@ -296,8 +297,8 @@ allocated by thread T0 here:
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Lab03: 해제 코드는 존재하지만 호출되지 않는다</h3></header>
+      <article class="finding" id="f11" data-sev="major">
+        <header><span class="tier">중대</span><h3>Lab03: 해제 코드는 존재하지만 호출되지 않는다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>DelList()</code>(:151–160)는 리스트 전체를 순회하며 해제하도록 올바르게 작성되어 있다. 그런데 <code>main</code>에서 호출하지 않는다. <code>makeEmpty()</code>(:102–106)는 더 나쁘다 — 파라미터 <code>list</code>에 새 할당을 대입하는데, C는 값 전달이므로 <strong>호출자에게는 아무 효과가 없고 원래 리스트만 유실된다.</strong> 정의만 되고 호출되지 않는 것이 오히려 다행인 함수다. <code>isEmpty()</code>, <code>isLast()</code>도 호출부가 없다.</p>
           <p>입력 파싱도 취약하다. :46–48의 <code>do–while</code>은 <code>fscanf</code>의 반환값을 확인하지 않는다. 입력이 <code>p</code>로 끝나지 않으면 <code>command</code>가 갱신되지 않은 채 <strong>무한 루프</strong>에 들어간다. 커밋된 입력이 마침 <code>p</code>로 끝나서 드러나지 않을 뿐이다. :42의 <code>fopen</code> 결과도 <code>NULL</code> 검사가 없다 — 다른 랩들은 대부분 검사한다.</p>
@@ -309,8 +310,8 @@ allocated by thread T0 here:
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Lab07-2: 1-based 힙에 <code>capacity</code>칸만 잡았다</h3></header>
+      <article class="finding" id="f12" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Lab07-2: 1-based 힙에 <code>capacity</code>칸만 잡았다</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>배열 기반 이진 힙을 1번 인덱스부터 쓰려면 <code>capacity + 1</code>칸이 필요하다(0번은 센티널). 여기서는 정확히 <code>capacity</code>칸만 잡는다. 동시에 <code>isFull()</code>은 <code>size &gt;= capacity</code>로 판정하므로 <code>capacity</code>개까지 삽입을 허용한다. 마지막 삽입에서 <code>i</code>가 <code>capacity</code>가 되어 <strong>배열 바로 뒤에 쓴다.</strong></p>
           <p>같은 코드가 <code>lab13/p13.c</code>:184, :215에 복사되어 있다. 거기서는 그 힙을 아무도 호출하지 않아 터지지 않는다.</p>
@@ -333,8 +334,8 @@ allocated by thread T0 here:
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Lab12: 정점 배열을 포인터 한 개 크기로 잡는다</h3></header>
+      <article class="finding" id="f13" data-sev="major">
+        <header><span class="tier">중대</span><h3>Lab12: 정점 배열을 포인터 한 개 크기로 잡는다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>g-&gt;vertex</code>는 <code>list</code>(포인터) <code>size</code>개를 담을 배열인데 <code>sizeof(list)</code>, 즉 포인터 <strong>하나</strong> 분량만 할당한다. 바로 다음 줄의 루프가 <code>size</code>개를 채워 넣는다.</p>
           <p>커밋 이력이 흥미롭다. <code>b294387 "Crash Fix"</code>(2016-05-26)에서 저자는 이 크래시를 만나 <code>int mat[100][100]</code>이라는 고정 인접 행렬을 구조체에 추가하는 것으로 <em>우회</em>했다. 원인인 <code>malloc</code> 크기는 손대지 않았고, 대신 정점 100개라는 하드코딩 상한과 <code>graphAppend</code>의 경계 검사 부재를 새로 들여왔다.</p>
@@ -357,8 +358,8 @@ for (i = 0; i &lt; size; ++i)
     <p class="prose">DFS와 BFS로 경로를 찾는 과제다. 실행하면 시작 직후 죽는다. 원인은 컴파일러가 이미 경고로 알려준 자리에 있다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>graph_create()</code>에 <code>return</code>이 없다</h3></header>
+      <article class="finding" id="f14" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>graph_create()</code>에 <code>return</code>이 없다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>함수는 <code>pGraph</code>를 반환한다고 선언되어 있고, 내부에서 구조체를 할당해 초기화까지 한다. 그리고 그것을 반환하지 않는다. 호출자가 받는 값은 미정의다 — 실제로는 레지스터에 남은 쓰레기값이다. 그 쓰레기 포인터의 <code>size</code> 필드를 읽어 <code>graph_realloc</code>에 넘기고, <code>malloc</code>이 <code>0xffffffffbcc60608</code>바이트를 요구하며 죽는다.</p>
           <p><code>-Wall</code>이 정확히 이 줄을 짚는다. 경고를 한 번도 켜지 않았다는 증거다.</p>
@@ -382,8 +383,8 @@ ERROR: AddressSanitizer: requested allocation size <span class="hl">0xffffffffbc
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>경계 검사를 역참조 뒤에 한다</h3></header>
+      <article class="finding" id="f15" data-sev="major">
+        <header><span class="tier">중대</span><h3>경계 검사를 역참조 뒤에 한다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>&amp;&amp;</code>는 왼쪽부터 평가한다. 따라서 <code>graph-&gt;vertex[now_index]-&gt;first-&gt;value</code>를 먼저 읽고 <em>그 다음에</em> <code>now_index &lt; graph-&gt;size</code>를 확인한다. 찾는 정점이 없으면 배열 끝을 넘어 읽는다. 두 조건의 순서만 바꾸면 되는 문제다.</p>
           <p>같은 함수에서 <code>visited[now]</code>는 배열 <em>인덱스</em>가 아니라 정점 <em>값</em>으로 접근한다(:220, :222). 정점 번호가 배열 크기 이상이면 그대로 경계 밖이다. <code>graph_append_edge</code>의 <code>if (start &gt; graph-&gt;size)</code>(:207)도 값과 개수를 비교하는 같은 종류의 혼동이다. 그리고 <code>graph_find_dfs_rec_util</code>은 <code>int</code>를 반환한다면서 루프를 다 돌고 나면 반환 없이 끝난다(:232).</p>
@@ -403,8 +404,8 @@ ERROR: AddressSanitizer: requested allocation size <span class="hl">0xffffffffbc
     <p class="prose">README의 항목명은 <strong>Circular Queue ADT</strong>다. 원형 큐의 존재 이유는 배열을 재사용해 enqueue와 dequeue를 <strong>둘 다 O(1)</strong>로 만드는 것이다. 구현에는 <code>front</code>도 <code>rear</code>도 없고 나머지 연산(<code>%</code>)도 없다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>dequeue가 배열 전체를 한 칸씩 밀어낸다</h3></header>
+      <article class="finding" id="f16" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>dequeue가 배열 전체를 한 칸씩 밀어낸다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>구조체에는 <code>index</code> 하나뿐이다. <code>pop()</code>은 0번을 꺼낸 뒤 나머지 전체를 앞으로 복사한다 — O(n)이다. 이건 원형 큐가 아니라 배열 기반 리스트다. 게다가 <code>capacity</code>만큼 채운 뒤 dequeue하면 뒤쪽 공간이 재사용되긴 하지만, 그것은 원형 인덱싱 덕분이 아니라 매번 전체를 시프트하기 때문이다. <strong>과제가 가르치려던 개념이 구현에 하나도 없다.</strong></p>
           <p>그리고 <code>ret</code>는 빈 큐 검사보다 <strong>먼저</strong> 대입된다. 큐가 비어 있으면 초기화되지 않은 메모리를 읽는다 — 값은 버려지지만 읽기 자체가 일어난다.</p>
@@ -422,8 +423,8 @@ ERROR: AddressSanitizer: requested allocation size <span class="hl">0xffffffffbc
 	stk-&gt;index--;</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>테스트 입력 파일에 머지 충돌 마커가 그대로 커밋되어 있다</h3></header>
+      <article class="finding" id="f17" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>테스트 입력 파일에 머지 충돌 마커가 그대로 커밋되어 있다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>lab05/input</code> 16–21행에 해결되지 않은 Git 충돌 마커가 남아 있다. <code>dfe0f97 "Update Directory"</code> 커밋으로 들어왔고 <strong>2016년 이후 지금까지 master에 그대로</strong> 있다. 프로그램은 <code>&lt;</code>, <code>=</code>, <code>&gt;</code>, 16진 해시 문자를 명령으로 해석하지 못해 조용히 무시한다 — 그래서 아무도 눈치채지 못했다.</p>
           <p>충돌을 해결하지 않고 커밋했다는 것 자체보다, <strong>그 뒤로 이 파일로 프로그램을 한 번도 눈여겨 돌려보지 않았다</strong>는 사실이 더 문제다. 참고로 저자는 <code>3e22981 "remove unmerged file"</code>이라는 커밋도 남겼다 — 충돌 상황을 인지하고 있었지만 이 파일은 놓쳤다.</p>
@@ -438,8 +439,8 @@ r
 <span class="hl">&gt;&gt;&gt;&gt;&gt;&gt;&gt; e2e69fc4bd26023e10c75c7fe77d8f83c4dc142f</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>첫 <code>malloc</code>은 초기화되지 않고 곧바로 버려진다</h3></header>
+      <article class="finding" id="f18" data-sev="major">
+        <header><span class="tier">중대</span><h3>첫 <code>malloc</code>은 초기화되지 않고 곧바로 버려진다</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main</code>은 <code>Node</code>를 하나 할당하는데 <code>value</code>, <code>capacity</code>, <code>index</code> 어느 것도 초기화하지 않는다. 입력의 <code>n 5</code> 명령이 <code>init(5)</code>로 덮어쓰면서 이 할당은 누수된다. 반대로 입력에 <code>n</code>이 없으면 모든 연산이 초기화되지 않은 <code>capacity</code>와 널 아닌 쓰레기 <code>value</code> 포인터를 쓰게 된다.</p>
           <p>해제 함수 <code>empty()</code>(:72–76)와 출력 함수 <code>view()</code>(:64–71)는 정의만 되고 호출되지 않는다. <code>init()</code>의 <code>malloc(sizeof(int) * cap + 1)</code>(:14)은 연산자 우선순위상 <code>int</code> 한 칸이 아니라 <strong>1바이트</strong>를 더 잡는다 — 의도가 무엇이었든 그대로 이루어지지 않았다.</p>
@@ -460,8 +461,8 @@ r
     <p class="prose">그래프 두 과제는 이 레포에서 드물게 <strong>알고리즘 자체가 정답을 내는</strong> 경우다. 다만 그 사실을 확인하려면 매크로 하나를 고쳐야 했다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>줄바꿈 문자를 플랫폼별 상수로 하드코딩했다</h3></header>
+      <article class="finding" id="f19" data-sev="major">
+        <header><span class="tier">중대</span><h3>줄바꿈 문자를 플랫폼별 상수로 하드코딩했다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>파서가 입력의 "첫 줄=정점 목록, 둘째 줄=간선 목록" 구조를 <strong>줄바꿈 바이트를 직접 비교해서</strong> 판별한다. <code>__linux__</code>도 <code>_MSC_VER</code>도 아닌 환경(macOS·BSD)에서는 <code>LINE_CHAR</code>가 <code>13</code>이 되고, LF로 끝나는 입력 파일에서 조건이 영원히 거짓이 된다. Lab12는 <strong>빈 줄 하나만 출력</strong>하고 끝나고, Lab13은 모든 토큰을 정점으로 오인해 비용이 전부 0 또는 INF인 쓰레기를 출력한다. <code>lab15/p15_1.c</code>, <code>p15_2.c</code>도 같은 매크로를 공유한다.</p>
           <p>검증을 위해 <code>#define LINE_CHAR 13</code>을 <code>10</code>으로 바꾼 사본을 만들어 돌렸다. 그러자 <strong>두 과제 모두 정답을 냈다.</strong> 알고리즘은 맞았고 이식성만 틀린 것이다. 그러나 3분기 <code>#if</code>를 직접 작성해 놓고 마지막 분기를 검증하지 않은 것 자체가 결함이다 — 애초에 <code>c == '\n' || c == '\r'</code>이면 끝날 일이었다.</p>
@@ -485,8 +486,8 @@ to 5, cost 3    to 6, cost 6    to 7, cost 5   <span class="cm">← 손으로 �
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Lab13은 Dijkstra가 아니다 — 힙을 만들어 놓고 쓰지 않는다</h3></header>
+      <article class="finding" id="f20" data-sev="major">
+        <header><span class="tier">중대</span><h3>Lab13은 Dijkstra가 아니다 — 힙을 만들어 놓고 쓰지 않는다</h3><a class="permalink" href="#f20" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>p13.c</code>는 :173–251에 완전한 이진 최대 힙(<code>heap_create</code>, <code>heap_push</code>, <code>heap_pop</code>, <code>heap_free</code>, 약 80행)을 구현해 놓았다. 그런데 <code>grep</code>으로 확인한 결과 <strong>이 네 함수의 호출부가 파일 전체에 하나도 없다.</strong> <code>dijkstra()</code>는 <code>pList heap = list_create()</code>, 즉 평범한 연결 리스트를 쓰면서 변수 이름만 <code>heap</code>이다.</p>
           <p>그래서 "최소 비용 정점 추출" 루프가 힙 연산이 아니다. 더 나쁜 것은 그 루프의 비교문이다. <code>k</code>는 파일 상단의 <strong>전역 <code>int i, j, k;</code></strong> 중 하나로, <code>main</code>의 :375에서 마지막으로 읽은 <em>간선 가중치</em>가 들어 있다. 그 값으로 <code>list_index(heap, k)</code>를 계산해 인덱싱한다 — 의미 없는 비교다. 결국 최소값 선택이 성립하지 않는다.</p>
@@ -505,8 +506,8 @@ LIST_FOR_EACH(heap, maxer)
 <span class="cm">// 정의 4개, 호출 0개</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>해제를 포기한다고 주석으로 선언한 함수</h3></header>
+      <article class="finding" id="f21" data-sev="minor">
+        <header><span class="tier">경미</span><h3>해제를 포기한다고 주석으로 선언한 함수</h3><a class="permalink" href="#f21" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>graphFree()</code>는 본문이 주석 처리된 <code>free(g)</code> 한 줄뿐인 빈 함수다. 호출은 되지만 아무것도 하지 않는다. 정점 리스트, 노드, 그래프 구조체 전부가 누수된다. <code>p13.c</code>의 <code>dijkstra()</code>가 할당하는 <code>dist</code> 배열(:268)도 해제되지 않는다.</p>
           <p>부수적으로, 두 파일 모두 <code>int i, j, k;</code>를 <strong>전역</strong>으로 두고 서로 다른 함수에서 루프 카운터로 재사용한다. 지금은 중첩 호출이 없어 터지지 않지만, <code>graphInit</code>이 <code>i</code>를 쓰는 동안 <code>i</code>로 도는 루프에서 그것을 호출하면 즉시 무한 루프가 된다.</p>
@@ -526,8 +527,8 @@ LIST_FOR_EACH(heap, maxer)
     <p class="prose">머지 소트를 재귀·반복 두 가지로, 퀵 소트를 피벗 선택 세 가지로 구현하는 과제다. 함수 포인터 <code>typedef int (*Pivot)(int, int)</code>로 피벗 전략을 갈아끼우는 설계는 학부 과제로서 좋은 판단이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>반복형 머지 소트는 정렬하지 못하고, 음수 크기로 <code>malloc</code>한다</h3></header>
+      <article class="finding" id="f22" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>반복형 머지 소트는 정렬하지 못하고, 음수 크기로 <code>malloc</code>한다</h3><a class="permalink" href="#f22" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>세 개의 off-by-one이 겹쳐 있다. <code>merge_sort_merge</code>는 <code>last</code>를 <strong>포함(inclusive)</strong> 인덱스로 쓰는데(<code>n2 = last - mid</code>, <code>ary[mid+1..last]</code>를 복사), <code>merge_sort_iterative_util</code>은 <code>right</code>를 <strong>배타적 끝</strong>으로 계산해 넘긴다. 게다가 호출부는 원소 개수 <code>i</code>가 아니라 <code>i - 1</code>을 넘기는데, 받는 쪽은 <code>start &lt; n</code>으로 개수처럼 쓴다.</p>
           <p>블록 크기가 커지면 <code>mid</code>가 <code>last</code>를 넘어서고 <code>n2</code>가 음수가 된다. <code>malloc(sizeof(int) * -2)</code>는 <code>size_t</code>로 승격되어 <code>0xfffffffffffffff8</code>이 된다 — ASan이 정확히 그 값을 보고한다.</p>
@@ -557,8 +558,8 @@ merge_sort_recursive  → 1, 5, 11, 15, 19, 26, 48, 59, 61, 77   <span class="cm
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>XOR swap — 표준이 정의하지 않는 동작</h3></header>
+      <article class="finding" id="f23" data-sev="major">
+        <header><span class="tier">중대</span><h3>XOR swap — 표준이 정의하지 않는 동작</h3><a class="permalink" href="#f23" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>a ^= b ^= (a ^= b)</code>는 하나의 시퀀스 포인트 사이에서 같은 객체를 여러 번 수정한다. C에서 <strong>미정의 동작</strong>이며, 컴파일러가 바꾸면 결과가 바뀔 수 있다. <code>i == j</code>일 때 원소를 0으로 만들어 버리는 성질도 있다(:185의 <code>if (i != j)</code> 가드 덕에 여기서는 피해 간다). 같은 관용구가 <code>lab02/p2_1.c</code>:78에도 있는데, 거기엔 그 가드가 없다 — <code>i &lt; j</code>가 보장되어 우연히 안전할 뿐이다.</p>
           <p>세 줄 임시변수 교환이 더 짧고 빠르고 정의된 동작이다. 이 관용구는 2016년 기준으로도 이미 20년 묵은 안티패턴이었다.</p>
@@ -568,8 +569,8 @@ merge_sort_recursive  → 1, 5, 11, 15, 19, 26, 48, 59, 61, 77   <span class="cm
 ary[pivot] ^= ary[j] ^= (ary[pivot] ^= ary[j]);</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>파티션 루프에 하한이 없고, <code>%s</code>에 길이 제한이 없다</h3></header>
+      <article class="finding" id="f24" data-sev="major">
+        <header><span class="tier">중대</span><h3>파티션 루프에 하한이 없고, <code>%s</code>에 길이 제한이 없다</h3><a class="permalink" href="#f24" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>:182의 <code>while (ary[j] &gt; ary[pivot]) --j;</code>는 <code>j &gt;= first</code>를 확인하지 않는다. 지금은 <code>ary[pivot]</code> 자신이 자기보다 크지 않아 멈추지만, :188–189에서 <code>pivot</code>이 이동한 뒤에는 그 보장이 약해진다. :181의 <code>while (ary[i] &lt;= ary[pivot] &amp;&amp; i &lt; last)</code>는 Lab14와 같은 "역참조 후 경계 검사" 순서다.</p>
           <p>:253의 <code>char input_string[100]</code>에 :259의 <code>fscanf(fp, "%s", input_string)</code>로 읽는다 — 길이 제한이 없다. 100자 넘는 토큰이 들어오면 스택을 넘어 쓴다. <code>%99s</code> 한 번이면 끝날 문제이고, 같은 패턴이 <code>lab02/p2_1.c</code>:67에도 있다.</p>
@@ -588,8 +589,8 @@ ary[pivot] ^= ary[j] ^= (ary[pivot] ^= ary[j]);</pre></div>
     <h2>Lab01 · Lab02 · Lab07-1 · Lab08 — 나머지</h2>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Lab08: <code>deleteValue</code> 50행 전체가 죽은 코드이고, 그 안에 오답 <code>free</code>가 있다</h3></header>
+      <article class="finding" id="f25" data-sev="major">
+        <header><span class="tier">중대</span><h3>Lab08: <code>deleteValue</code> 50행 전체가 죽은 코드이고, 그 안에 오답 <code>free</code>가 있다</h3><a class="permalink" href="#f25" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>AVL 트리의 삽입과 회전은 정상 동작한다(실행 로그에 <code>Single Rotate Left/Right</code>, <code>Double Rotate Left</code>가 올바른 시점에 찍힌다). 그런데 <code>deleteValue</code>(:131–183)는 <strong>호출부가 없다.</strong> 그 안에서 <code>preright = mom</code>으로 읽는 전역 <code>Tree * mom;</code>(:18)은 어디서도 대입되지 않아 항상 <code>NULL</code>이다 — 죽은 코드 안의 죽은 분기다.</p>
           <p>더 심각한 것은 :150이다. 중위 후속자 <code>ret</code>를 끌어올린 뒤 제거해야 하는데, 해제하는 것은 <code>rret-&gt;right</code>다. <code>while</code> 루프가 한 번이라도 돌았다면 <code>ret</code>는 <code>rret-&gt;left</code>에 있고, <code>rret-&gt;right</code>는 <strong>트리에 여전히 연결된 다른 노드</strong>다. 살아 있는 노드를 해제하고, 그 자리를 <code>NULL</code>로 끊어 서브트리를 통째로 유실시킨다. 똑같은 코드가 <code>lab07/p7_1.c</code>:141에도 있다 — Lab08이 Lab07을 복사했고, 두 과제의 입력 모두 삭제 명령을 포함하지 않아 아무도 이 경로를 밟지 않았다.</p>
@@ -609,8 +610,8 @@ if (now-&gt;right != NULL)
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Lab02: 기대 출력을 커밋해 놓고 한 번도 대조하지 않았다</h3></header>
+      <article class="finding" id="f26" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Lab02: 기대 출력을 커밋해 놓고 한 번도 대조하지 않았다</h3><a class="permalink" href="#f26" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>lab02/TestCase/</code>에는 세 문제 각각의 <code>input1/input2</code>와 <strong>기대 출력 <code>output1/output2</code></strong>가 들어 있다. 레포 전체에서 기대 출력이 존재하는 유일한 곳이다. 그래서 실제로 돌려 <code>diff</code>를 떠 봤다.</p>
           <p><code>p2_1</code>은 두 입력 모두 <strong>완전 일치</strong>한다. 그런데 <code>p2_2</code>와 <code>p2_3</code>은 <strong>네 케이스 전부 불일치</strong>한다. 숫자 값은 맞고, 틀리는 것은 라벨과 공백이다 — <code>p2_3</code>은 <code>progAvg</code>/<code>examAvg</code>여야 할 자리에 <code>HwAvg</code>/<code>ExamAvg</code>를 쓰고 탭 대신 공백을 넣는다. <code>p2_2</code>는 첫 열 머리글 앞 들여쓰기가 없고 줄 끝에 불필요한 탭이 붙는다.</p>
@@ -625,8 +626,8 @@ if (now-&gt;right != NULL)
 <span class="cm">// 숫자는 맞는다. 라벨과 구분자가 다르다. 네 케이스 모두 동일한 양상.</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Lab02: 입력 길이를 믿고 파싱한다</h3></header>
+      <article class="finding" id="f27" data-sev="major">
+        <header><span class="tier">중대</span><h3>Lab02: 입력 길이를 믿고 파싱한다</h3><a class="permalink" href="#f27" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>집합 <code>{a,b,c}</code> 형태를 읽어 부분집합/순열을 만드는 과제다. <code>fscanf(fin, "%s", ret)</code>는 <code>SIZE</code> 버퍼에 길이 제한 없이 쓴다. 이어지는 <code>while (ret[++ptr] != '}')</code>는 종료 조건을 <strong>닫는 중괄호의 존재에만</strong> 의존한다 — 입력에 <code>'}'</code>가 없으면 힙 버퍼를 벗어나 우연히 <code>0x7D</code> 바이트를 만날 때까지 읽고, 그 사이의 모든 바이트를 <code>string</code>에 쓴다. 시작 인덱스가 <code>++ptr</code>이라 여는 중괄호를 건너뛰는 건 의도적이지만, 그 의도를 문서화한 검사는 없다.</p>
         </div>
@@ -640,8 +641,8 @@ while (ret[++ptr] <span class="hl">!= '}'</span>)        <span class="cm">// 버
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>Lab01: 나눗셈은 0을 검사하고 나머지는 검사하지 않는다</h3></header>
+      <article class="finding" id="f28" data-sev="minor">
+        <header><span class="tier">경미</span><h3>Lab01: 나눗셈은 0을 검사하고 나머지는 검사하지 않는다</h3><a class="permalink" href="#f28" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>함수 포인터 배열로 연산자를 디스패치하는 계산기다. 구조는 깔끔한데, 인접한 두 함수의 방어 수준이 다르다. <code>division</code>은 <code>second</code>가 0이면 0을 반환하는데, 바로 아래 <code>modulus</code>는 그대로 <code>%</code>를 수행한다 — <code>x % 0</code>은 x86에서 SIGFPE다. 같은 화면에 보이는 두 함수 사이의 불일치라 더 눈에 띈다.</p>
           <p>또한 <code>printf(__FUNCTION__)</code>(:13, 19, 25, 35, 41)은 사용자 입력이 아니라 컴파일 타임 리터럴이므로 실제 위험은 없지만, 포맷 문자열 자리에 변수를 놓는 습관 그 자체다(<code>-Wformat-security</code> 대상). <code>printf("%s", __FUNCTION__)</code>가 맞다.</p>
@@ -660,8 +661,8 @@ inline static int modulus(int first, int second, bool state) {
 		return <span class="hl">first % second</span>;    <span class="cm">// 0 검사 없음 → SIGFPE</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>레포 위생: 중복 제출 아카이브와 바이너리</h3></header>
+      <article class="finding" id="f29" data-sev="minor">
+        <header><span class="tier">경미</span><h3>레포 위생: 중복 제출 아카이브와 바이너리</h3><a class="permalink" href="#f29" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>lab06/lab06.zip</code>은 <code>p6.c</code>, <code>input</code>, <code>lab6.docx</code>를 담고 있는데 <strong>셋 다 이미 같은 디렉터리에 개별 파일로 커밋되어 있다.</strong> 제출용으로 압축한 것을 지우지 않고 함께 올린 것이다. 나머지 14개 랩에는 zip이 없으니 실수로 보인다.</p>
           <p>과제 명세 PDF/DOCX 30개가 함께 커밋되어 있다(<code>lab15.pdf</code> 278KB 등, 팩 전체 2.65MB). 학부 레포에서 명세를 같이 두는 것은 납득할 만하지만, <code>.gitignore</code>에는 <code>*.out</code>, <code>log/</code>, <code>test/</code>만 있고 바이너리 문서에 대한 정책은 없다. <code>lab10/p10-test.c</code>가 남은 것도 같은 맥락이다 — <code>lab12/p12-test.c</code>는 지웠으면서.</p>

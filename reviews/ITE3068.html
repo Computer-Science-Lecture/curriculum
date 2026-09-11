@@ -32,6 +32,7 @@
       <div class="grade"><b>C+</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>8</b> 치명적</a><a class="chip s-major" href="#f01"><b>9</b> 중대</a><a class="chip s-minor" href="#f01"><b>5</b> 경미</a><span class="total">합계 22</span></div>
 
   <section>
     <h2>총평</h2>
@@ -65,8 +66,8 @@
     <p class="prose">제출물은 <code>results/mysql.png</code>, <code>results/arcus.png</code>, <code>results/nbase.png</code> 세 장의 nGrinder 리포트다. 셋 다 Total Vusers 6, Agent 1, Processes/Threads 2/3, Duration 00:01:00, Sample Ignore 0, Errors 0으로 조건이 같다. 조건을 맞춘 것 자체는 잘했다. 문제는 조건이 아니라 비교 대상이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>/init</code>이 nBase-ARC만 미리 채워서, 워밍업된 캐시와 빈 캐시를 나란히 놓고 비교했다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>/init</code>이 nBase-ARC만 미리 채워서, 워밍업된 캐시와 빈 캐시를 나란히 놓고 비교했다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>초기화 루프는 MySQL에 1만 행을 넣으면서 같은 값을 <code>nbase</code>에도 <code>set</code>한다. arcus에 대한 <code>set</code>은 어디에도 없다. 따라서 부하 테스트 시작 시점에 nBase-ARC는 히트율 100%, arcus는 히트율 0%로 출발한다.</p>
           <p>결과가 그대로 나온다. nbase 291.5 TPS / 평균 19.39ms / 16,355건, arcus 24.0 TPS / 249.83ms / 1,343건. 12배 차이는 nBase-ARC가 arcus보다 12배 빠르다는 뜻이 아니라, 한쪽만 캐시가 차 있었다는 뜻이다. 보고서에는 이 비대칭에 대한 언급이 없다.</p>
@@ -83,8 +84,8 @@ def init():
     return 'Initialization finished'</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>arcus 런의 기대 히트율은 6.5%다. 리포트의 arcus 수치는 "캐시 효과 0" 모델로 오차 1% 안에 재현된다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>arcus 런의 기대 히트율은 6.5%다. 리포트의 arcus 수치는 "캐시 효과 0" 모델로 오차 1% 안에 재현된다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>nGrinder 스크립트가 <code>id</code> 쿼리 파라미터를 보내지 않으므로(에러 0건 = 항상 존재하는 id → 무작위 경로) 매 요청은 1..10000에서 무작위 키를 뽑는다. 60초 동안 실행된 요청은 1,343건. 무작위 추출 1,343회로 1만 개 키 공간을 채울 때 기대 히트율은 6.5%다(N=10000, 60회 시뮬레이션 평균). 60초 런에서는 캐시가 정상 작동해도 효과가 드러날 수 없는 구조다.</p>
           <p>검산해 보면 더 분명하다. 미스 비용을 mysql 런의 평균(268.84ms), 히트 비용을 nbase 런의 평균(19.39ms)으로 두고 히트율 6.5%를 섞으면 평균 252.6ms, 6 vuser 기준 23.8 TPS가 나온다. 리포트의 arcus 값은 249.83ms / 24.0 TPS. <strong>즉 arcus 숫자는 "MySQL 조회에 캐시 쓰기 비용이 조금 붙은 것" 이상도 이하도 아니다.</strong> 20점짜리 항목의 결론이 여기에 달려 있다.</p>
@@ -100,8 +101,8 @@ TPS = 6 / (t/1000)                        <span class="cm"># = 23.8</span>
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>testset</code>에 인덱스가 없어 "캐시 없는 MySQL"의 기준선이 풀 테이블 스캔이다</h3></header>
+      <article class="finding" id="f03" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>testset</code>에 인덱스가 없어 "캐시 없는 MySQL"의 기준선이 풀 테이블 스캔이다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>테이블은 <code>create table testset ( id int, data int );</code>로 만들어진다. PRIMARY KEY도 인덱스도 없다. 그런데 조회는 전부 <code>where id=...</code>이므로 1만 행 풀 스캔이 매번 일어난다. 로컬 MySQL 단건 조회가 268ms까지 느려진 이유가 이것이다.</p>
           <p>캐시를 붙이기 전에 <code>id</code>에 인덱스부터 거는 것이 정상적인 순서이고, 그렇게 했다면 "캐시 대비 이득"이 훨씬 작게 나왔을 것이다. 기준선을 불리하게 만들어 놓고 비교한 셈인데, 의도적이라는 증거는 없고 단순히 놓친 것으로 보인다. 어느 쪽이든 20점 항목의 숫자를 부풀린다.</p>
@@ -113,24 +114,24 @@ def select(record_id):
     cursor.execute(query)</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>부하 생성기, 웹 서버, DB, 캐시가 모두 한 노트북의 127.0.0.1에 있다</h3></header>
+      <article class="finding" id="f04" data-sev="major">
+        <header><span class="tier">중대</span><h3>부하 생성기, 웹 서버, DB, 캐시가 모두 한 노트북의 127.0.0.1에 있다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>세 리포트 모두 헤더가 <code>Report : Test for 127.0.0.1</code>이고, <code>results/docker process.png</code>의 프롬프트는 <code>maybe@MayMac Book: ~/Workspace/ITE3068</code>다. nGrinder 컨트롤러/에이전트(JVM 2 프로세스 3 스레드), Flask, MySQL, memcached 3대, nBase-ARC가 같은 CPU를 나눠 쓴다. 이 상태에서 측정한 TPS 차이는 네트워크·CPU 경합과 분리되지 않는다.</p>
           <p>덧붙여 세 런은 23:46:51 → 23:48:56 → 23:50:42로 2분 간격 연속 실행이다. 워밍업 구간을 버리는 설정(<code>Sample Ignore</code>)이 0이므로 앞 런이 남긴 InnoDB 버퍼 풀 상태가 뒤 런에 그대로 섞인다. 순서도 nbase → arcus → mysql로, 가장 불리한 조건인 mysql이 맨 마지막(=버퍼 풀이 가장 따뜻한 시점)에 실행됐다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>측정을 뒷받침할 nGrinder 스크립트가 레포에 없다</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3>측정을 뒷받침할 nGrinder 스크립트가 레포에 없다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>전체 히스토리(모든 브랜치)를 뒤져도 <code>.groovy</code>나 jython 테스트 스크립트, CSV 원시 데이터가 없다. 남은 것은 PNG 스크린샷 3장뿐이다. nGrinder 리포트 화면에는 <code>Download CSV</code> 버튼이 찍혀 있는데 그 CSV도 커밋되지 않았다.</p>
           <p>결과적으로 "어떤 URL에, 어떤 파라미터로, 몇 초 램프업으로 요청했는가"를 레포에서 확인할 방법이 없다. 위에서 히트율을 추정할 때도 "에러 0건"이라는 간접 증거로 스크립트가 <code>id</code>를 안 보냈다고 역추론해야 했다. 성능 비교가 핵심인 프로젝트에서 측정 스크립트 미제출은 그 자체로 감점 사유다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>settings.json</code>의 <code>testsize</code>와 코드의 <code>testsize</code>가 10배 다르다</h3></header>
+      <article class="finding" id="f06" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>settings.json</code>의 <code>testsize</code>와 코드의 <code>testsize</code>가 10배 다르다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>settings.json:45</code>은 <code>"testsize": 100000</code>, <code>api/app.py:9</code>는 <code>testsize = 10000</code>이다. 그리고 <code>api/app.py</code>는 <code>settings.json</code>을 읽지 않으므로 전자는 아무 효과가 없는 장식이다. README:32의 "All settings are stored in <code>settings.json</code>"과 어긋난다.</p>
         </div>
@@ -144,8 +145,8 @@ def select(record_id):
     <p class="prose">README는 <code>python app.py start</code> 한 줄이면 된다고 쓴다(README:95–99). 99줄짜리 <code>app.py</code>가 <code>settings.json</code>을 읽어 <code>docker run</code> 명령 문자열을 조립하고 <code>Popen</code>으로 실행한다. 설정으로 컨테이너 토폴로지를 기술한다는 발상 자체는 괜찮다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>부트스트랩 실행부 전체가 제출 직전 커밋에서 주석 처리됐다</h3></header>
+      <article class="finding" id="f07" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>부트스트랩 실행부 전체가 제출 직전 커밋에서 주석 처리됐다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>2017-12-15 23:52 커밋 <code>f636918 "Update application and depricated"</code>가 컨테이너 내부 <code>install.sh</code> 실행 블록과 기동 대기 루프를 통째로 주석으로 바꿨다(18줄 추가 / 17줄 삭제, 전부 <code>#</code> 붙이기). 남은 것은 <code>docker run</code>과 <code>docker cp</code>뿐이다.</p>
           <p>따라서 <code>app.py start</code>는 스크립트 파일을 컨테이너 <code>/opt</code>에 복사만 하고 실행하지 않는다. arcus zookeeper 앙상블 구성도, Hubblemon 수집기 기동도, nbase-arc 초기화도 일어나지 않는다. <code>results/docker process.png</code>에서 memcached 컨테이너들이 이미지 기본 COMMAND인 <code>/usr/bin/supervisord</code>로 떠 있는 것도 이와 일치한다. README가 약속한 "just run application"과 코드가 하는 일이 다르다.</p>
@@ -160,8 +161,8 @@ def select(record_id):
     <span class="cm"># execute('docker exec -it nbase-arc /bin/bash -c /root/install.sh')</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>settings.json</code>의 네 개 키가 코드에서 한 번도 읽히지 않는다</h3></header>
+      <article class="finding" id="f08" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>settings.json</code>의 네 개 키가 코드에서 한 번도 읽히지 않는다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>app.py</code>의 <code>docker_run()</code>이 소비하는 키는 <code>name</code>, <code>ports</code>, <code>env</code>, <code>docker</code> 넷이고 <code>volumn</code>이 <code>docker cp</code>에 쓰인다. 설정 파일이 선언한 나머지 <code>commands</code>, <code>wait</code>, <code>host</code>, <code>testsize</code>는 소비처가 없다. <code>commands</code>/<code>wait</code>는 위 주석 처리의 부산물이지만, <code>host</code>와 <code>testsize</code>는 애초에 배선된 적이 없다.</p>
           <p>실제로 설정을 그대로 넣어 <code>docker_run()</code>을 돌려 보면 <code>host</code> 값(<code>"arcus"</code>, <code>"memcached-1"</code> 등)은 생성된 명령 어디에도 나타나지 않는다.</p>
@@ -178,16 +179,16 @@ docker run -d --net ite3068 <span class="hl">--name=arcus-memcached-3 ruo91/arcu
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>execute()</code>가 stderr 유무로 성공/실패를 판정한다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>execute()</code>가 stderr 유무로 성공/실패를 판정한다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>app.py:23</code>은 <code>return False if stderr else stdout.decode('utf-8')[:-1]</code>이다. 종료 코드가 아니라 stderr가 비었는지로 판단하므로, docker가 경고 한 줄만 뱉어도 성공한 컨테이너가 실패로 집계된다. 반대로 종료 코드가 0이 아니어도 stderr가 비면 성공으로 본다.</p>
           <p>파장이 있다. <code>app.py:48–49</code>는 모든 컨테이너가 "성공"일 때만 <code>containers.p</code>를 저장하는데, 이미 <code>ite3068</code> 네트워크가 있는 상태에서 재실행하면 <code>docker network create</code>가 에러를 내고, 이후 <code>app.py stop</code>은 <code>containers.p</code>가 없어 <code>FileNotFoundError</code>로 죽는다. 두 번째 실행부터 정리가 불가능해진다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>최종 트리에 Dockerfile도 docker-compose도 없다</h3></header>
+      <article class="finding" id="f10" data-sev="minor">
+        <header><span class="tier">경미</span><h3>최종 트리에 Dockerfile도 docker-compose도 없다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>히스토리에는 <code>Dockerfile</code>, <code>app/dockerfile</code>, <code>arcus/dockerfile</code>, <code>docker-compose.yml</code>이 있었으나 모두 삭제됐다. 남은 <code>docker-compose.yml</code>의 마지막 내용(<code>731fc2e</code>)은 Docker 공식 튜토리얼의 web+redis 예제 그대로였고, 6일 뒤 삭제됐다. README:71은 compose를 쓰지 못한 이유를 설명하는데, 이유 자체는 타당하다(컨테이너 기동 후 설정이 필요하다). 다만 <code>results/docker process.png</code>의 <code>docker images</code>에는 로컬 빌드된 <code>arcus</code>, <code>ite3068/arcus</code> 이미지가 찍혀 있다 — 레포에서 재현할 수 없는 이미지로 실험했다는 뜻이다.</p>
         </div>
@@ -205,8 +206,8 @@ docker run -d --net ite3068 <span class="hl">--name=arcus-memcached-3 ruo91/arcu
     <p class="prose">이 레포는 GitHub에 공개돼 있다. 아래 항목은 값을 적지 않고 위치와 종류만 기록한다. 학부 과제용 로컬 환경이라 실질 피해는 낮지만, 습관의 문제로 전부 지적 대상이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>사용자 입력을 문자열 포매팅으로 SQL에 붙인다</h3></header>
+      <article class="finding" id="f11" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>사용자 입력을 문자열 포매팅으로 SQL에 붙인다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>request.args.get('id', ...)</code>의 결과가 <code>%</code> 포매팅으로 쿼리에 삽입된다. PyMySQL은 <code>cursor.execute(sql, params)</code> 형태의 파라미터 바인딩을 지원하는데 쓰지 않았다. <code>/mysql?id=1 OR 1=1</code>이면 전체 행이 대상이 되고, PyMySQL 기본 설정에서 다중 문장은 막히지만 <code>UNION</code> 기반 추출은 그대로 열린다.</p>
           <p><code>api/app.py:39</code>의 INSERT도 같은 <code>%</code> 포매팅이지만 여기는 값이 서버 생성 정수라 실질 위험은 없다. 문제는 같은 파일에서 안전한 쓰기 방식을 쓰지 않는 습관이 일관되게 나타난다는 점이다.</p>
@@ -221,8 +222,8 @@ record_id = <span class="hl">request.args.get('id', random.randint(1, testsize))
 <span class="cm">#   select * from testset where id=1 OR 1=1</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Flask 디버그 모드를 <code>0.0.0.0</code>에 바인딩</h3></header>
+      <article class="finding" id="f12" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Flask 디버그 모드를 <code>0.0.0.0</code>에 바인딩</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>debug=True</code>는 Werkzeug 대화형 디버거를 켠다. 예외가 나는 경로에 도달하면 브라우저에서 임의 파이썬 코드를 실행할 수 있고, <code>host='0.0.0.0'</code>이므로 같은 네트워크 어디서나 접근 가능하다. 그리고 예외가 나는 경로가 실제로 있다 — <code>api/app.py:63</code>과 <code>:74</code>의 <code>res[1]</code>은 존재하지 않는 <code>id</code>가 오면 <code>res</code>가 <code>None</code>이 되어 <code>TypeError</code>를 던진다. <code>/arcus?id=99999</code> 한 번이면 디버거 화면이 열린다.</p>
           <p>덤으로 성능 측정에도 영향을 준다. 디버그 모드는 리로더와 예외 추적 오버헤드를 붙이고, Flask 개발 서버는 프로덕션 WSGI가 아니다. nbase 런의 291.5 TPS가 이 서버의 사실상 상한이며, mysql/arcus 런의 22–24 TPS는 그 상한에 한참 못 미치므로 여기서는 병목이 아니지만, "캐시를 붙이면 얼마나 빨라지나"의 천장을 개발 서버가 정해 버린 것은 맞다.</p>
@@ -231,22 +232,22 @@ record_id = <span class="hl">request.args.get('id', random.randint(1, testsize))
     app.run(host='0.0.0.0', <span class="hl">debug=True</span>, port=5000)</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>하드코딩된 자격증명이 여러 파일에 남아 있다</h3></header>
+      <article class="finding" id="f13" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>하드코딩된 자격증명이 여러 파일에 남아 있다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>애플리케이션 설정과 설치 스크립트에 DB 접속 정보와 SSH 비밀번호가 평문으로 들어 있다. 설치 스크립트는 <code>StrictHostKeyChecking=no</code>까지 함께 쓴다. <strong>이 저장소는 아직 공개 상태이고 값도 그대로이므로, 이 보고서에는 파일과 행 번호를 싣지 않는다.</strong> 조치는 값을 환경변수로 옮기는 것이 아니라 <strong>먼저 해당 자격증명을 폐기·교체하는 것</strong>이다 — 이미 커밋된 순간 유출이며, 삭제 커밋으로는 되돌아가지 않는다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>인증 없는 GET 요청 하나가 테이블을 drop한다</h3></header>
+      <article class="finding" id="f14" data-sev="major">
+        <header><span class="tier">중대</span><h3>인증 없는 GET 요청 하나가 테이블을 drop한다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>/init</code>은 <code>methods=['GET']</code>이고 첫 줄이 <code>drop table if exists testset</code>이다. 인증도 확인도 없다. GET은 안전해야 한다는 HTTP 규약을 정면으로 어기므로 브라우저 프리페치나 크롤러 한 번으로 데이터가 날아간다. 실습 환경이라 실해는 없지만, 부하 테스트 도중 누가 <code>/init</code>을 눌렀는지 여부를 확인할 방법도 없다는 뜻이기도 하다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>모듈 전역 <code>connection</code>/<code>cursor</code> 하나를 모든 요청이 공유한다</h3></header>
+      <article class="finding" id="f15" data-sev="major">
+        <header><span class="tier">중대</span><h3>모듈 전역 <code>connection</code>/<code>cursor</code> 하나를 모든 요청이 공유한다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>api/app.py:11–27</code>에서 커넥션과 커서를 모듈 로드 시점에 한 번 만들고, 이후 모든 라우트가 그 전역을 쓴다. PyMySQL 커넥션은 스레드 안전하지 않다. Flask 개발 서버가 스레드 모드로 뜨면 여러 요청이 같은 소켓에 인터리브되어 응답이 섞이거나 <code>InterfaceError</code>가 나고, 스레드 모드가 아니면 모든 요청이 직렬화된다.</p>
           <p>nGrinder는 vuser 6으로 동시 요청을 보냈으므로 둘 중 하나가 반드시 일어난다. 어느 쪽이든 측정값의 의미가 흐려진다. 커넥션 풀이나 요청 스코프 커넥션(<code>flask.g</code>)이 정석이다. 덧붙여 <code>:25</code>의 bare <code>except:</code>는 <code>KeyboardInterrupt</code>까지 삼켜서 기동 대기 루프를 Ctrl-C로 못 빠져나오게 만든다.</p>
@@ -260,8 +261,8 @@ record_id = <span class="hl">request.args.get('id', random.randint(1, testsize))
     <h2>arcus · nBase-ARC · Hubblemon</h2>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>arcus를 arcus로 쓰지 않았다 — 클라이언트는 평범한 memcached 두 주소를 본다</h3></header>
+      <article class="finding" id="f16" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>arcus를 arcus로 쓰지 않았다 — 클라이언트는 평범한 memcached 두 주소를 본다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>arcus의 핵심은 ZooKeeper를 통한 클러스터 멤버십 발견과 그것을 구현한 arcus 클라이언트다. 그런데 코드는 <code>python-memcached</code>로 고정된 주소 두 개를 직접 잡는다. ZooKeeper(2181)는 <code>results/docker process.png</code> 기준 <code>arcus-admin</code>에서 호스트로 게시조차 되지 않았다(<code>22/tcp</code>만 노출).</p>
           <p>더 나쁜 것은 두 주소 중 하나가 존재하지 않는다는 점이다. <code>settings.json:17–22</code>는 <code>arcus-memcached-1</code>에 11211만 게시하고 11212는 게시하지 않는다. <code>docker ps</code> 캡처가 이를 확인해 준다: <code>arcus-memcached-1</code>의 PORTS에 <code>11212/tcp</code>는 있지만 <code>0.0.0.0:11212-&gt;</code> 매핑이 없다. 그리고 README가 10점을 주장하는 "multi-node"의 나머지 두 노드 <code>arcus-memcached-2</code>, <code>-3</code>은 게시 포트가 아예 없어 Flask에서 도달 불가다. 3노드 클러스터가 아니라 도달 가능한 1노드다.</p>
@@ -273,8 +274,8 @@ arcus = memcache.Client([<span class="hl">"127.0.0.1:11211", "127.0.0.1:11212"</
 <span class="cm">                                            ↑ 이 포트는 호스트에 게시되지 않았다</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>제출된 유일한 Hubblemon 캡처는 arcus가 <code>get</code>을 한 번도 받지 않았음을 보여준다</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3>제출된 유일한 Hubblemon 캡처는 arcus가 <code>get</code>을 한 번도 받지 않았음을 보여준다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>results/hubblemon.png</code>의 <code>d6c48d84e00a/arcus_11211</code> 패널을 그대로 읽으면: <code>cmd_get</code> 그래프는 0에 붙어 있고, <code>curr_items</code>는 1.00 고정, <code>hit_ratio</code> 패널은 데이터가 없어 비어 있으며, <code>cmd_set</code>만 1–2 사이를 규칙적으로 오간다(수집기 자체의 주기적 활동으로 보인다). evictions 0, reclaimed 0.</p>
           <p>그리고 캡처의 time range는 <code>2017-12-15 13:11 – 13:41</code>인데, nGrinder 런은 같은 날 <code>23:46–23:51</code>이다. 10시간 차이가 난다. 즉 이 대시보드는 부하 테스트 구간을 보여주는 것이 아니다. 결론은 둘 중 하나다 — 모니터링 증거가 부하 테스트를 전혀 뒷받침하지 못하거나, 아니면 캐시에 아이템이 1개뿐이고 <code>get</code>이 0인 상태가 실제 arcus의 정상 상태였거나. 어느 쪽도 "arcus로 성능 비교를 했다"는 주장에 도움이 되지 않는다.</p>
@@ -282,8 +283,8 @@ arcus = memcache.Client([<span class="hl">"127.0.0.1:11211", "127.0.0.1:11212"</
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>nbase용 Hubblemon 수집기는 <code>NameError</code>로 뜨지 않는다</h3></header>
+      <article class="finding" id="f18" data-sev="major">
+        <header><span class="tier">중대</span><h3>nbase용 Hubblemon 수집기는 <code>NameError</code>로 뜨지 않는다</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>hubblemon/nbase/collect_client.run_client.py:23</code>에서 <code>psutil_stat</code> import를 주석 처리했는데, <code>:79</code>에서 그 이름을 그대로 호출한다. 모듈 최상위 코드이므로 import 즉시 <code>NameError</code>다. AST로 모듈 수준 호출 이름과 바인딩을 대조해 확인했다 — 세 파일 중 nbase만 미정의 호출이 나온다.</p>
           <p>같은 디렉터리의 <code>arcus/</code>와 <code>mysql/</code> 버전은 둘 다 <code>from client_psutil_plugin import psutil_stat</code>을 살려 두었다. 저자 본인의 다른 두 파일이 이 이름이 별도 import를 필요로 한다는 증거다. 즉 <code>hubblemon/install.sh:21</code>의 <code>nohup python3 collect_client/run_client.py &amp;</code>는 nbase 컨테이너에서 즉시 죽고, <code>nohup</code>이라 에러는 <code>nohup.out</code>에만 남는다.</p>
@@ -297,8 +298,8 @@ arcus = memcache.Client([<span class="hl">"127.0.0.1:11211", "127.0.0.1:11212"</
 <span class="cm">             arcus: none   /   mysql: none</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>캐시된 값이 <code>0</code>이면 영원히 미스로 취급된다</h3></header>
+      <article class="finding" id="f19" data-sev="minor">
+        <header><span class="tier">경미</span><h3>캐시된 값이 <code>0</code>이면 영원히 미스로 취급된다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>api/app.py:59</code>는 <code>if res:</code>로 히트를 판정한다. 저장되는 값은 <code>:38</code>의 <code>random.randint(0, testsize)</code>라 0을 포함하고, python-memcached는 정수를 그대로 돌려주므로 <code>0</code>은 falsy가 되어 히트인데도 미스 경로로 간다. 1만 개 중 평균 1개꼴이라 성능 영향은 없지만, <code>is None</code>이 아니라 truthiness로 캐시 히트를 판정하는 것은 캐시 코드에서 가장 흔한 오류 중 하나다.</p>
           <p>참고로 nbase(<code>:70</code>)는 redis가 <code>b'0'</code>을 반환해 truthy라 우연히 영향을 받지 않는다. 같은 버그가 한쪽에서만 드러나는 형태다.</p>
@@ -312,8 +313,8 @@ else:
     return 'Cache Miss: ' + str(res)</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>캐시 무효화 전략이 없다 — 다만 무효화할 쓰기 경로도 없다</h3></header>
+      <article class="finding" id="f20" data-sev="minor">
+        <header><span class="tier">경미</span><h3>캐시 무효화 전략이 없다 — 다만 무효화할 쓰기 경로도 없다</h3><a class="permalink" href="#f20" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>API는 읽기 전용(<code>/mysql</code>, <code>/arcus</code>, <code>/nbase</code>)이고 <code>/init</code>만 쓴다. 그런데 <code>/init</code>은 MySQL 테이블을 drop하고 nbase를 덮어쓰면서 arcus는 건드리지 않으므로, 이미 채워진 arcus 항목은 이전 데이터셋의 값으로 남는다. TTL도 없다(<code>arcus.set</code>/<code>nbase.set</code> 모두 만료 인자 없음). 두 번째 <code>/init</code> 이후 <code>/arcus</code>는 조용히 옛날 값을 반환한다.</p>
           <p>실습 범위에서 치명적이진 않지만, "캐시를 도입했다"고 주장하려면 최소한 쓰기 경로와 무효화 규칙 한 줄은 있어야 한다. 현재 상태는 캐시 계층이 아니라 일회성 조회 가속기다.</p>
@@ -331,8 +332,8 @@ else:
     <h2>레포 위생</h2>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>레포 296MB 중 98MB가 서드파티 바이너리다</h3></header>
+      <article class="finding" id="f21" data-sev="major">
+        <header><span class="tier">중대</span><h3>레포 296MB 중 98MB가 서드파티 바이너리다</h3><a class="permalink" href="#f21" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>ngrinder-controller-3.4.1.war</code> 68MB 하나, <code>ngrinder-agent/lib/</code>의 jar 39개 약 30MB(<code>jython-standalone</code> 14MB, <code>groovy-all</code> 6.3MB, <code>hibernate-core</code> 4.4MB 등). 모두 nGrinder 공식 배포판을 그대로 커밋한 것으로, <code>ef1d349 "Update docker scripts"</code>(2017-12-06) 한 커밋에 들어왔다. <code>.git</code>만 192MB다.</p>
           <p>저자가 직접 쓴 코드는 <code>app.py</code>(99) + <code>api/app.py</code>(79) + <code>settings.json</code>(89) + <code>arcus/install.sh</code>(35) + <code>hubblemon/install.sh</code>(26) 합쳐 약 330줄이다. 코드 1줄당 300KB의 바이너리가 붙어 있는 셈이고, 클론할 때마다 전송된다. nGrinder는 릴리스 URL과 버전만 적어 두면 충분했다.</p>
@@ -340,8 +341,8 @@ else:
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>브랜치 세 개가 서로 다른 프로젝트를 담고 있고, README가 이를 설명하지 않는다</h3></header>
+      <article class="finding" id="f22" data-sev="minor">
+        <header><span class="tier">경미</span><h3>브랜치 세 개가 서로 다른 프로젝트를 담고 있고, README가 이를 설명하지 않는다</h3><a class="permalink" href="#f22" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>master</code>는 인프라 프로젝트(45 커밋), <code>origin/gh-pages</code>는 billboard.js 과제인 Jekyll 사이트(35 커밋, <code>_posts/</code> 4편 + <code>_data/</code>), <code>origin/dev</code>는 master보다 뒤처진 상태다(<code>results/*.png</code> 3장이 없고 19개 파일 차이). README:5의 "Assignment: Using billboard.js" 체크는 <code>gh-pages</code>를 가리키는데, 링크는 사내 hconnect 주소라 외부에서 열리지 않는다.</p>
           <p><code>.gitignore</code>는 4줄뿐이고 마지막 줄 <code>containers.p</code>에 개행이 없다. <code>_site/</code>, <code>.sass-cache/</code>는 gh-pages용 항목이 master에 섞여 남은 것이다.</p>

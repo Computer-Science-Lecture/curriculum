@@ -33,6 +33,7 @@
       <div class="grade"><b>C+</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>4</b> 치명적</a><a class="chip s-major" href="#f01"><b>8</b> 중대</a><a class="chip s-minor" href="#f01"><b>7</b> 경미</a><span class="total">합계 19</span></div>
 
   <!-- ============ 총평 ============ -->
   <section>
@@ -63,8 +64,8 @@
     <p class="prose">이 레포를 평가하기 전에 반드시 갈라야 하는 선이다. 날짜 디렉터리의 파일 헤더와 내용을 직접 대조한 결과는 다음과 같다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>날짜 디렉터리의 C 코드는 대부분 Learn C the Hard Way 예제이며, 출처가 어디에도 적혀 있지 않다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>날짜 디렉터리의 C 코드는 대부분 Learn C the Hard Way 예제이며, 출처가 어디에도 적혀 있지 않다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>ex1.c</code>부터 <code>ex22_main.c</code>까지가 책의 예제 번호를 그대로 쓴다. 내용도 그대로다 — <code>ex7.c</code>는 저자 이름 자리에 "Zed" "Shaw"를 넣어 출력하고, <code>ex12.c</code>는 <code>"Zed A. Shaw"</code>를 문자열로 들고 있으며, <code>ex22_main.c:3</code>은 <code>const char *MY_NAME = "Zed A. Shaw";</code>다. <code>ex17.c:117</code>에는 책이 독자에게 남긴 지시문까지 그대로 따라와 있다.</p>
           <p><code>list.c</code>, <code>list_algo.c</code>, <code>darray.c</code>, <code>hashmap.c</code>, <code>dbg.h</code>, <code>minunit.h</code>도 전부 같은 출처다. 헤더 가드가 <code>lcthw_List_h</code>, <code>_lcthw_Hashmap_h</code>, <code>lcthw_List_algos_h</code>로 되어 있다 — 책의 <code>liblcthw</code> 소스 트리에서 그대로 가져온 흔적이다. 함수 사이 공백이 <code>printf( "..." ) ;</code>, <code>who-&gt; name</code>처럼 뭉개져 있는 것은 책 PDF에서 붙여넣었을 때 생기는 전형적인 패턴이다.</p>
@@ -81,8 +82,8 @@
  char *res = strncpy( addr-&gt; name, name, MAX_DATA) ;</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>단, 원본 저작권 헤더를 지운 흔적은 없다</h3></header>
+      <article class="finding" id="f02" data-sev="minor">
+        <header><span class="tier">경미</span><h3>단, 원본 저작권 헤더를 지운 흔적은 없다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>공정하게 짚으면, 저자가 남의 저작권 표기를 <em>삭제한</em> 정황은 없다. <code>bstrlib.c</code>와 <code>bstrlib.h</code>는 Paul Hsieh의 BSD/GPL 헤더를 온전히 달고 있다. 나머지 파일들(<code>list.c</code>, <code>darray.c</code>, <code>dbg.h</code> 등)은 <em>원본에도</em> 헤더 주석이 없는 파일들이다. 즉 이것은 표기를 뜯어낸 표절이 아니라, 새로 붙였어야 할 표기를 붙이지 않은 것이다.</p>
           <p>그래도 지적은 유효하다. 날짜 디렉터리가 과제 제출물이 아닌 개인 학습 기록이라는 점을 감안해 "치명적"이 아닌 "레포 위생"으로 다루더라도, 59바이트짜리 README에 "이 디렉터리는 LCTHW 따라 치기"라는 한 줄이 없다는 것은 10년 뒤 이 레포를 보는 사람이 <strong>저자가 쓴 코드와 책 코드를 구분할 수 없게 만든다.</strong> 실제로 채점자인 나는 이 구분을 하기 위해 파일별로 헤더 가드와 문자열 리터럴을 대조해야 했다.</p>
@@ -108,8 +109,8 @@
     <p class="prose">곡 목록을 불러와 이름/장르/앨범 세 가지 뷰로 보여주고, 증분 검색·추가·삭제·파일 저장을 지원하는 400×600 Win32 애플리케이션이다. 두 과제의 소스는 <code>main.cpp</code> 하나만 다르고 나머지는 동일하다 — <code>diff</code>로 확인한 변경분은 50줄이며, 전부 <strong>저장 포맷을 줄 단위 텍스트에서 XML로 바꾸는 작업</strong>이다. 즉 Assignment#4의 채점 대상은 사실상 그 50줄이다. macOS 환경이라 Win32 빌드는 하지 못했으므로, 아래 지적은 정독과 이식 가능한 부분의 부분 컴파일·데이터 파일 검증에 근거한다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>XML 라이터가 닫는 태그를 전부 <code>&lt;/name&gt;</code>으로 쓴다 — 레포에 커밋된 데이터 파일 3개 전부가 XML이 아니다</h3></header>
+      <article class="finding" id="f03" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>XML 라이터가 닫는 태그를 전부 <code>&lt;/name&gt;</code>으로 쓴다 — 레포에 커밋된 데이터 파일 3개 전부가 XML이 아니다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>musicListSave</code>는 <code>&lt;name&gt;</code>만 제대로 닫고, <code>&lt;album&gt;</code>·<code>&lt;artist&gt;</code>·<code>&lt;genre&gt;</code> 세 줄은 복사·붙여넣기 상태 그대로 <code>&lt;/name&gt;</code>으로 닫는다. 파일 첫 줄에는 <code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code>를 당당히 박아 놓는다.</p>
           <p>이 버그가 살아남은 이유가 더 나쁘다. 같은 커밋에서 작성된 리더(<code>main.cpp:239</code>)는 <strong>여는 태그의 접두사만 보고, 값은 "첫 <code>&gt;</code>와 마지막 <code>&lt;</code> 사이"로 잘라낸다.</strong> 닫는 태그 이름을 아예 검사하지 않는다. 그래서 앱은 자기가 뱉은 깨진 파일을 멀쩡히 다시 읽고, 저자에게는 아무 증상이 보이지 않는다. 이 포맷은 자기 자신하고만 왕복한다.</p>
@@ -129,8 +130,8 @@ out &lt;&lt; "\t\t&lt;genre&gt;"  &lt;&lt; info.genre  &lt;&lt; <span class="hl"
     <span class="hl">temp.find_last_of('&lt;')</span> - temp.find_first_of('&gt;') - 1));</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>장르 뷰의 필드 순서가 "불러오기/삭제"와 "추가"에서 서로 다르다</h3></header>
+      <article class="finding" id="f04" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>장르 뷰의 필드 순서가 "불러오기/삭제"와 "추가"에서 서로 다르다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>genreList</code>는 별도 타입을 만들지 않고 <code>musicInfo</code>의 필드 자리를 바꿔 끼워 재사용한다. 파일에서 읽을 때(<code>:232</code>)는 <code>(name, genre, album, artist)</code> 순으로 섞어 넣고, 삭제할 때(<code>:438</code>, <code>:567</code>)도 같은 순서로 섞어 찾는다. 여기까지는 일관적이다.</p>
           <p>그런데 다이얼로그로 곡을 <em>추가</em>하는 두 경로(<code>:459</code>, <code>:549</code>)는 <strong>섞지 않은 <code>inputed</code>를 그대로 넣는다.</strong> 결과적으로 앱 실행 중에 추가한 곡은 장르 뷰에서 앨범 자리에 원래 앨범이 들어가 그룹 헤더가 어긋나고, 같은 곡을 다시 지우려 하면 섞인 키로 찾기 때문에 <code>genreList</code>에서만 삭제에 실패한다. 파일에서 불러온 곡과 방금 추가한 곡이 서로 다른 규칙으로 저장되는 상태다.</p>
@@ -147,8 +148,8 @@ albumList.insert(inputed);
 genreList.insert(<span class="hl">inputed</span>);</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>table&lt;T&gt;::remove</code>는 문법적으로 컴파일되지 않는 코드다 — 아무도 호출하지 않아서 들키지 않았다</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>table&lt;T&gt;::remove</code>는 문법적으로 컴파일되지 않는 코드다 — 아무도 호출하지 않아서 들키지 않았다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>table.h:106–109</code>의 본문은 세미콜론도 <code>return</code>도 없고, 멤버 함수 <code>find</code>를 호출하지 않고 이름만 값으로 넘긴다. 템플릿이라 실체화되기 전까지는 파싱만 통과한다. <code>remove(size_t)</code>가 이것을 호출하지만 <code>remove(size_t)</code> 자체를 프로젝트 어디서도 부르지 않는다 — <code>grep</code>으로 확인한 유일한 호출 지점은 <code>table.h:103</code>, 즉 자기 자신뿐이다.</p>
           <p>즉 이 프로젝트는 "죽은 코드가 있어서" 빌드되는 것이다. 저자가 언젠가 테이블에서 아이템 하나를 지우려고 손을 대는 순간 빌드가 깨진다. 확인을 위해 <code>object.h</code>만 스텁으로 치환한 뒤 명시적으로 실체화해 보았다.</p>
@@ -169,8 +170,8 @@ bool table&lt;T&gt;::remove(T object)
 <span class="cm">2 errors generated.</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>indexTable</code>은 <code>vector</code> 내부를 가리키는 댕글링 포인터 맵이다</h3></header>
+      <article class="finding" id="f06" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>indexTable</code>은 <code>vector</code> 내부를 가리키는 댕글링 포인터 맵이다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>생성자와 <code>insert</code>가 <code>&amp;(this-&gt;raw.back())</code>, 즉 <code>vector&lt;T&gt;</code> 원소의 주소를 <code>unordered_map&lt;size_t, T*&gt;</code>에 저장한다. <code>push_back</code>은 용량 초과 시 버퍼를 재할당하므로, 두 번째 <code>insert</code>부터 이전에 저장한 포인터가 전부 무효가 된다. <code>WM_CREATE</code>에서 <code>topIcon</code>·<code>botIcon</code>에 각각 4개씩 넣으므로 재할당은 실제로 일어난다.</p>
           <p>지금 프로그램이 안 죽는 이유는 <code>indexTable</code>을 <em>읽는</em> 코드가 없기 때문이다 — 조회는 전부 <code>raw.at(index)</code>로 한다. 쓰기만 하고 읽지 않는 필드가 UB의 뇌관으로 남아 있는 상태다. 인덱스 → 원소 매핑이 필요했다면 <code>vector</code>의 첨자가 이미 그 매핑이고, 애초에 이 맵이 존재할 이유가 없다.</p>
@@ -190,8 +191,8 @@ table&lt;T&gt;::table()
 	this-&gt;indexTable.insert({ this-&gt;raw.size() - 1, <span class="hl">&amp;(this-&gt;raw.back())</span> });</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>괄호 없는 <code>abs</code> 매크로 때문에 스크롤 감속이 한쪽 방향에서만 동작한다</h3></header>
+      <article class="finding" id="f07" data-sev="major">
+        <header><span class="tier">중대</span><h3>괄호 없는 <code>abs</code> 매크로 때문에 스크롤 감속이 한쪽 방향에서만 동작한다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main.cpp:7</code>이 표준 라이브러리 이름 <code>abs</code>를 삼항 연산자 매크로로 덮어쓴다. 전체를 감싸는 괄호가 없다. <code>main.cpp:128</code>에서 <code>abs(X) / 10</code>으로 쓰는 순간 <code>/ 10</code>이 삼항의 <em>거짓 가지에만</em> 결합한다.</p>
           <p>결과적으로 <code>X &gt; 0</code>일 때는 <code>X</code> 전체가, <code>X ≤ 0</code>일 때는 <code>X/10</code>만 <code>y</code>에 더해진다. 10ms 타이머로 도는 감속 애니메이션이 한쪽 방향에서는 10배 튄다. 같은 매크로를 쓴 <code>:120</code>은 우연히 <code>(abs(...)) / 10</code>처럼 한 겹 더 싸여 있어 정상 동작한다 — 같은 함수 안에서 두 줄이 서로 다르게 동작하는 셈이다.</p>
@@ -202,8 +203,8 @@ nList-&gt;y -= <span class="hl">(</span>abs(nList-&gt;y)<span class="hl">)</span
 nList-&gt;y += (abs(nList-&gt;y - SIZEW + nList-&gt;maxY())<span class="hl">/ 10</span>);  <span class="cm">// :128  /10 이 거짓 가지에만 붙음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>메시지 루프가 <code>PeekMessage</code>로 CPU 코어 하나를 계속 태운다</h3></header>
+      <article class="finding" id="f08" data-sev="major">
+        <header><span class="tier">중대</span><h3>메시지 루프가 <code>PeekMessage</code>로 CPU 코어 하나를 계속 태운다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>애니메이션은 전부 <code>SetTimer</code>/<code>WM_TIMER</code>로 돌아가므로 게임 루프가 필요 없다. 그런데 <code>WinMain</code>은 <code>GetMessage</code> 대신 <code>PeekMessage(PM_REMOVE)</code>를 조건 없이 반복한다. 메시지가 없어도 루프가 멈추지 않으므로 유휴 상태에서 코어 하나를 100% 점유한다. 한 글자 수정(<code>while (GetMessage(&amp;messages, NULL, 0, 0)) { ... }</code>)으로 해결되는 문제다.</p>
           <p>바로 위 <code>:55</code>의 <code>SetProcessWorkingSetSize(hwnd, -1, -1)</code>도 잘못된 호출이다. 이 API의 첫 인자는 프로세스 <code>HANDLE</code>인데 윈도우 <code>HWND</code>를 넘기고 있다. 반환값을 검사하지 않아 실패가 조용히 묻힌다. 워킹셋을 줄이려던 의도로 보이지만 실제로는 아무 일도 일어나지 않는다.</p>
@@ -220,8 +221,8 @@ while (messages.message != WM_QUIT)
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>파일 다이얼로그를 열 때마다 객체가 새고, 파서 버퍼도 해제되지 않는다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3>파일 다이얼로그를 열 때마다 객체가 새고, 파서 버퍼도 해제되지 않는다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>new OpenFileDialog()</code> / <code>new SaveFileDialog()</code>가 네 곳(<code>:476</code>, <code>:493</code>, <code>:572</code>, <code>:618</code>)에 있고 대응하는 <code>delete</code>가 하나도 없다. <code>grep</code>으로 확인한 <code>main.cpp</code> 전체의 <code>delete</code> 개수는 0이다. 더구나 두 클래스의 생성자는 각각 <code>FileName = new TCHAR[MAX_PATH]</code>를 또 할당하므로 다이얼로그 한 번당 두 덩이가 샌다. 이 객체들은 스택에 두면 될 것들이라 <code>new</code> 자체가 불필요했다.</p>
           <p><code>musicListOpen</code>의 <code>malloc(257)</code>도 마찬가지로 해제되지 않는다. 이 함수는 <code>WM_CREATE</code>와 파일 열기 때마다 호출된다. 참고로 <code>sizeof(char) * 257</code>을 할당하고 <code>getline(buffer, 256)</code>으로 읽는데, <code>istream::getline</code>은 두 번째 인자에 널 종료를 포함한 크기를 받으므로 257은 그냥 근거 없는 여유분이다.</p>
@@ -232,8 +233,8 @@ while (in.getline(buffer, 256))
 <span class="cm">// 함수 끝(:267)까지 free(buffer) 없음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>파일이 조금만 어긋나면 <code>args[0..3]</code>이 범위 밖을 읽는다</h3></header>
+      <article class="finding" id="f10" data-sev="major">
+        <header><span class="tier">중대</span><h3>파일이 조금만 어긋나면 <code>args[0..3]</code>이 범위 밖을 읽는다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>&lt;/music&gt;</code>을 만나면 무조건 <code>args[0]</code>부터 <code>args[3]</code>까지 접근한다. <code>args</code>의 크기를 한 번도 확인하지 않는다. <code>&lt;music&gt;</code> 블록 안에 필드가 세 개만 있거나, 파일이 중간에 잘렸거나, 사용자가 필드 하나를 지운 XML을 열면 <code>vector::operator[]</code>가 경계 밖을 읽는다 — <code>at()</code>이 아니므로 예외도 던지지 않는다.</p>
           <p>같은 클래스의 다른 코드에서는 <code>raw.at(idx)</code>처럼 <code>at()</code>을 쓰고 있어, 저자가 <code>at()</code>의 존재를 모르는 것은 아니다. 외부에서 들어오는 데이터를 다루는 딱 이 지점에서만 검사가 빠졌다.</p>
@@ -247,8 +248,8 @@ while (in.getline(buffer, 256))
 }   <span class="cm">// args.size() 검사 없음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>operator&lt;</code>의 마지막 항이 <code>this-&gt;genre</code>다 — 복사·붙여넣기 오타</h3></header>
+      <article class="finding" id="f11" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>operator&lt;</code>의 마지막 항이 <code>this-&gt;genre</code>다 — 복사·붙여넣기 오타</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>좌변과 우변을 같은 모양으로 이어 붙이다가 마지막 항만 <code>info.genre</code> 대신 <code>this-&gt;genre</code>가 되었다. 양변에 같은 값이 들어가므로 genre는 비교에 아무 영향을 주지 않는다. 이 연산자는 바로 아래 <code>std::less&lt;musicInfo&gt;</code> 특수화(<code>:42–48</code>)가 그대로 위임받아 쓴다.</p>
           <p>실제 피해는 제한적이다 — <code>keySearch</code>의 <code>sort</code>/<code>unique</code>(<code>main.cpp:158–159</code>)에서 검색 결과 중복 제거에만 쓰이고, name·album·artist가 전부 같고 genre만 다른 곡은 드물기 때문이다. 그래도 문자열을 연결해서 비교하는 방식 자체가 취약하다. <code>std::tie(name, album, artist, genre) &lt; std::tie(...)</code> 한 줄이면 오타도 나지 않고 (a="x", b="y")와 (a="xy", b="")를 혼동하지도 않는다.</p>
@@ -259,8 +260,8 @@ while (in.getline(buffer, 256))
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>XOR 스왑, 중복된 <code>drawProc</code>, 매 프레임 테이블 복사</h3></header>
+      <article class="finding" id="f12" data-sev="minor">
+        <header><span class="tier">경미</span><h3>XOR 스왑, 중복된 <code>drawProc</code>, 매 프레임 테이블 복사</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>drawing.cpp:94</code>의 <code>preC ^= posC ^= preC ^= posC;</code>는 한 표현식 안에서 <code>preC</code>를 두 번 수정하므로 C++14 이전 기준 미정의 동작이다. 같은 줄을 <code>std::swap(preC, posC)</code>로 쓰면 UB도 없고 의도도 드러난다.</p>
           <p><code>:99–100</code>은 완전히 동일한 <code>drawProc</code> 호출이 두 번 연속이다. 매 행마다 같은 사각형을 두 번 그린다.</p>
@@ -272,8 +273,8 @@ drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);
 drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);  <span class="cm">// ← 동일 호출 중복</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>한글 음악 앱인데 검색창에 한글을 입력할 수 없다</h3></header>
+      <article class="finding" id="f13" data-sev="minor">
+        <header><span class="tier">경미</span><h3>한글 음악 앱인데 검색창에 한글을 입력할 수 없다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>검색 입력을 <code>WM_KEYDOWN</code>에서 가상 키 코드로 직접 처리하는데, 받아들이는 범위가 <code>'A'–'Z'</code>와 <code>'0'–'9'</code>뿐이다. IME를 거치는 한글은 <code>WM_KEYDOWN</code>으로 오지 않으므로 한 글자도 입력되지 않는다. <code>WM_CHAR</code>(또는 <code>WM_IME_CHAR</code>)를 받았어야 한다. 저장된 <code>list3.xml</code>의 곡 제목이 모두 영문이라 테스트에서도 드러나지 않았을 것이다.</p>
           <p>같은 맥락에서 <code>musicList.h:78</code>의 <code>transform(..., toupper)</code>도 위험하다. <code>char</code>를 그대로 <code>toupper</code>에 넘기는데 CP949 한글 바이트는 음수라 UB다. 인덱스 구축 경로(<code>tableInsertString</code>)에도 같은 호출이 있어, 한글 곡명은 검색 인덱스 자체가 어떻게 만들어질지 보장되지 않는다.</p>
@@ -289,16 +290,16 @@ drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);  <span cl
 	break;   <span class="cm">// 한글 경로 없음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>다이얼로그를 취소해도 곡이 추가된다</h3></header>
+      <article class="finding" id="f14" data-sev="minor">
+        <header><span class="tier">경미</span><h3>다이얼로그를 취소해도 곡이 추가된다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>musicInputProc</code>은 <code>INPUT_OK</code>를 눌렀을 때만 전역 <code>inputed</code>를 채운다(<code>:93–101</code>). 하지만 X 버튼으로 닫아도 <code>WM_CLOSE → DestroyWindow → WM_DESTROY → PostQuitMessage</code> 경로를 타고 내부 메시지 루프가 빠져나온 뒤, 호출부(<code>:457</code>, <code>:547</code>)는 성공/취소 구분 없이 무조건 <code>musicList.insert(inputed)</code>를 실행한다. <code>inputed</code>는 전역이므로 첫 취소에는 빈 곡이, 이후 취소에는 <strong>직전에 입력했던 곡이 다시</strong> 들어간다.</p>
           <p>다이얼로그 프로시저는 이미 <code>bool musicInput</code>이라는 전역 플래그를 쓰고 있으니, <code>INPUT_OK</code> 분기에서 성공 여부를 따로 세팅하고 호출부에서 검사하면 세 줄로 끝난다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>default:</code> 블록 안에 <code>case</code> 레이블을 숨겨 놓았다</h3></header>
+      <article class="finding" id="f15" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>default:</code> 블록 안에 <code>case</code> 레이블을 숨겨 놓았다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>WM_KEYDOWN</code> 처리의 <code>switch</code>에서 <code>default:</code>가 블록을 열고, 그 안에 <code>case 'O'</code>, <code>case 'S'</code>, <code>case 'F'</code>가 들어 있다(<code>:472–517</code>). C++ 문법상 유효하고 실제로 동작하지만(Duff's device와 같은 원리), <code>default</code>가 나머지 case보다 <em>위에</em> 있는 형태라 읽는 사람은 이 세 단축키가 죽은 코드라고 오해하기 쉽다. 그냥 <code>default</code>를 맨 아래로 내리면 될 일이다.</p>
           <p>같은 함수 <code>:639–641</code>에는 <code>default: break; break;</code>로 도달 불가능한 <code>break</code>가 하나 더 있다.</p>
@@ -318,8 +319,8 @@ drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);  <span cl
     <p class="prose">날짜 디렉터리에서 유일하게 저자가 처음부터 쓴 C 코드다. 한글 주석이 함수마다 달려 있고, 동봉된 <code>option.txt</code>에는 빌드 커맨드(<code>gcc list_test.c list.c -std=c99 -o list</code>)가 적혀 있다. 그 커맨드에 <code>-Wall -Wextra</code>를 붙여 실제로 빌드하고 실행했다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>find_index</code>가 "없음"과 "0번째"를 같은 값으로 반환한다 — 없는 값을 찾으면 "1번째에 있음"이라고 답한다</h3></header>
+      <article class="finding" id="f16" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>find_index</code>가 "없음"과 "0번째"를 같은 값으로 반환한다 — 없는 값을 찾으면 "1번째에 있음"이라고 답한다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>find_index</code>는 찾으면 인덱스를, 못 찾으면 <code>0</code>을 반환한다(<code>list.c:31</code>). 첫 번째 원소의 인덱스도 <code>0</code>이므로 두 경우를 구별할 수 없다. 호출부는 이 값을 그대로 <code>1 + find_index(...)</code>로 출력한다.</p>
           <p>실행으로 재현했다. 리스트에 <code>5</code>만 넣고 <code>77</code>을 검색하면 존재하지 않는 값에 대해 위치를 단언한다.</p>
@@ -343,8 +344,8 @@ printf("%d는 %d번째에 있음\n", input, 1 + find_index(List, input));</pre><
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>존재하지 않는 노드 뒤에 삽입하면 즉시 SIGSEGV — 재현됨</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3>존재하지 않는 노드 뒤에 삽입하면 즉시 SIGSEGV — 재현됨</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>list_test.c:24</code>는 <code>find</code>의 결과를 검사 없이 <code>insert_next</code>에 넘긴다. <code>find</code>는 못 찾으면 <code>NULL</code>을 반환하고, <code>insert_next</code>는 첫 줄부터 <code>node-&gt;next</code>를 역참조한다(<code>list.c:83</code>). 존재하지 않는 위치를 지정해 삽입하면 바로 죽는다.</p>
           <p>대화형 입력과 직접 호출 두 경로 모두에서 종료 코드 <code>139</code>(SIGSEGV)를 확인했다. 근본 원인은 <code>scanf</code>의 반환값을 한 번도 확인하지 않는 것과 같은 뿌리다 — <code>list_test.c:19</code>, <code>:31</code>, <code>:40</code> 세 곳 모두 반환값을 버리므로, 숫자가 아닌 입력이 들어오면 <code>arg</code>/<code>input</code>은 <code>:14</code>에서 초기화되지 않은 채 그대로 쓰인다.</p>
@@ -362,8 +363,8 @@ else if (!exist(List, input))
 <span class="cm">139</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>malloc</code> 검사 없음, 도달 불가능한 방어 코드, 전체 누수</h3></header>
+      <article class="finding" id="f18" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>malloc</code> 검사 없음, 도달 불가능한 방어 코드, 전체 누수</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>create()</code>(<code>list.c:9–15</code>)는 <code>malloc</code> 반환값을 확인하지 않고 바로 <code>result-&gt;next</code>에 쓴다. <code>value</code> 필드는 초기화하지 않는다 — 헤드 노드가 쓰레기 값을 들고 다니지만 순회가 <code>head-&gt;next</code>부터 시작하도록 일관되게 짜여 있어 증상은 나지 않는다.</p>
           <p><code>remove_node</code>(<code>:64–65</code>)의 <code>if (prev == NULL) return 0;</code>은 도달할 수 없다. <code>find_front_of</code>는 최소한 <code>head</code>를 반환하므로 절대 <code>NULL</code>이 아니다. 주석("prev가 없으면 삭제할 수 없고 0을 반환합니다")까지 붙어 있어 저자가 이 사실을 몰랐음을 보여준다. 반대로 정말 필요한 방어 — <code>node</code>가 이 리스트에 속하지 않을 때 <code>find_front_of</code>의 <code>while</code>이 리스트 끝을 넘어가는 것 — 은 빠져 있다.</p>
@@ -384,8 +385,8 @@ else if (!exist(List, input))
     <p class="prose">책의 C 연결 리스트를 C++ 클래스로 다시 쓰려는 시도다. 저자의 순수 창작물이지만, 컴파일이 되지 않는다. 그리고 레포에서 가장 마지막 날짜 디렉터리가 바로 이 파일이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>한 번도 컴파일되지 않은 파일이 3주 간격으로 두 번 커밋됐다 — 두 사본은 바이트 단위로 동일하다</h3></header>
+      <article class="finding" id="f19" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>한 번도 컴파일되지 않은 파일이 3주 간격으로 두 번 커밋됐다 — 두 사본은 바이트 단위로 동일하다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>15-11-03/list.cc</code>와 <code>15-11-25/list.cc</code>를 <code>diff</code>로 비교하면 차이가 없다. <code>list.h</code>도 동일하다. 2015-11-03에 커밋된 파일이 2015-11-25 커밋("<code>2015-11-25</code>")에서 한 글자도 수정되지 않은 채 새 디렉터리로 복사됐다. 이 두 커밋이 레포의 마지막 실습 기록이다.</p>
           <p><code>g++ -std=c++11</code>로 빌드하면 첫 오류가 <code>list.h:11</code>에서 나온다. 문제가 한두 개가 아니다 — 아래는 확인한 것 전부다.</p>

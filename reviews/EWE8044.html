@@ -32,6 +32,7 @@
       <div class="grade"><b>C</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>5</b> 치명적</a><a class="chip s-major" href="#f01"><b>8</b> 중대</a><a class="chip s-minor" href="#f01"><b>6</b> 경미</a><span class="total">합계 19</span></div>
 
   <section>
     <h2>총평</h2>
@@ -61,8 +62,8 @@
     <p class="prose">objective는 세 가지다. (1) RGB / YUV / Lab 각 채널 엔트로피, (2) <code>H(Y|R), H(Y|G), H(Y|B)</code>와 상관계수 <code>ρYR, ρYG, ρYB</code>, (3) 엔트로피 특성을 고려한 영상처리 사례 — YUV 압축과 color filter array(Bayer filter). 세 항목 중 (1)은 계산 방식에 흠이 있고, (2)의 상관계수는 실제로 답하지 못했으며, (3)의 Bayer filter는 아예 구현되지 않았다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>"상관계수"로 출력된 세 값은 두 셀 앞에서 계산한 조건부 엔트로피다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>"상관계수"로 출력된 세 값은 두 셀 앞에서 계산한 조건부 엔트로피다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>In[11]</code>에서 <code>entropies</code>에 <code>H(Y|R), H(Y|G), H(Y|B)</code>를 담는다. <code>In[12]</code>는 이 변수를 초기화하지 않은 채 뒤에 세 개를 <code>append</code>하고, 정작 상관계수는 <code>corrcoef</code>라는 별도 리스트에 넣은 뒤 <strong>한 번도 사용하지 않는다</strong>. 마지막 <code>print</code>는 <code>corrcoef</code>가 아니라 <code>entropies</code>를 <code>zip(..., "RGB")</code>로 잘라 쓰므로 앞 3개, 즉 조건부 엔트로피가 그대로 나온다. objective #2의 절반이 답해진 것처럼 보이면서 실제로는 답해지지 않았다.</p>
         </div>
@@ -84,8 +85,8 @@
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>PSNR 4.16 dB는 압축 손실이 아니라 dtype 불일치를 잰 값이다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>PSNR 4.16 dB는 압축 손실이 아니라 dtype 불일치를 잰 값이다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>image</code>는 <code>io.imread</code>가 반환한 uint8(0–255), <code>revert</code>는 <code>color.yuv2rgb</code>가 반환한 float(0–1)다. 두 스케일을 그대로 빼면 MSE가 폭발하고, PSNR은 내용과 무관하게 4 dB 근처로 고정된다. 4:2:0 수준 크로마 서브샘플링의 정상 PSNR은 35–45 dB다.</p>
           <p>numpy로 직접 확인했다. <strong>완전히 동일한 이미지</strong>를 하나는 uint8, 하나는 float(0–1)로 넣고 이 <code>psnr</code>을 호출하면 <code>4.78 dB</code>가 나온다. 노트북이 보고한 값은 <code>4.16 dB</code>다. 즉 보고된 "손실"의 거의 전부가 서브샘플링이 아니라 이 버그다. 서브샘플링의 실제 영향은 그 차이인 0.6 dB 안에 묻혀 있다. 이 절의 결론 자체가 성립하지 않는다.</p>
@@ -99,8 +100,8 @@
 505| PSNR: <span class="hl">4.16</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>압축률 0.33은 산술이 틀렸다 — 실제로는 0.50</h3></header>
+      <article class="finding" id="f03" data-sev="major">
+        <header><span class="tier">중대</span><h3>압축률 0.33은 산술이 틀렸다 — 실제로는 0.50</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>출력 문자열은 "374 x 500 + 187 x 250 x 2"라고 찍지만, 실제 식은 <code>int(image.shape[1] * ratio) * 2</code>뿐이다. 세로(<code>shape[0]</code>)가 곱해지지 않아 U·V 두 채널이 <code>187×250×2 = 93,500</code>이 아니라 <code>250×2 = 500</code>으로 계산된다. 재현 확인: 코드가 내는 값은 <code>187,000 + 500 = 187,500</code> → 0.33, 라벨이 주장하는 값은 <code>187,000 + 93,500 = 280,500</code> → <strong>0.50</strong>. 후자가 4:2:0의 교과서 값이다.</p>
         </div>
@@ -111,16 +112,16 @@
 504| Copressed ratio: <span class="hl">0.33</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>과제 objective에 적힌 Bayer filter가 구현되지 않았다</h3></header>
+      <article class="finding" id="f04" data-sev="major">
+        <header><span class="tier">중대</span><h3>과제 objective에 적힌 Bayer filter가 구현되지 않았다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>노트북 첫 셀이 objective #3으로 "Image compression using YUV component"와 "color filter array (Bayer filter)" 두 가지를 명시한다. 앞의 것은 크로마 서브샘플링 절로 구현됐지만(비록 위의 PSNR 버그로 결론이 무효화됐지만), Bayer filter는 어디에도 없다. 두 노트북 전체에서 <code>bayer</code>, <code>color filter array</code> 문자열은 <strong>이 objective 목록에 각각 1회씩 등장하는 것이 전부</strong>이고, <code>mosaic</code>/<code>demosaic</code>/<code>cfa</code>는 0회다. 스스로 적은 목표를 스스로 지우지 않고 남겨둔 채 제출했다.</p>
         </div>
         <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L28" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:28 (objective 셀)</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="28" data-end="28">전체 맥락</button></div><pre>28|     - <span class="hl">color filter array (Bayer filter)</span>   <span class="cm">← 이 줄이 이 문자열의 유일한 등장</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>markdown은 "2500장씩", 코드는 32장</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3>markdown은 "2500장씩", 코드는 32장</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>클래스 간 차이를 분석하는 절의 설명 셀은 각 클래스 2,500장을 쓴다고 적었다. 바로 다음 코드 셀은 <code>imgs[:32]</code>다. 78배 차이다. 표본 32개로 낸 cat/dog 엔트로피 평균차(7.3791 vs 7.4807)는 분산 추정도 유의성 검정도 없이 제시된다. 5,000장을 전부 메모리에 올려놓고(<code>:78</code>) 정작 32장만 쓴다는 점도 모순이다.</p>
         </div>
@@ -129,8 +130,8 @@
 667| entropies = {category: np.array(tuple(map(operation, imgs[<span class="hl">:32</span>]))) for category, imgs in images.items()}</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>train/test 분리는 했지만 두 지표의 축약 방식이 달라 비교가 불가능하다</h3></header>
+      <article class="finding" id="f06" data-sev="major">
+        <header><span class="tier">중대</span><h3>train/test 분리는 했지만 두 지표의 축약 방식이 달라 비교가 불가능하다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>데이터 누수는 없다 — <code>imgs[:100]</code>과 <code>imgs[100:150]</code>은 겹치지 않고, 모델은 train에만 <code>fit</code>한 뒤 test에서 <code>predict</code>한다. 문제는 지표다. forward 방향은 <code>.sum()</code>, reverse 방향은 <code>.mean()</code>으로 축약한다. 표본 수로 나누느냐 마느냐의 차이만으로 두 숫자가 0.413 대 5138.007로 벌어졌는데, 노트북은 이 둘을 나란히 출력한다. 스케일도 다르다(확률 0–1 대 명도 0–255). 어느 쪽도 상대 비교의 근거가 될 수 없다.</p>
           <p>또한 분리해 계산한 train/test 조건부 엔트로피를 마지막에 하나로 합쳐 평균 내므로, 이 절이 원래 보려던 "train과 test에서 조건부 엔트로피가 어떻게 다른가"는 끝내 확인되지 않는다. 그 줄은 동시에 모듈 전역의 <code>cond_entropy</code> <strong>함수를 배열로 덮어쓴다</strong> — 이 셀 이후 해당 함수를 부르면 <code>TypeError</code>다.</p>
@@ -145,15 +146,15 @@
     Reverse expected squared error: 5138.006873</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>RGB는 원해상도, YUV·Lab은 160×160 리사이즈 후 엔트로피 — 같은 표에 나란히 놓았다</h3></header>
+      <article class="finding" id="f07" data-sev="minor">
+        <header><span class="tier">경미</span><h3>RGB는 원해상도, YUV·Lab은 160×160 리사이즈 후 엔트로피 — 같은 표에 나란히 놓았다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>H(R)=7.5203</code>은 374×500 원본에서, <code>H(Y)=7.6070</code>은 <code>transform.resize</code>로 160×160까지 줄인 뒤 계산됐다(<code>:220–221</code>, <code>:230–231</code>). 리사이즈는 보간으로 값 분포를 바꾸고 표본 수를 1/7로 줄이므로 엔트로피 추정값에 직접 영향을 준다. "RGB보다 Y의 엔트로피가 높다" 같은 비교를 이 표로 하면 안 된다. 같은 전처리를 거치게 하는 데 한 줄이면 충분했다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>seed가 전혀 없다</h3></header>
+      <article class="finding" id="f08" data-sev="minor">
+        <header><span class="tier">경미</span><h3>seed가 전혀 없다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>이 노트북 코드 셀 전체에 <code>seed</code>는 0회 등장한다(JSON 본문의 <code>seed</code> 일치는 전부 base64 이미지 문자열 내부였고, 셀 소스만 파싱해 확인했다). 대표 이미지 선택(<code>choice</code>), 썸네일 샘플링, 32장 무작위 추출이 모두 실행마다 달라진다. 보고서에 인용된 모든 수치는 재실행하면 재현되지 않는다.</p>
         </div>
@@ -171,8 +172,8 @@
     <p class="prose">전반부는 2500×1562 그레이스케일 이미지에서 8×8 패치를 뽑아 k-means로 코드북을 만들고 엔트로피 변화를 보는 것, 후반부는 4개 정규분포 클래스의 평균 사이 KL distance를 클러스터링 전후로 비교하는 것이다. 전반부는 실험은 돌았으나 해석이 없고, 후반부는 계산 대상 자체가 KL divergence가 아니다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>KL divergence가 음수인데 그 값으로 결론을 냈다</h3></header>
+      <article class="finding" id="f09" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>KL divergence가 음수인데 그 값으로 결론을 냈다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>KL(P‖Q) ≥ 0</code>은 정의에서 나오는 성질이고, 등호는 <code>P = Q</code>일 때만 성립한다. 노트북의 출력 6개 중 4개가 음수다. 원인은 명확하다: <code>points[s].mean(0)/100</code>은 좌표 평균 2개짜리 벡터를 100으로 나눈 것일 뿐, 합이 1인 확률분포가 아니다. 정규화되지 않은 두 벡터에 KL 공식을 적용하면 부호 제약이 사라진다.</p>
           <p>seed가 <code>8044</code>로 고정돼 있어 이 부분을 그대로 재현했다. numpy에서 같은 시드로 points를 만들어 같은 <code>KL</code>을 돌린 결과 <strong>노트북에 저장된 출력과 소수점 넷째 자리까지 일치</strong>했다(<code>mean=0.2003, std=0.8998</code>). 따라서 위 진단은 추정이 아니라 확인된 사실이다. 그런데 이 음수들 아래에 어떤 의문도 적혀 있지 않다.</p>
@@ -187,8 +188,8 @@
      Distance B-D: <span class="hl">-0.4120</span>    Distance C-D: <span class="hl">-0.1162</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>클러스터링 전후 비교가 벡터 대 스칼라라 비교 자체가 성립하지 않는다</h3></header>
+      <article class="finding" id="f10" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>클러스터링 전후 비교가 벡터 대 스칼라라 비교 자체가 성립하지 않는다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>클러스터링 전(<code>In[35]</code>)은 <code>points[s].mean(0)</code>, 즉 (10000, 2) 배열을 축 0으로 줄인 <strong>2원소 벡터</strong>에 KL을 건다. 클러스터링 후(<code>In[36]</code>)의 <code>next_mean[s]</code>는 이미 <code>codebook</code>의 한 행, 즉 shape (2,)다. 여기에 다시 <code>.mean(0)</code>을 걸면 두 좌표의 평균인 <strong>스칼라</strong>가 된다. 즉 앞은 2항 합, 뒤는 1항이다. 재현으로 확인했다: shape (2,) 배열에 <code>.mean(0)</code>을 하면 <code>np.float64</code> 스칼라가 나온다.</p>
           <p>그래서 "거리가 줄었다"는 마지막 결론은 클러스터링 효과가 아니라 합산 항이 둘에서 하나로 줄어든 결과일 수 있다. 이 노트북의 유일한 결론 문장이 그 위에 서 있다.</p>
@@ -202,8 +203,8 @@
 511| "<span class="hl">The KL totally distance was reduced.</span>"</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>execution_count가 뒤엉켰고 실행 8회분의 코드가 남아 있지 않다</h3></header>
+      <article class="finding" id="f11" data-sev="major">
+        <header><span class="tier">중대</span><h3>execution_count가 뒤엉켰고 실행 8회분의 코드가 남아 있지 않다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>EWE8044.ipynb</code>와 달리 이 노트북은 위에서 아래로 재실행된 상태가 아니다. 실행 번호 <strong>22, 24, 25, 26, 27, 28, 29, 34</strong>가 통째로 비어 있다 — 실행됐지만 지워졌거나 다른 셀로 대체된 코드가 최소 8개라는 뜻이고, 그 코드가 현재 커널 상태에 무엇을 남겼는지는 노트북만 보고 알 수 없다. 셀 32(<code>exec=23</code>)가 셀 30(<code>exec=35</code>)보다 먼저 실행됐다는 사실도 파일 순서와 어긋난다. 다행히 seed 덕에 KL 부분은 재현됐지만(위 참조), 그건 운이지 설계가 아니다.</p>
         </div>
@@ -213,8 +214,8 @@
 비교: EWE8044.ipynb = 1 … 27 (결번 없음)</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>markdown이 코드보다 두 자릿수 앞서간다 — 패치 100만 대 1만, 코드북 크기 대 반복 횟수</h3></header>
+      <article class="finding" id="f12" data-sev="major">
+        <header><span class="tier">중대</span><h3>markdown이 코드보다 두 자릿수 앞서간다 — 패치 100만 대 1만, 코드북 크기 대 반복 횟수</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>설명 셀은 "8×8 패치 약 100만 개"를 뽑는다고 적었으나 코드는 <code>patch_counts = 10000</code>이다. 100배 차이고, 2500×1562 이미지에서 겹침을 허용해 1만 개를 뽑으면 커버리지는 전체 화소의 0.16%다. 또 "k-means clustering 10, 20, 30, 40 times to analyze codeward and entropy changes"라고 적었지만, 코드는 클러스터 수를 2000으로 <strong>고정</strong>하고 <code>max_iter</code>만 바꾼다. 코드북 크기를 바꿔가며 엔트로피 변화를 보는 것이 VQ 과제의 핵심인데, 실제로 바뀐 것은 수렴 반복수다.</p>
           <p>그 결과 네 조건의 엔트로피가 8.0473 / 8.0164 / 8.0181 / 8.0255로 총 0.03 bit 안에서 움직인다. 사실상 신호가 없는 결과인데, 이 출력 뒤에는 해석 셀이 없다. 숫자를 내고 그대로 다음 주제로 넘어간다.</p>
@@ -228,8 +229,8 @@
 254|     model = KMeans(n_clusters=<span class="hl">2000</span>, <span class="hl">max_iter=it</span>)   <span class="cm">← 코드북 크기는 고정</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>astype(np.int8)</code> — 오버플로는 이번 시드에서만 피했고, 절사 편향은 실제로 발생했다</h3></header>
+      <article class="finding" id="f13" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>astype(np.int8)</code> — 오버플로는 이번 시드에서만 피했고, 절사 편향은 실제로 발생했다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>np.int8</code>의 표현 범위는 −128–127인데 <code>loc</code>는 <code>randint(100)</code>, <code>scale</code>은 최대 10이다. 재현해 보니 이 시드에서 최대 표본은 107.4로 범위를 넘지 않았다 — 여유가 겨우 20이었다. <code>randint</code>가 몇 만 더 큰 값을 냈다면 조용히 음수로 wrap 됐을 것이다. 반면 절사 편향은 실제로 발생했다: <code>.astype</code>은 반올림이 아니라 0 방향 절사이므로 네 클래스 전부 평균이 정확히 0.5씩 낮아졌다(A: 74.04 → 73.55). 좌표를 정수로 만들 이유 자체가 없었다.</p>
         </div>
@@ -241,15 +242,15 @@ A: float mean=[74.04 73.04]  →  int8 mean=[73.55 72.54]   (정확히 −0.5)
 C: float max=[102.9 84.0],  D: float max=[107.4 68.7]   (int8 상한 127까지 여유 20)</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>한 노트북에서 서로 다른 두 k-means 구현을 쓴다</h3></header>
+      <article class="finding" id="f14" data-sev="minor">
+        <header><span class="tier">경미</span><h3>한 노트북에서 서로 다른 두 k-means 구현을 쓴다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>전반부는 <code>sklearn.cluster.KMeans</code>(In[14]), 후반부는 <code>scipy.cluster.vq.kmeans</code>(In[23])다. 초기화 전략도, 반복 종료 조건도, 반환 형태(<code>labels_</code> 대 <code>(codebook, distortion)</code>)도 다르다. 한 과제 안에서 이유 없이 갈아탄 것이라 두 절의 결과를 서로 참조할 수 없다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>seed가 벡터 양자화 절 <em>뒤</em>에 놓여 있다</h3></header>
+      <article class="finding" id="f15" data-sev="minor">
+        <header><span class="tier">경미</span><h3>seed가 벡터 양자화 절 <em>뒤</em>에 놓여 있다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>이 노트북의 유일한 <code>np.random.seed(8044)</code>는 <code>In[16]</code>, 즉 KL 절 바로 앞이다. 그런데 패치 추출(<code>In[7]</code>, <code>np.random.randint</code>)과 썸네일 샘플링(<code>In[8]</code>, <code>np.random.choice</code>)은 그보다 앞에서 실행된다. 결과적으로 노트북의 절반은 재현 가능하고 절반은 아니다. seed를 import 직후로 한 셀만 올리면 해결될 문제였다.</p>
         </div>
@@ -267,24 +268,24 @@ C: float max=[102.9 84.0],  D: float max=[107.4 68.7]   (int8 상한 127까지 �
     <p class="prose">이 레포에서 사람이 쓴 것은 노트북 두 개, 합쳐서 6 MB(대부분 base64 출력 이미지)다. 나머지는 전부 남의 데이터다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Kaggle 학습 데이터셋 5,000장을 git에 커밋했다</h3></header>
+      <article class="finding" id="f16" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Kaggle 학습 데이터셋 5,000장을 git에 커밋했다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>추적 파일 5,004개 중 5,000개가 <code>train/</code> 아래 Dogs vs Cats 이미지다(cat 2,500 + dog 2,500). 워킹 트리 258 MB, <code>.git</code> 129 MB, pack 117.58 MiB. 이 레포를 clone하려는 사람은 노트북 두 권을 읽기 위해 118 MB를 받아야 한다.</p>
           <p>이건 단순한 용량 문제가 아니다. git은 바이너리에 델타 압축이 거의 듣지 않으므로 데이터가 한 번 들어가면 히스토리에서 영구히 빠지지 않는다. 그리고 이 데이터는 Kaggle 대회 데이터로 재배포 조건이 따로 있다 — 노트북은 출처 링크를 성실히 달아 뒀으면서(<code>Requirements</code> 셀), 정작 링크만 남기고 데이터를 통째로 올리는 쪽을 택했다. 올바른 처리는 <code>.gitignore</code>에 <code>train/</code>을 넣고 README에 다운로드 절차를 적는 것, 한 줄과 세 줄이면 됐다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>커밋이 1개다 — 개발 이력이 존재하지 않는다</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3>커밋이 1개다 — 개발 이력이 존재하지 않는다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>bd3c34b</code>, <code>2020-04-07</code>, 메시지 "Update EWE8044". 브랜치는 <code>master</code> 하나뿐이고 origin에도 다른 브랜치가 없다. 노트북 markdown에 적힌 작성일은 각각 2019/10/21과 2019/11/06이므로, 과제 제출로부터 <strong>약 5개월 뒤</strong>에 완성본을 통째로 밀어 넣은 것이다.</p>
           <p>실질적 손실이 있다. 이 레포에는 "어디서 막혔고 어떻게 풀었는가"를 보여주는 증거가 하나도 없다 — 위에서 지적한 PSNR 4 dB나 음수 KL 같은 문제를 저자가 중간에 발견했다가 놓친 것인지, 처음부터 못 본 것인지 구분할 방법이 없다. git을 버전 관리로 쓴 것이 아니라 완성품 업로드용 드라이브로 쓴 결과다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>test1.zip</code> 3.4 MB — 깨져서 열리지 않고, 어느 노트북도 참조하지 않는다</h3></header>
+      <article class="finding" id="f18" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>test1.zip</code> 3.4 MB — 깨져서 열리지 않고, 어느 노트북도 참조하지 않는다</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>파일 앞 4바이트는 정상 zip 시그니처 <code>PK\x03\x04</code>지만 end-of-central-directory 레코드가 없다. 잘린 파일이라 <code>unzip</code>이 거부한다. 크기는 정확히 3,571,712 바이트다. 그리고 두 노트북의 코드 셀 전체에서 <code>test1</code> 문자열은 <strong>0회</strong> 등장한다 — 쓰이지도 않는 깨진 바이너리가 3.4 MB 자리를 차지하고 있다. 같은 커밋에 <code>cat.jpg</code>(2500×1562, 388 KB)도 있는데 이쪽은 <code>EWE8044#3.ipynb</code>가 실제로 쓴다.</p>
         </div>
@@ -299,8 +300,8 @@ $ grep -c test1 EWE8044.ipynb 'EWE8044#3.ipynb'
 EWE8044.ipynb:<span class="hl">0</span>   EWE8044#3.ipynb:<span class="hl">0</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>README, .gitignore, requirements가 모두 없다</h3></header>
+      <article class="finding" id="f19" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README, .gitignore, requirements가 모두 없다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>루트에 <code>README</code>도 <code>.gitignore</code>도 <code>requirements.txt</code>도 <code>environment.yml</code>도 없다. 실행 환경 정보는 우연히 남았다 — <code>In[9]</code>의 stderr 경고가 <code>/home/jiun/conda/lib/python3.7/site-packages/skimage/...</code>를 노출해 conda + Python 3.7 환경임을 알려주고, 노트북 metadata에는 3.6.9로 적혀 있어 서로 어긋난다. 의존성 목록에 가장 가까운 것은 <code>EWE8044.ipynb</code>의 "Requirements" markdown 셀인데 버전이 없다.</p>
           <p>파일명 <code>EWE8044#3.ipynb</code>의 <code>#</code>도 사소하지만 실질적 문제다. URL fragment 구분자라 GitHub 링크나 <code>nbconvert</code> 인자로 넘길 때마다 이스케이프가 필요하다.</p>

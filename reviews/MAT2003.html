@@ -33,6 +33,7 @@
       <div class="grade"><b>B-</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>3</b> 치명적</a><a class="chip s-major" href="#f01"><b>4</b> 중대</a><a class="chip s-minor" href="#f01"><b>6</b> 경미</a><span class="total">합계 13</span></div>
 
   <!-- ============ 총평 ============ -->
   <section>
@@ -66,8 +67,8 @@
     <p class="prose">과제는 <code>M=9</code>를 <code>s=0</code>에서 <code>t=13</code>로 보낼 때의 최소 비용을 요구했다. 저자는 Johnson potential을 쓴 successive shortest path를 세 가지(Bellman-Ford / PQ / <code>O(V²)</code> Dijkstra)로 구현하고 10개 그래프에 각각 10000회 돌려 비교했다. 답 109는 맞다. 비교 설계가 무너져 있다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>불가능한 요청과 "비용 0"이 같은 값으로 반환된다 — 그리고 벤치마크의 70%가 여기에 걸린다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>불가능한 요청과 "비용 0"이 같은 값으로 반환된다 — 그리고 벤치마크의 70%가 여기에 걸린다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>tflow</code>가 요구 유량 <code>f</code>에 도달하지 못하면 <code>0</code>을 돌려준다. 호출자는 "9를 보낼 수 없다"와 "9를 공짜로 보냈다"를 구분할 방법이 없다. 세 구현(<code>Problem2.cc:112</code>, <code>Problem2i.cc:112</code>, <code>Problem2ii.cc:115</code>) 모두 동일하다.</p>
         </div>
@@ -98,8 +99,8 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Problem2i의 priority queue는 거리가 아니라 정점 번호로 정렬된다 — Dijkstra가 아니다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Problem2i의 priority queue는 거리가 아니라 정점 번호로 정렬된다 — Dijkstra가 아니다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>보고서는 "Dijkstra Algorithm도 priority queue(우선순위 큐)를 간선에 따라 정리하여 최적의 경로만 선택하도록 하여 속도를 더 올릴 수 있다"고 적고 그 구현이 <code>problem2i.cc</code>라고 명시한다. 그런데 큐에 들어가는 쌍은 <code>{정점, 거리}</code> 순서이고 <code>std::priority_queue&lt;pair&lt;int,int&gt;&gt;</code>는 <code>first</code>부터 비교하는 <em>최대</em> 힙이다. 결과적으로 매번 "거리가 가장 짧은 정점"이 아니라 "번호가 가장 큰 정점"이 뽑힌다.</p>
         </div>
@@ -117,12 +118,12 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
 				break;</pre></div>
         <div class="prose">
           <p>게다가 settled(확정) 집합이 없다. 완화될 때마다 무조건 다시 push하므로 이 루프는 Dijkstra가 아니라 pop 순서가 뒤틀린 label-correcting(SPFA 계열) 알고리즘이다. <strong>답은 맞다</strong> — 재현 실행에서 <code>Problem2i</code>는 10개 그래프 모두 <code>Problem2</code>·<code>Problem2ii</code>와 동일한 값을 냈다. label-correcting은 pop 순서와 무관하게 수렴하기 때문이다. 그래서 이 버그는 오답이 아니라 <em>주장의 붕괴</em>로 나타난다. 보고서가 설명한 개선 기제(최적 경로 우선 선택)는 코드에 존재하지 않으며, <code>Problem2i.out</code>이 보여주는 <code>Problem2</code> 대비 속도 향상(graph0에서 3.166→2.594초)은 문서가 설명하는 이유 때문이 아니라 단순히 전체 <code>V×V</code> 스윕을 반복하는 대신 변화가 있는 정점만 재방문하기 때문이다.</p>
-          <p>같은 절이 <code>problem2ii.cc</code>를 "중복해서 방문하지 않도록 중복을 제거해주는 방식으로 Dijkstra를 최적화"한 것으로 소개하는데, 실제 <code>Problem2ii.cc:38,61,64</code>는 <code>found</code> 배열을 두고 매 단계 미방문 정점 중 최소 <code>dist</code>를 선형 탐색하는 교과서적 <code>O(V²)</code> Dijkstra다. 2i에 무언가를 <em>더한</em> 것이 아니라 priority queue를 <em>들어낸</em> 것이다. 셋 중 가장 정직하게 Dijkstra인 구현이 가장 빠르다는 결과(graph0 0.734초)는 옳지만, 보고서의 개선 서사는 계보를 거꾸로 적고 있다.</p>
+          <p>같은 절이 <code>problem2ii.cc</code>를 "중복해서 방문하지 않도록 중복을 제거해주는 방식으로 Dijkstra를 최적화"한 것으로 소개하는데, 실제 <code>Problem2ii.cc:38,61,64</code>는 <code>found</code> 배열을 두고 매 단계 미방문 정점 중 최소 <code>dist</code>를 선형 탐색하는 교과서적 <code>O(V²)</code> Dijkstra다. 2i에 무언가를 <em>더한</em> 것이 아니라 priority queue를 <em>들어낸</em> 것이다. 셋 중 가장 정직하게 Dijkstra인 구현이 가장 빠르다는 결과(graph0 0.734초)는 옳지만, 보고서의 개선 서사는 계보를 거꾸로 적었다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>potential 갱신이 도달 불가 정점에서 INF로 오염된다</h3></header>
+      <article class="finding" id="f03" data-sev="minor">
+        <header><span class="tier">경미</span><h3>potential 갱신이 도달 불가 정점에서 INF로 오염된다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>세 구현 모두 <code>label[k] = min(label[k] + dist[k], INF);</code>(<code>Problem2.cc:74</code>, <code>Problem2i.cc:74</code>, <code>Problem2ii.cc:77</code>)로 potential을 갱신한다. 도달 불가 정점은 <code>dist[k] == INF</code>이므로 <code>label[k]</code>가 INF로 고정되고, 다음 라운드의 <code>value = dist[s] + label[s] - label[t] + cost</code>에서 INF끼리 상쇄되며 의미 없는 값이 만들어진다. 지금 데이터셋에서는 그 정점들이 결국 증가 경로에 포함되지 않아 결과가 바뀌지 않았지만(재현 결과가 커밋 로그와 일치), 안전한 구현은 도달 불가 정점의 potential을 건드리지 않는다.</p>
         </div>
@@ -141,8 +142,8 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
     <p class="prose">과제는 s에서 t로 1초간 보낼 수 있는 최대 데이터량을 요구했다. 보고서는 먼저 컷 논증으로 손계산 18을 유도한 뒤 일반해로 BFS 증가 경로를 구현하고, 그것을 "개선"한 <code>Problem1i.cc</code>를 덧붙인다. 두 구현 모두 10개 그래프 전부에서 같은 값을 냈다(<code>18 4 12 16 5 4 2 2 2 0</code>). 문제는 그 "개선"이 무엇인지에 대한 설명이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>보고서가 설명한 최적화가 코드에 없고, 그 최적화의 전제 자체가 거짓이다</h3></header>
+      <article class="finding" id="f04" data-sev="major">
+        <header><span class="tier">중대</span><h3>보고서가 설명한 최적화가 코드에 없고, 그 최적화의 전제 자체가 거짓이다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>보고서 Problem 1 Improve 절의 주장은 두 단계다. (1) "주어진 그래프에서 <code>f(u,v)=c(u,v)</code>이 성립하는 간선은 무조건 지나야 하는 것을 알 수 있다", (2) "이를 이용하여 지나야만 하는 간선을 확정하는 방식으로 문제를 해결해 볼 수 있다. 이를 이용한 풀이는 Problem1i.cc에 작성되었으며".</p>
           <p>(1)은 성립하지 않는다. 어떤 최대 유량 해에서 포화된 간선이 <em>모든</em> 최대 유량 해에 포함될 필요는 없다. 용량이 같은 두 경로가 병렬로 존재하기만 해도 반례가 된다. (2)는 코드에 없다. <code>Problem1i.cc</code>에 포화 간선을 미리 확정하는 코드는 한 줄도 없다. 실제로 있는 것은 인접행렬(<code>Problem1.cc:25</code>의 <code>vector&lt;vector&lt;int&gt;&gt; res</code>) 대신 인접 리스트 잔여 그래프를 세우고, BFS 한 번에 t로 들어오는 간선들을 훑으며 여러 경로를 한꺼번에 흘리는 Dinic 계열 변형이다.</p>
@@ -157,12 +158,12 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
 		{
 			Edge * edge = &amp;G[G[t][i].to][G[t][i].index];</pre></div>
         <div class="prose">
-          <p>속도 향상 자체는 진짜다. 커밋된 로그에서 graph0 10000회 기준 0.833초 → 0.343초다. 하지만 그 이유는 보고서가 적은 이유가 아니라 (a) <code>O(V²)</code> 인접행렬 스캔이 <code>O(E)</code> 인접 리스트 순회로 바뀐 것, (b) BFS 한 번에 복수 경로를 흘리는 것이다. 보고서는 자신이 실제로 한 최적화를 설명하지 못하고 있다. 성능 수치는 정직한데 인과가 틀렸다.</p>
+          <p>속도 향상 자체는 진짜다. 커밋된 로그에서 graph0 10000회 기준 0.833초 → 0.343초다. 하지만 그 이유는 보고서가 적은 이유가 아니라 (a) <code>O(V²)</code> 인접행렬 스캔이 <code>O(E)</code> 인접 리스트 순회로 바뀐 것, (b) BFS 한 번에 복수 경로를 흘리는 것이다. 보고서는 자신이 실제로 한 최적화를 설명하지 못한다. 성능 수치는 정직한데 인과가 틀렸다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>배열 첫 원소 앞을 가리키는 sentinel 포인터 — 정의되지 않은 동작</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3>배열 첫 원소 앞을 가리키는 sentinel 포인터 — 정의되지 않은 동작</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>경로 역추적의 종료 표식으로 <code>G[0]</code>의 첫 원소 <em>하나 앞</em> 주소를 만든다. C++ 표준이 허용하는 것은 "마지막 원소 하나 뒤"까지이고, 하나 앞은 계산하는 것만으로 UB다. 또 <code>G[0]</code>가 비어 있으면(정점 0에서 나가는 간선이 없는 그래프) <code>&amp;G[0][0]</code> 자체가 이미 UB다.</p>
         </div>
@@ -176,8 +177,8 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>BFS가 t에 도달한 뒤에도 그래프 전체를 계속 순회한다</h3></header>
+      <article class="finding" id="f06" data-sev="minor">
+        <header><span class="tier">경미</span><h3>BFS가 t에 도달한 뒤에도 그래프 전체를 계속 순회한다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>Problem1.cc:47–55</code>의 BFS 루프는 큐가 빌 때까지 돌고 마지막에 <code>visited[t]</code>만 확인한다. t를 찾은 순간 끊으면 증가 경로 탐색 비용이 줄어든다. 증가 경로가 많은 graph0에서는 매 라운드마다 쓸모없는 순회가 반복된다. <code>-Wall -Wextra</code>로 재현 빌드했을 때 나온 경고 2건(<code>Problem1.cc:66:24</code>, <code>:69:24</code>)도 같은 함수에 있는데, <code>for (size_t v = t; v != s; ...)</code>에서 <code>size_t</code>와 <code>int</code>를 비교하고 있다. 지금은 BFS 성공 후에만 실행되어 무해하지만, <code>parent[v]</code>가 <code>-1</code>인 채로 <code>size_t</code>에 대입되면 곧장 거대한 인덱스가 되어 범위 밖 접근이 된다.</p>
         </div>
@@ -196,8 +197,8 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
     <p class="prose">보고서 Presets 절은 "입/출력과 시간 측정하는 부분을 공통되도록 작성"하고 "구현 부분의 함수를 제외한 코드는 모두 같게" 했다고 밝힌다. 공정한 비교를 의식한 설계이고 실제로 다섯 개 <code>main</code>은 거의 동일하다. 그 공통 기반 자체가 부실하다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>입력 파서가 스트림 실패를 확인하지 않는다 — 벤치마크 그래프 하나가 조용히 변조되어 있다</h3></header>
+      <article class="finding" id="f07" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>입력 파서가 스트림 실패를 확인하지 않는다 — 벤치마크 그래프 하나가 조용히 변조되어 있다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>operator&gt;&gt;</code>는 <code>while (g.E--)</code>로 선언된 간선 수만큼 무조건 읽고, 매번 <code>is</code>의 상태를 확인하지 않는다. 파일이 일찍 끝나면 C++11 이후 <code>operator&gt;&gt;</code>는 실패 시 대상을 <code>0</code>으로 설정하므로, 존재하지 않는 간선이 <code>0 0 0 0</code>으로 그래프에 삽입된다. 마지막 줄 <code>g.E = g.edges.size()</code>가 간선 수를 다시 맞춰주기 때문에 호출자 입장에서는 아무 이상이 없어 보인다. 정점 번호가 <code>V</code> 이상인지도 검사하지 않아, 잘못된 파일 하나면 <code>g.cost[from][to]</code>가 벡터 범위 밖 쓰기가 된다.</p>
         </div>
@@ -225,8 +226,8 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>할당한 메모리를 한 번도 반환하지 않는다</h3></header>
+      <article class="finding" id="f08" data-sev="major">
+        <header><span class="tier">중대</span><h3>할당한 메모리를 한 번도 반환하지 않는다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>graph.h:32</code>의 <code>new edge()</code>는 매 간선마다 할당되지만 <code>graph</code>의 소멸자는 <code>~graph() {}</code>(<code>graph.h:13</code>)로 비어 있다. 10개 그래프 × 구현 5개를 순회하는 <code>main</code>에서 <code>graph</code> 객체가 반복 생성·파괴되므로 간선 객체가 전부 샌다. 소유권을 넘길 곳도 없다 — <code>g.edges</code>는 파서가 채운 뒤 다섯 개 <code>.cc</code> 어디에서도 읽히지 않는다. 순수한 누수다.</p>
         </div>
@@ -241,15 +242,15 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>graph.h만 include guard가 없다</h3></header>
+      <article class="finding" id="f09" data-sev="minor">
+        <header><span class="tier">경미</span><h3>graph.h만 include guard가 없다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>fileIO.h:1</code>, <code>measure.h:1</code>, <code>to_string.h:1</code>은 모두 <code>#pragma once</code>로 시작하는데 <code>graph.h</code>에는 없다. 지금은 각 <code>.cc</code>가 한 번씩만 include해서 드러나지 않지만, <code>graph.h</code>가 두 번 포함되는 순간 <code>struct edge_</code>와 <code>operator&gt;&gt;</code> 재정의로 컴파일이 깨진다. 헤더 네 개 중 셋에 있는 것이 넷째에 빠진 전형적인 누락이다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>include 경로가 백슬래시라 Windows 밖에서는 빌드되지 않는다</h3></header>
+      <article class="finding" id="f10" data-sev="minor">
+        <header><span class="tier">경미</span><h3>include 경로가 백슬래시라 Windows 밖에서는 빌드되지 않는다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>다섯 개 <code>.cc</code> 전부가 <code>#include "headers\graph.h"</code>(각 파일 10–12행)로 되어 있고 데이터 경로도 <code>"data\\graph"</code>(예: <code>Problem1.cc:104</code>)다. 손대지 않은 원본을 macOS의 <code>g++</code>로 빌드하면 즉시 실패한다.</p>
         </div>
@@ -303,22 +304,22 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
   <section>
     <h2>레포 위생</h2>
     <div class="stack-lg">
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Windows 실행 파일 5개가 커밋되어 있고, .gitignore는 그것을 막지 않는다</h3></header>
+      <article class="finding" id="f11" data-sev="major">
+        <header><span class="tier">중대</span><h3>Windows 실행 파일 5개가 커밋되어 있고, .gitignore는 그것을 막지 않는다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>git ls-files</code> 기준 추적 파일 37개, 총 3,370,801바이트. 이 중 <code>*.exe</code> 다섯 개가 1,490,518바이트(약 44%)다. <code>file</code>로 확인하면 전부 <code>PE32 executable (console) Intel 80386 (stripped to external PDB), for MS Windows</code>, 즉 macOS·Linux에서는 실행조차 되지 않는 산출물이다.</p>
           <p>아이러니한 것은 <code>.gitignore</code>가 3,121바이트짜리 Visual Studio 표준 템플릿이라는 점이다. <code>[Dd]ebug/</code>, <code>[Bb]in/</code>, <code>[Oo]bj/</code>는 무시하지만 <code>*.exe</code> 항목이 없고, <code>git check-ignore -v LinearAlgebra/Problem1.exe</code>는 아무것도 반환하지 않는다. 빌드 산출물을 프로젝트 루트에 직접 떨어뜨렸기 때문에 디렉터리 기반 규칙을 전부 비껴갔다. 커밋 이력상 <code>da066e3 finished code</code>, <code>4174a3b MCMF Improved!!</code>, <code>5575894 FINSH PROJECT</code> 세 번에 걸쳐 추가되었으므로 한 번의 실수가 아니라 습관이다.</p>
           <p>텍스트 로그인 <code>*.out</code>(1.1–1.3KB)은 사정이 다르다. 재현 대조에 실제로 쓰였고 크기도 작아 커밋할 이유가 있다. 지적 대상은 <code>.exe</code>다.</p>
         </div>
       </article>
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>같은 보고서가 세 벌, 서로 다른 내용으로 들어 있다</h3></header>
+      <article class="finding" id="f12" data-sev="minor">
+        <header><span class="tier">경미</span><h3>같은 보고서가 세 벌, 서로 다른 내용으로 들어 있다</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>루트에 <code>선형대수 프로젝트 보고서.docx</code>(702KB)와 <code>.pdf</code>(594KB)가 있고, 별도로 <code>LinearAlgebra/report.pdf</code>(285KB)가 있다. 세 번째 파일은 앞의 PDF와 md5가 다르고 크기도 절반 이하이므로 동일본이 아니다(이전 초안으로 <strong>추정</strong>된다 — 환경에 <code>pdftotext</code>가 없어 내용 대조는 하지 못했다). 어느 것이 제출본인지 레포만 보고는 알 수 없다. <code>README.md</code>는 세 줄뿐이라 도움이 되지 않는다.</p>
         </div>
       </article>
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>커밋 16개 중 3개가 에디터 연동 테스트다</h3></header>
+      <article class="finding" id="f13" data-sev="minor">
+        <header><span class="tier">경미</span><h3>커밋 16개 중 3개가 에디터 연동 테스트다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>cc5306e commit test @ sublimetext3</code>, <code>73ad072 git commit test sublimeText3</code>, <code>0d1bff3 git commit test sublimetext3</code>가 2015-11-29 하루에 연달아 있다. 이력의 19%가 내용이 없는 커밋이고, <code>5575894 FINSH PROJECT</code>에는 오타가 있다. 과제 규모를 감안하면 치명적이지 않지만, 이력 자체가 산출물의 일부라는 감각은 아직 없다.</p>
         </div>

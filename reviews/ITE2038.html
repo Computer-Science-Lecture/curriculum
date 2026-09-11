@@ -33,6 +33,7 @@
       <div class="grade"><b>C+</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>7</b> 치명적</a><a class="chip s-major" href="#f01"><b>10</b> 중대</a><a class="chip s-minor" href="#f01"><b>5</b> 경미</a><span class="total">합계 22</span></div>
 
   <section>
     <h2>총평</h2>
@@ -64,8 +65,8 @@
     <p class="prose">주어진 배달 서비스 시나리오를 ER 모델로 설계하는 과제다. Navicat Data Modeler로 9개 테이블(Seller, Service, Owner, Buyer, Agency, Order, Contact, Payment, Destination)을 그리고 모델 파일·캡처 이미지·내보낸 PostgreSQL DDL·설명 문서를 함께 제출했다. 개체 분할과 FK 배치 자체는 대체로 타당하다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>제출된 DDL은 그대로 실행할 수 없다</h3></header>
+      <article class="finding" id="f01" data-sev="major">
+        <header><span class="tier">중대</span><h3>제출된 DDL은 그대로 실행할 수 없다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>Navicat이 내보낸 파일을 손대지 않고 제출했다. 앞부분 드롭 구문 중 네 줄은 제약 이름이 빈 문자열이라 어떤 PostgreSQL에서도 문법 오류다. 그 앞의 <code>DROP CONSTRAINT</code>·<code>DROP TABLE</code> 20줄도 <code>IF EXISTS</code>가 없어 새 데이터베이스에서는 전부 실패한다. 즉 이 스크립트를 실제로 한 번이라도 돌려본 흔적이 없다.</p>
         </div>
@@ -75,8 +76,8 @@ ALTER TABLE "Agency" DROP CONSTRAINT <span class="hl">""</span>;
 ALTER TABLE "Contact" DROP CONSTRAINT <span class="hl">""</span>;   <span class="cm">// ← 제약 이름이 빈 문자열</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>정규화 과제인데 다치 속성을 varchar 한 칸에 밀어넣었다</h3></header>
+      <article class="finding" id="f02" data-sev="major">
+        <header><span class="tier">중대</span><h3>정규화 과제인데 다치 속성을 varchar 한 칸에 밀어넣었다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>판매자의 영업일과 영업시간, 서비스의 이벤트 목록이 전부 <code>varchar(255)</code> 한 칸이다. 요일 집합이나 이벤트 목록은 명백한 다치 속성이고, 이 과목이 가르치려는 1NF 분해 대상 그 자체다. "월,화,수" 같은 문자열로 저장하면 "수요일에 여는 가게" 질의를 쓸 수 없다. 별도 <code>BusinessHour(sellerId, day, open, close)</code> 테이블이 정답이다.</p>
           <p>같은 파일에서 타입 선택도 여러 군데 어긋난다. <code>Destination.name</code>이 <code>int4</code>로 선언돼 있고, README가 "opened date"라고 설명한 <code>Seller.createdAt</code>은 날짜가 아니라 <code>time(0)</code>(시:분:초)이다.</p>
@@ -90,8 +91,8 @@ ALTER TABLE "Contact" DROP CONSTRAINT <span class="hl">""</span>;   <span class=
 "name" <span class="hl">int4</span> NOT NULL,                <span class="cm">// Destination.name</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>Contact 테이블에 기본키가 없고, 소유자를 세 개의 nullable FK로 표현했다</h3></header>
+      <article class="finding" id="f03" data-sev="major">
+        <header><span class="tier">중대</span><h3>Contact 테이블에 기본키가 없고, 소유자를 세 개의 nullable FK로 표현했다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>연락처의 소유자가 판매자인지 구매자인지 배달대행인지를 세 개의 nullable FK로 나타냈는데, "셋 중 정확히 하나만 NULL이 아니다"를 강제하는 CHECK 제약이 없다. 세 개 다 NULL인 고아 연락처, 세 개 다 채워진 연락처를 모두 삽입할 수 있다. 기본키도 없어서 완전히 동일한 행을 무한히 넣을 수 있고, UNIQUE는 <code>buyerId</code> 쪽에만 걸려 있어 판매자·배달대행 연락처는 중복 방지도 안 된다.</p>
           <p>덧붙여 README는 이 관계를 일관되게 <em>Contract</em>라고 부르는데(README:71, 74, 77) 실제 테이블 이름은 <code>Contact</code>다. 문서와 스키마가 서로 다른 이름을 쓰고 있고, 제약 이름만 <code>SellersContracts</code>로 문서 쪽 오타를 따라갔다.</p>
@@ -106,8 +107,8 @@ ALTER TABLE "Contact" DROP CONSTRAINT <span class="hl">""</span>;   <span class=
 )</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>문서가 선언한 관계 하나가 스키마에 없다</h3></header>
+      <article class="finding" id="f04" data-sev="minor">
+        <header><span class="tier">경미</span><h3>문서가 선언한 관계 하나가 스키마에 없다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>README:78은 <code>Order</code>가 <em>Service, Buyer, Agency</em>에 속한다고 적었지만, 실제 <code>Order</code> 테이블(<code>deliveryHY.sql:85–96</code>)에는 <code>buyerId</code>가 없다. <code>paymentId</code>와 <code>destinationId</code>를 거쳐 간접적으로만 구매자에 닿으므로, 결제수단을 지우면 주문의 주인을 잃는다. 문서가 코드보다 앞서 있는 전형적인 예다.</p>
           <p>또 <code>Agency.activity_location</code>은 README:46이 "korean-style postal address를 보관"한다고 설명하는데 <code>varchar(8)</code>이다. 한국식 주소는 8자에 들어가지 않는다.</p>
@@ -126,8 +127,8 @@ ALTER TABLE "Contact" DROP CONSTRAINT <span class="hl">""</span>;   <span class=
     <p class="prose">명세(<code>docs/DB_Assignment02.pdf</code>)는 같은 주소록 시나리오를 두 번 구현하라고 요구한다. 한 번은 CSV 파일만으로(2-1 file), 한 번은 DBMS로(2-1 SQL). 관리자는 한양인 주소록을 관리하고, 학생은 자기 개인 주소록만 보되 목록을 볼 때는 두 주소록이 합쳐져 나와야 하며, Step 3에서는 email 컬럼을 local_part / domain_name으로 <em>분리해 저장</em>하고 도메인 도수분포표를 내야 한다. 2-2는 수강신청 DB에 대한 SQL 다섯 문제다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>WHERE 조건이 두 개 이상이면 무조건 죽는다</h3></header>
+      <article class="finding" id="f05" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>WHERE 조건이 두 개 이상이면 무조건 죽는다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>모든 조회·수정·삭제가 거쳐 가는 <code>findIndex</code>가 조건 배열을 <code>np.logical_and</code>에 펼쳐 넣고 뒤에 <code>ones</code> 두 개를 덧붙인다. <code>np.logical_and</code>은 ufunc이라 위치 인자를 최대 3개(<code>x1, x2, out</code>)만 받는다. 조건이 0개면 <code>(ones, ones)</code>, 1개면 <code>(cond, ones, ones)</code>로 우연히 맞아떨어지지만 — 뒤쪽 <code>ones</code>가 조건이 아니라 출력 버퍼로 소비되는 것이다 — 조건이 2개가 되는 순간 인자 4개가 되어 <code>TypeError</code>다.</p>
           <p>README가 직접 광고한 <code>WHERE [COND, ...]</code> 쉼표 문법이 바로 이 경로를 탄다. 저자가 문서에 적은 사용법대로 쓰면 프로그램이 죽는다.</p>
@@ -150,8 +151,8 @@ Traceback (most recent call last):
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>제출된 결과 파일은 프로그램이 만든 것이 아니다</h3></header>
+      <article class="finding" id="f06" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>제출된 결과 파일은 프로그램이 만든 것이 아니다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>학생 모드의 커밋이 빈 함수다. 개인 주소록에 대한 <code>create</code>/<code>update</code>/<code>remove</code>는 전부 메모리에만 반영되고 디스크에 쓰이지 않는다. 유일하게 파일을 쓰는 곳은 <code>load()</code>인데, 방금 읽은 프레임을 그대로 되쓰기 때문에 내용이 바뀌지 않는다.</p>
           <p>레포에 커밋된 <code>private_2009003125.csv</code>는 실제로 입력 <code>business_cards/Grass_corp.csv</code>와 바이트 단위로 같다(공백 제거만 다름). 반면 명세가 요구한 반영 결과로 제출된 <code>business_cards_updated/Grass_corp.csv</code>에는 <code>main.py</code>가 수행하는 변경(이상해씨→이상해풀, 리피아 추가)이 들어 있으나 <code>main.py</code>가 반드시 수행하는 "임의 1건 삭제"는 반영돼 있지 않다. 즉 프로그램을 돌려서 얻은 파일이 아니라 손으로 편집한 파일이다.</p>
@@ -171,8 +172,8 @@ def commit_student(self):
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>Step 3의 핵심 요구(email 컬럼 분리 저장)가 두 버전 모두 빠져 있다</h3></header>
+      <article class="finding" id="f07" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Step 3의 핵심 요구(email 컬럼 분리 저장)가 두 버전 모두 빠져 있다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>명세 6쪽은 "email 열을 local_part 열과 domain_name 열로 <strong>분리하여 저장</strong>한다"와 "저장 형태가 달라진 이후에도 출력 형태는 변화가 없어야 한다"를 요구한다. 이건 스키마 변경 후에도 뷰가 유지되는지를 묻는, 이 과목의 핵심 개념 문제다.</p>
           <p>구현된 것은 도수분포표뿐이다. <code>emailFrequency</code>는 <code>split('@')</code> 결과로 <code>Counter</code>를 만들어 반환할 뿐 컬럼을 바꾸지도, 저장하지도 않는다. 레포 전체에 <code>local_part</code>/<code>domain_name</code>이라는 문자열은 한 번도 등장하지 않고, 커밋된 <code>contacts.csv</code>의 헤더는 여전히 <code>sid,phone,email</code>이다. SQL 버전도 마찬가지로 <code>dbms.sql</code>에 <code>ALTER TABLE</code>이 0회 나온다 — 명세가 힌트로 <code>ALTER TABLE</code>과 <code>CREATE TABLE ... AS ...</code>를 콕 집어 줬는데도 그렇다.</p>
@@ -188,8 +189,8 @@ sid,phone,<span class="hl">email</span></pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>"두 주소록을 합쳐 보여주는" 기능은 정의만 되고 한 번도 호출되지 않으며, 호출하면 터진다</h3></header>
+      <article class="finding" id="f08" data-sev="major">
+        <header><span class="tier">중대</span><h3>"두 주소록을 합쳐 보여주는" 기능은 정의만 되고 한 번도 호출되지 않으며, 호출하면 터진다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>명세 3쪽·5쪽이 반복해서 요구하는 "한양인 주소록 + 개인 주소록을 같이 보여주기"에 대응하는 함수는 <code>elements()</code>뿐이다. 레포 전체에서 이 이름이 등장하는 곳은 정의된 줄 하나가 전부다 — <code>main.py</code>도, REPL도 부르지 않는다.</p>
           <p>그리고 실제로 개인 주소록에 대해 호출하면 동작하지 않는다. <code>__values_admin</code>에는 <code>T.business</code> 키 자체가 없어서 <code>KeyError</code>가 난다. 설령 키가 있었더라도 contacts는 3열, business는 4열이라 <code>np.vstack</code>이 실패한다.</p>
@@ -206,8 +207,8 @@ elements(business) ERR: <span class="hl">KeyError &lt;T.business: 6&gt;</span></
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>dbms.sql은 오타 하나로 21개 INSERT가 전부 실패한다</h3></header>
+      <article class="finding" id="f09" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>dbms.sql은 오타 하나로 21개 INSERT가 전부 실패한다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>students</code> 대신 <code>stdents</code>라는 테이블을 만들어 놓고 이후 모든 INSERT는 <code>students</code>를 대상으로 한다. 존재하지 않는 테이블이다. 파일 마지막 질의도 <code>domain</code>과 <code>count(*)</code> 사이에 쉼표가 빠져 문법 오류다. Step 1의 UPDATE·DELETE는 서브쿼리로 <code>students</code>를 참조하므로 연쇄적으로 전부 실패한다. 이 파일은 단 한 번도 실행된 적이 없다.</p>
         </div>
@@ -228,8 +229,8 @@ Parse error near line 29: no such table: students
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>2-2: 다섯 문제 중 둘만 맞다</h3></header>
+      <article class="finding" id="f10" data-sev="major">
+        <header><span class="tier">중대</span><h3>2-2: 다섯 문제 중 둘만 맞다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><strong>1번</strong>(강의실 20개 이상인 건물): <code>rooms</code>라는 존재하지 않는 컬럼을 SELECT하고, <code>building_id</code>가 양쪽 테이블에 있어 모호하며, <code>name</code>·<code>admin</code>이 GROUP BY에도 집계함수에도 들어가지 않았다. 표준 SQL과 MySQL <code>ONLY_FULL_GROUP_BY</code>에서 모두 거부된다.</p>
           <p><strong>4번</strong>(수용인원 100명 이상인 강의실의 건물): <code>FULL OUTER JOIN</code> 뒤에 <code>WHERE Rooms.capacity &gt;= 100</code>을 붙였다. 이 WHERE가 NULL 행을 전부 제거하므로 외부 조인이 내부 조인으로 퇴화한다 — 굳이 FULL OUTER를 쓴 의미가 사라진다. 게다가 MySQL은 <code>FULL OUTER JOIN</code>을 지원하지 않고, <code>DISTINCT</code>가 없어 큰 강의실이 여럿인 건물은 중복 출력된다.</p>
@@ -251,8 +252,8 @@ LIMIT 10;                          <span class="cm">// ORDER BY 없이 자른 �
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>데모 스크립트를 세 번 돌린 결과가 그대로 제출 데이터가 됐다</h3></header>
+      <article class="finding" id="f11" data-sev="major">
+        <header><span class="tier">중대</span><h3>데모 스크립트를 세 번 돌린 결과가 그대로 제출 데이터가 됐다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main.py</code>는 실행할 때마다 홍길동 행을 무조건 append한다(중복 검사 없음). 커밋된 <code>students.csv</code>에는 동일한 홍길동 행이 3개, <code>contacts.csv</code>에는 동일한 hong@ 행이 3개 들어 있다. <code>sid</code>는 이 시나리오에서 기본키인데, 제출된 "데이터베이스"에 기본키 중복 행이 3중으로 남아 있다. 원본 <code>raw/students.csv</code>는 21줄, 제출본은 24줄이다.</p>
           <p>같은 파일에 다른 학생들의 평문 비밀번호가 그대로 들어 있고(<code>2009003125,125125125</code> 등), <code>main.py:47, 74, 89</code>는 그 비밀번호를 소스에 하드코딩해 로그인한다. 과제 제공 데이터라 해도, 비밀번호 컬럼을 그대로 소스에 박아 넣는 습관은 Assignment 3에서 실제 사고로 이어진다.</p>
@@ -262,8 +263,8 @@ LIMIT 10;                          <span class="cm">// ORDER BY 없이 자른 �
 <span class="hl">2016001234,xxx,홍길동,male,6,1999002345,1</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>REPL에 예외 처리가 전혀 없고, 디버그 출력이 남아 있다</h3></header>
+      <article class="finding" id="f12" data-sev="minor">
+        <header><span class="tier">경미</span><h3>REPL에 예외 처리가 전혀 없고, 디버그 출력이 남아 있다</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main.py:131–163</code>의 입력 루프에는 <code>try/except</code>가 한 줄도 없다. <code>FROM</code> 없는 SELECT는 언패킹 오류, 없는 테이블 이름은 <code>T.fromString</code>이 <code>None</code>을 반환해 <code>KeyError: None</code>, 값에 <code>=</code>나 <code>,</code>가 들어가면 조건 파싱이 조용히 어긋난다. 한 번 터지면 세션 전체가 종료되고 커밋 안 된 변경은 사라진다.</p>
           <p>또 README는 "you can write query to execute <strong>insert</strong>, update, remove"라고 적었지만 REPL에는 INSERT 분기가 없다. 그리고 제출 코드에 <code>print("WTF", ...)</code>가 남아 있다.</p>
@@ -285,8 +286,8 @@ LIMIT 10;                          <span class="cm">// ORDER BY 없이 자른 �
     <p class="prose">판매자·구매자·배달부 세 역할이 한 로그인 화면을 공유하는 배달 앱을 만드는 과제다(<code>docs/DB_Assignment03_v3.pdf</code>). Express + Sequelize + MySQL 8에 jQuery/Bootstrap 프런트, 8개 모델, 8개 컨트롤러, 3개 역할별 화면, Google Maps 연동까지 들어 있다. 이 레포에서 가장 큰 덩어리이고 구조적으로도 가장 야심 찬 코드다. 모델 자동 로딩, 라우트 자동 마운트, 컨트롤러 분리 같은 배선은 실무 프로젝트 수준으로 잡혀 있다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>인가가 존재하지 않고, 그 결과 전 사용자의 평문 비밀번호와 카드번호가 공개 API로 나온다</h3></header>
+      <article class="finding" id="f13" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>인가가 존재하지 않고, 그 결과 전 사용자의 평문 비밀번호와 카드번호가 공개 API로 나온다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>req.session</code>은 레포 전체에서 <code>app/routes/index.js</code> 한 파일에만 등장한다 — 로그인 시 쓰기 3회, 세션 덤프 엔드포인트 1회. 어떤 라우터도, 어떤 컨트롤러도 세션을 읽어 "이 사람이 이 자원의 주인인가"를 묻지 않는다. 미들웨어는 하나도 없다(<code>next()</code>가 앱 코드에 단 한 번도 나오지 않는다).</p>
           <p>동시에 모든 <code>index</code> 컨트롤러가 <code>req.query</code>를 그대로 Sequelize <code>where</code>에 넣고 <code>attributes</code> 필터 없이 전체 행을 JSON으로 뱉는다. <code>Customer</code>·<code>Seller</code>·<code>Delivery</code> 모델은 모두 <code>passwd</code> 컬럼을 가지고 있고 비밀번호는 해싱 없이 평문으로 저장된다(로그인이 <code>passwd: req.body.password</code>로 직접 비교한다). 따라서 로그인하지 않은 누구든 <code>GET /customer</code> 한 번으로 전 고객의 이름·전화번호·이메일·<strong>평문 비밀번호</strong>·<strong>카드번호와 계좌번호 JSON</strong>·현재 좌표를 통째로 받는다.</p>
@@ -309,8 +310,8 @@ app/routes/index.js:50,59,68:  req.session.user = user;
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>인증 없이 아무 계정의 비밀번호나 바꿀 수 있다</h3></header>
+      <article class="finding" id="f14" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>인증 없이 아무 계정의 비밀번호나 바꿀 수 있다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>PUT /seller/:seller_id</code>가 <code>m.Seller.update(req.body, ...)</code>를 호출한다. 본문에 어떤 컬럼이 들어오든 그대로 반영되는 mass assignment이고, 앞서 말했듯 세션 검사가 없다. 판매자 화면의 "개인정보 변경"이 실제로 이 엔드포인트에 <code>{name, passwd}</code>를 보낸다. 같은 요청을 로그인 없이 임의의 <code>seller_id</code>로 보내면 그 계정을 탈취할 수 있다. <code>PUT /customer/:id/payment</code>도 마찬가지로 경로 이름과 달리 <code>passwd</code>를 포함한 모든 컬럼을 갱신한다. <code>DELETE /seller/:id</code>, <code>DELETE /order/:id</code>, <code>DELETE /menu/:id</code>도 전부 무인증이다.</p>
         </div>
@@ -323,8 +324,8 @@ sellers.route('/:seller_id').put(seller.update)   <span class="cm">// 미들웨�
 
       
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>판매자는 주문에 무슨 메뉴가 들어 있는지 영원히 볼 수 없다</h3></header>
+      <article class="finding" id="f15" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>판매자는 주문에 무슨 메뉴가 들어 있는지 영원히 볼 수 없다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>orders.menus</code> 하나를 세 클라이언트가 서로 다른 형식으로 읽는다. 구매자는 <code>{메뉴ID: 수량}</code> 객체를 <code>JSON.stringify</code>해서 쓰고, 구매자 화면과 배달부 화면은 <code>JSON.parse</code>로 읽는다. 그런데 판매자 화면만 그 문자열을 쉼표로 잘라 <code>parseInt</code>한다. <code>{"3":2,"5":1}</code>을 쉼표로 자르면 <code>['{"3":2', '"5":1}']</code>이고 <code>parseInt</code>는 둘 다 <code>NaN</code>이다. 결과적으로 필터가 항상 빈 배열을 반환한다.</p>
           <p>음식을 만들어야 하는 사람이 주문 내역을 못 보는 것이므로 이 앱의 핵심 흐름이 끊긴다. 판매자 화면을 한 번만 열어봤으면 바로 보였을 것이다. 같은 파일 안에 정답(<code>JSON.parse</code>)이 두 벌이나 있는데도 세 번째 구현만 다르다.</p>
@@ -342,10 +343,10 @@ customer/delivery sees: ["3","5"]</pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>구매자의 개인정보 변경은 존재하지 않는 엔드포인트를 호출한다</h3></header>
+      <article class="finding" id="f16" data-sev="major">
+        <header><span class="tier">중대</span><h3>구매자의 개인정보 변경은 존재하지 않는 엔드포인트를 호출한다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
-          <p>명세 7쪽은 구매자에게도 판매자와 동일한 개인정보 관리(이름·비밀번호 변경)를 요구한다. 프런트는 <code>PUT /customer/:customer_id</code>를 부르는데 라우터에는 <code>GET /</code>와 <code>PUT /:customer_id/payment</code>만 등록돼 있다. 매칭되는 라우트가 없으므로 404가 떨어지지만, jQuery <code>success</code> 콜백이 없는 오류 처리로 인해 사용자에게는 아무 일도 일어나지 않는다. 판매자 쪽 동일 기능은 라우트가 있어서 동작한다 — 두 화면을 복사·수정하다 한쪽만 라우트를 빠뜨린 것으로 보인다.</p>
+          <p>명세 7쪽은 구매자에게도 판매자와 동일한 개인정보 관리(이름·비밀번호 변경)를 요구한다. 프런트는 <code>PUT /customer/:customer_id</code>를 부르는데 라우터에는 <code>GET /</code>와 <code>PUT /:customer_id/payment</code>만 등록돼 있다. 매칭되는 라우트가 없으므로 404가 떨어지지만, jQuery <code>success</code> 콜백이 없는 오류 처리 탓에 사용자에게는 아무 일도 일어나지 않는다. 판매자 쪽 동일 기능은 라우트가 있어서 동작한다 — 두 화면을 복사·수정하다 한쪽만 라우트를 빠뜨린 것으로 보인다.</p>
         </div>
         <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE2038/blob/HEAD/Assignment3/static/scripts/customer.js#L422-L428" target="_blank" rel="noopener"><b>static/scripts/customer.js</b></a><span>:422–428 vs app/routes/customer.js:5–9</span><button class="expand" type="button" data-repo="ITE2038" data-path="Assignment3/static/scripts/customer.js" data-start="422" data-end="428">전체 맥락</button></div><pre><span class="cm">// 프런트가 부르는 곳</span>
 url: `<span class="hl">/customer/${session.user.customer_id}</span>`,  type: 'PUT',
@@ -356,8 +357,8 @@ customers.route('/').get(customer.index);
 customers.route('<span class="hl">/:customer_id/payment</span>').put(customer.update);</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>명세가 못 박은 "배달 개수 4개 이하" 필터가 구현되지 않았다</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3>명세가 못 박은 "배달 개수 4개 이하" 필터가 구현되지 않았다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>명세 6쪽: "주문 확인 시: 가장 가깝고, 배달 개수(Stock)가 <strong>4개 이하</strong>인 배달부를 5명 표시." 서버는 배달부마다 현재 배달 건수를 <code>stack</code>으로 정확히 계산해 내려보내고, 프런트는 그 값을 화면에 <em>표시</em>까지 한다. 그런데 정렬 후 5명을 자를 뿐 <code>stack &lt;= 4</code> 조건을 어디서도 걸지 않는다. 필요한 데이터를 다 만들어 놓고 마지막 한 줄을 안 쓴 것이다.</p>
           <p>같은 함수에 별개 버그가 하나 더 있다. <code>#order-delivery</code> 셀렉트를 비우지 않고 <code>append</code>만 하므로, 주문 A의 확인 모달을 열었다가 닫고 주문 B를 열면 B의 배달부 목록에 A의 후보가 그대로 남는다.</p>
@@ -369,8 +370,8 @@ customers.route('<span class="hl">/:customer_id/payment</span>').put(customer.up
 });</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>데이터베이스 과목인데 핵심 관계 하나만 FK가 없고, 나머지는 JSON 문자열로 대체됐다</h3></header>
+      <article class="finding" id="f18" data-sev="major">
+        <header><span class="tier">중대</span><h3>데이터베이스 과목인데 핵심 관계 하나만 FK가 없고, 나머지는 JSON 문자열로 대체됐다</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>init.sql</code>은 <code>orders → customers / stores / destinations</code>에 InnoDB FK를 제대로 걸었다. 그런데 배달 앱에서 가장 중요한 관계인 <code>orders → deliveries</code>만 <code>int(11) DEFAULT '0'</code>짜리 맨 정수다. 배달부를 삭제해도 주문은 사라진 ID를 계속 가리키고, 존재하지 않는 <code>delivery_id</code>를 넣어도 DB가 막지 않는다. 실제로 "미배정"을 NULL이 아니라 <code>0</code>이라는 매직 넘버로 표현하기 때문에 FK를 걸 수 없는 구조가 됐다.</p>
           <p>여기에 <code>orders.menus</code>(주문-메뉴 다대다)는 <code>varchar(512)</code> 직렬화, <code>customers.payments</code>·<code>stores.phone_nums</code>·<code>stores.schedules</code>·<code>stores.tags</code>는 전부 JSON 컬럼이다. 결제수단은 <code>bid</code>로 <code>banks</code>를 가리키지만 JSON 안이라 FK가 없다. 관계형 모델링을 평가하는 과목에서 관계 대부분을 문자열로 우회한 셈이고, 그 대가로 "특정 메뉴가 이번 달에 몇 번 팔렸나" 같은 질의는 SQL로 쓸 수 없다. (명세가 JSON 컬럼을 예시로 준 부분도 있으나, 주문-메뉴 다대다는 명세에 없는 본인 선택이다.)</p>
@@ -385,8 +386,8 @@ customers.route('<span class="hl">/:customer_id/payment</span>').put(customer.up
 )   <span class="cm">// ← deliveries 로 가는 제약만 없다</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>서버가 준 문자열을 그대로 jQuery 템플릿에 끼워 저장형 XSS가 열린다</h3></header>
+      <article class="finding" id="f19" data-sev="major">
+        <header><span class="tier">중대</span><h3>서버가 준 문자열을 그대로 jQuery 템플릿에 끼워 저장형 XSS가 열린다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>가게 이름·주소·설명·태그·메뉴 이름이 전부 이스케이프 없이 템플릿 리터럴에 들어가고 <code>$(...)</code>로 파싱된다. jQuery의 <code>$(htmlString)</code>은 실제 DOM을 생성하므로 <code>&lt;img src=x onerror=...&gt;</code> 같은 값이 즉시 실행된다. 같은 화면에서 메뉴 이름도 동일하게 처리되는데(<code>customer.js:108</code>), <code>POST /menu</code>는 인증이 없으므로 누구든 임의의 가게에 <code>name</code>을 심을 수 있다. 그리고 그 스크립트가 실행되는 페이지는 고객의 결제수단이 떠 있는 화면이다.</p>
         </div>
@@ -396,8 +397,8 @@ ${store.tags.map(tag =&gt; `&lt;span class="badge..."&gt;<span class="hl">${tag}
 &lt;p&gt;<span class="hl">${store.description}</span>&lt;/p&gt;</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>다른 회사 프로젝트의 뼈대가 그대로 묻어 있다</h3></header>
+      <article class="finding" id="f20" data-sev="minor">
+        <header><span class="tier">경미</span><h3>다른 회사 프로젝트의 뼈대가 그대로 묻어 있다</h3><a class="permalink" href="#f20" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>package.json</code>의 repository URL이 네이버 사내 GitHub의 웹툰 CIC 프로젝트를 가리킨다. 같은 맥락에서 <code>app/lib/io.js</code> 65줄은 재귀 mkdir/rmdir, rename, Promise 기반 read/write 같은 파일 시스템 유틸 15개를 정의하는데, 이 앱에서 실제로 쓰이는 것은 <code>writeSync</code>와 <code>hash</code> 둘뿐이다(<code>index.js:10</code>). 나머지 13개는 호출자가 없다. 스캐폴딩 재사용 자체는 합리적이지만, 제출 전에 쓰지 않는 것을 걷어내고 남의 레포 주소를 지우는 정리는 필요했다.</p>
           <p>같은 줄에 <code>secretString</code>이 <code>const</code>/<code>let</code> 없이 대입되는 암묵적 전역이라 strict mode나 ES 모듈에서는 <code>ReferenceError</code>다. 그리고 <code>config.app.port</code>를 읽어 놓고 <code>app.listen(80, ...)</code>으로 하드코딩해 설정값이 죽어 있다(80번 포트라 root 권한도 필요하다).</p>
@@ -409,8 +410,8 @@ lib.io.writeSync('secret', <span class="hl">secretString</span> = lib.io.hash())
 app.listen(<span class="hl">80</span>, ...)                                    <span class="cm">// config.app.port 미사용</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>라우트 자동 마운트가 라우터를 자기 자신에 마운트하고, 컨트롤러 메서드 둘은 배선되지 않았다</h3></header>
+      <article class="finding" id="f21" data-sev="minor">
+        <header><span class="tier">경미</span><h3>라우트 자동 마운트가 라우터를 자기 자신에 마운트하고, 컨트롤러 메서드 둘은 배선되지 않았다</h3><a class="permalink" href="#f21" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>routes/index.js</code>는 디렉터리를 훑어 <code>router.use('/'+name, route)</code>로 자동 마운트하는데, 시드 객체가 <code>{ router }</code>라서 첫 반복에서 <code>router.use('/router', router)</code>가 실행된다. 라우터가 자기 자신의 하위에 붙어 <code>/router/router/router/...</code>가 무한히 매칭된다. 아래 <code>if (route.associate)</code> 분기는 <code>associate</code>를 정의한 라우트 파일이 하나도 없어 죽은 코드다.</p>
           <p>한편 <code>controllers/stores.js</code>의 <code>create</code>·<code>destroy</code>는 <code>routes/store.js</code>가 GET 두 개만 등록하므로 도달할 수 없다. 명세 6쪽의 "가게 설명·태그 관리"에 대응하는 UI도 없어서, 가게 정보 편집 기능은 컨트롤러만 있고 실제로는 미구현이다.</p>
@@ -423,8 +424,8 @@ Object.entries(routes).forEach(([name, route]) =&gt; {
 });</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>세션 덤프 엔드포인트가 열려 있고, 로그인 체인이 DB 오류를 비밀번호 오류로 위장한다</h3></header>
+      <article class="finding" id="f22" data-sev="minor">
+        <header><span class="tier">경미</span><h3>세션 덤프 엔드포인트가 열려 있고, 로그인 체인이 DB 오류를 비밀번호 오류로 위장한다</h3><a class="permalink" href="#f22" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>GET /session</code>은 "Session debug"라는 주석과 함께 세션 객체를 통째로 JSON으로 내보낸다. 세 화면이 모두 이 엔드포인트에 의존하므로 지울 수 없게 설계됐다.</p>
           <p>로그인은 Seller → Customer → Delivery를 <code>.catch()</code>로 이어 붙인 3단 체인이다. 명세의 "세 역할이 같은 로그인 화면"을 만족시키는 접근 자체는 맞지만, DB 연결 실패나 <code>res.sendFile</code> 오류까지 전부 다음 단계로 흘러가 최종적으로 "Invalid email or password"가 된다. 원인 진단이 불가능하고, 첫 단계가 응답을 보낸 뒤 예외가 나면 두 번째 단계가 두 번째 응답을 시도한다.</p>
@@ -466,7 +467,7 @@ router.get('/session', (req, res) =&gt; {
 
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/ITE2038</code> · 커밋 16개(2018-09-07 ~ 2018-12-16) · 추적 파일 94개 · 마지막 푸시 2018-12-16 · 브랜치는 <code>master</code> 하나뿐이며 원격에 다른 구현은 없음</p>
-    <p>검증 방식: Assignment 1~3의 모든 소스(Python 6파일, JavaScript 33파일, SQL 5파일, HTML 4파일)와 과제 명세 PDF 3종을 정독. 실제로 실행한 것 — (1) <code>Assignment2/2-1</code>을 사본으로 복사해 Python 3.11 / numpy 2.4.6 / pandas 3.0.5 환경에서 <code>main.py</code>를 끝까지 실행하고 REPL에 질의를 입력, 다중 조건 <code>TypeError</code>와 학생 변경분 미저장을 재현. (2) <code>dbms.sql</code>과 <code>sql.sql</code>을 <code>sqlite3</code>에 통과시켜 <code>stdents</code> 오타와 세미콜론 누락을 확인(방언 차이로 인한 오류는 판정에서 제외). (3) <code>seller.js</code>와 <code>customer.js</code>의 menus 직렬화·역직렬화 코드를 node v22에서 그대로 실행해 빈 결과를 확인. 실행하지 않은 것 — Assignment 3 앱 전체(MySQL 8 인스턴스와 <code>config.json</code>이 필요해 미구동), Assignment 1의 PostgreSQL DDL(파싱 단계에서 실패하므로 정적 확인으로 대체). 본문의 모든 인용은 실제 파일의 해당 행에서 그대로 옮긴 것이다. 레포는 읽기 전용으로만 다루었고 수정하지 않았다.</p>
+    <p>검증 방식: Assignment 1~3의 모든 소스(Python 6파일, JavaScript 33파일, SQL 5파일, HTML 4파일)와 과제 명세 PDF 3종을 정독. 실제로 실행한 것 — (1) <code>Assignment2/2-1</code>을 사본으로 복사해 Python 3.11 / numpy 2.4.6 / pandas 3.0.5 환경에서 <code>main.py</code>를 끝까지 실행하고 REPL에 질의를 입력, 다중 조건 <code>TypeError</code>와 학생 변경분 미저장을 재현. (2) <code>dbms.sql</code>과 <code>sql.sql</code>을 <code>sqlite3</code>에 통과시켜 <code>stdents</code> 오타와 세미콜론 누락을 확인(방언 차이에서 오는 오류는 판정에서 제외). (3) <code>seller.js</code>와 <code>customer.js</code>의 menus 직렬화·역직렬화 코드를 node v22에서 그대로 실행해 빈 결과를 확인. 실행하지 않은 것 — Assignment 3 앱 전체(MySQL 8 인스턴스와 <code>config.json</code>이 필요해 미구동), Assignment 1의 PostgreSQL DDL(파싱 단계에서 실패하므로 정적 확인으로 대체). 본문의 모든 인용은 실제 파일의 해당 행에서 그대로 옮긴 것이다. 레포는 읽기 전용으로만 다루었고 수정하지 않았다.</p>
   </footer>
 
 </div>

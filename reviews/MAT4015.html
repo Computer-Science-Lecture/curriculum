@@ -34,6 +34,7 @@
       <div class="grade"><b>C</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>4</b> 치명적</a><a class="chip s-major" href="#f01"><b>6</b> 중대</a><a class="chip s-minor" href="#f01"><b>8</b> 경미</a><span class="total">합계 18</span></div>
 
   <!-- ============ 총평 ============ -->
   <section>
@@ -69,8 +70,8 @@
     <p class="prose">평가 대상 코드는 <code>cv_tracker.cc</code> 348줄, <code>main.cc</code> 180줄, <code>cv_tracker.h</code> 118줄로 합계 646줄이다. 레포의 C/C++ 총합 81,973줄 중 나머지 약 81,000줄은 벤더링된 OpenCV 헤더(<code>include/opencv2/</code>, <code>include/opencv/</code>)이므로 저자 작업량이 아니다. 그 646줄 중 자작 추적기는 <code>Tracker::run</code>의 첫 블록(<code>cv_tracker.cc:35–117</code>)과 <code>myHistogram</code> / <code>mySimilarity</code> / <code>matrixAt</code>에 해당한다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>히스토그램이 확률분포가 아니고, 유사도가 Bhattacharyya 계수가 아니다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>히스토그램이 확률분포가 아니고, 유사도가 Bhattacharyya 계수가 아니다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>정규화가 <code>total += hists[i] * hists[i]</code> 후 <code>sqrt</code>, 즉 L2 노름이다. 이렇게 나누면 Σp<sub>i</sub> = 1이 성립하지 않으므로 결과는 확률질량함수가 아니라 단위벡터다. 이어서 유사도는 <code>hists[i] * nHists[i]</code>의 합, 곧 두 단위벡터의 내적(코사인 유사도)이다.</p>
           <p>강의자료가 다루는 Bhattacharyya 계수는 ρ(p,q) = Σ√(p<sub>i</sub>q<sub>i</sub>)이고, 이 값이 [0,1]에 갇히고 √(1−ρ)가 거리가 되는 근거는 p와 q가 <strong>확률분포라는 데서</strong> 나온다. 제곱근을 빼고 L1 정규화를 L2로 바꾸면 그 근거가 둘 다 사라진다. 남는 것은 추적에 쓸 수는 있지만 확률론적 해석이 없는 벡터 내적이다.</p>
@@ -96,8 +97,8 @@
         </div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>좌표 규약이 두 곳에서 엇갈려, mean shift 루프의 결과가 버려진다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>좌표 규약이 두 곳에서 엇갈려, mean shift 루프의 결과가 버려진다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>후보 윈도를 만드는 <code>:52</code>는 <code>Rect(x, y, w, h)</code>의 첫 두 인자, 즉 <strong>좌상단</strong> 자리에 <code>temp.x + temp.width/2</code>를 넣는다. 그런데 이 값은 계산해 보면 <code>nRect.x + nRect.width/2</code>, 곧 객체의 <strong>중심</strong>이다. 따라서 <code>nX</code>는 "좌상단 좌표들의 가중평균"이 된다.</p>
           <p>루프를 닫는 <code>:71</code>은 그 <code>nX</code>를 <strong>중심으로 보고</strong> <code>nX - width/2</code>를 한다. 반면 루프 직후 박스 크기를 고르는 <code>:79</code>는 같은 <code>nX</code>를 <strong>좌상단으로 보고</strong> 그대로 쓴다. 둘 중 하나만 맞을 수 있다.</p>
@@ -127,8 +128,8 @@ frame 20: ...                                   그려진 박스        = (106, 
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>반복 상한이 없고, 수렴 판정 기준을 루프 안에서 스스로 줄인다</h3></header>
+      <article class="finding" id="f03" data-sev="major">
+        <header><span class="tier">중대</span><h3>반복 상한이 없고, 수렴 판정 기준을 루프 안에서 스스로 줄인다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>TrackerParam::max_itrs = 32</code>(<code>cv_tracker.h:56</code>)은 정의돼 있지만, 코드 전체에서 이 값을 읽는 곳은 <code>:331</code>과 <code>:339</code>, 즉 OpenCV <code>TermCriteria</code>뿐이다. 자작 루프에는 반복 상한이 없다.</p>
           <p>대신 종료 조건은 이동거리가 <code>param.search_range</code> 이하가 되는 것인데, 그 <code>search_range</code>를 루프 <strong>안에서</strong> <code>:69</code>가 매 반복 줄인다. 새 계수는 <code>twRatio &gt; 0.25</code>이면 <code>1 - twRatio</code>(최대 0.75), 아니면 <code>0.75 + twRatio</code>(최대 1.0)이다. <strong>어느 쪽이든 1을 넘지 못하므로 탐색 반경은 단조 감소한다.</strong> 매 반복 임계값이 좁아지는 종료 조건이라 수렴 보장이 없다.</p>
@@ -145,8 +146,8 @@ param.search_range = min(max(param.search_range, SEARCH_MIN), SEARCH_MAX);</pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>후보 하나마다 <code>calloc</code>, 그리고 <code>free</code>는 레포 어디에도 없다</h3></header>
+      <article class="finding" id="f04" data-sev="major">
+        <header><span class="tier">중대</span><h3>후보 하나마다 <code>calloc</code>, 그리고 <code>free</code>는 레포 어디에도 없다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>myHistogram</code>은 호출될 때마다 <code>calloc</code>으로 새 배열을 할당해 반환한다. 이것을 매 후보 윈도마다 호출하는 것이 <code>mySimilarity</code>다. <code>grep</code>으로 확인한 결과 <code>cv_tracker.cc</code>와 <code>main.cc</code>를 통틀어 <code>free()</code> 호출은 <strong>0건</strong>이고, 유일한 <code>delete</code>는 <code>main.cc:67</code>에 주석 처리되어 있다.</p>
         </div>
@@ -160,8 +161,8 @@ param.search_range = min(max(param.search_range, SEARCH_MIN), SEARCH_MAX);</pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>탐색창 클램프에서 rows와 cols가 뒤바뀌어 있다</h3></header>
+      <article class="finding" id="f05" data-sev="minor">
+        <header><span class="tier">경미</span><h3>탐색창 클램프에서 rows와 cols가 뒤바뀌어 있다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>폭을 <code>hsv.rows</code>(세로 픽셀 수)로, 높이를 <code>hsv.cols</code>(가로 픽셀 수)로 자른다. 가로 영상에 작은 박스라면 클램프가 애초에 걸리지 않아 드러나지 않지만, 세로 영상이나 큰 ROI에서는 틀린 경계가 된다. 같은 실수가 <code>example/open.c:97</code>, <code>:110</code>에도 있다.</p>
         </div>
@@ -169,8 +170,8 @@ param.search_range = min(max(param.search_range, SEARCH_MIN), SEARCH_MAX);</pre>
 				min(nRect.width + (int)param.search_range * 2, <span class="hl">hsv.rows</span>), min(nRect.height + (int)param.search_range * 2, <span class="hl">hsv.cols</span>));</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>역투영 인덱싱이 <code>hist_bins == 16</code>에서만 우연히 맞는다</h3></header>
+      <article class="finding" id="f06" data-sev="minor">
+        <header><span class="tier">경미</span><h3>역투영 인덱싱이 <code>hist_bins == 16</code>에서만 우연히 맞는다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>myHistogram</code>은 <code>256 / hist_bins</code>로 나눠 bin을 정하는데(<code>:152, :157</code>), <code>myHistogramValue</code>는 <code>hist_bins</code>로 나눈다(<code>:201</code>). 두 값이 같아지는 경우는 <code>hist_bins = 16</code>뿐이고, 기본값이 정확히 16이라 지금은 동작한다. 파라미터를 바꾸는 순간 배열 밖을 읽는다.</p>
         </div>
@@ -187,8 +188,8 @@ hist_bins=32: myHistogram 최대 idx= 31 (배열 크기 32)| myHistogramValue �
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>모델 히스토그램 갱신 가드가 항상 열려 있다</h3></header>
+      <article class="finding" id="f07" data-sev="minor">
+        <header><span class="tier">경미</span><h3>모델 히스토그램 갱신 가드가 항상 열려 있다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>:97</code>의 <code>if (param.search_range == SEARCH_MIN)</code>은 "충분히 수렴했을 때만 모델을 갱신한다"는 의도의 가드다. 그런데 앞서 본 대로 <code>:69</code>의 계수가 1을 넘지 못해 탐색 반경은 첫 프레임에 하한 4.0에 도달한 뒤 계속 그 값이다(시뮬레이션 확인). 결과적으로 조건은 <strong>매 프레임 참</strong>이 되고, 모델은 현재 박스가 덮은 영역으로 무조건 0.05씩 끌려간다. 추적이 빗나가도 이를 막을 유사도 임계값은 없다. 전형적인 model drift 구조다.</p>
         </div>
@@ -207,8 +208,8 @@ hist_bins=32: myHistogram 최대 idx= 31 (배열 크기 32)| myHistogramValue �
     <p class="prose">브리프의 질문 — "OpenCV의 <code>meanShift</code>/<code>CamShift</code>를 그냥 호출했는가" — 에 대한 답은 "호출했지만, 그것은 자작 구현의 <em>비교 대상</em>으로 세운 것"이다. 문제는 그 비교 대상이 작동하지 않는다는 데 있다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>Rect</code>를 값으로 넘겨 OpenCV 추적 결과가 버려진다</h3></header>
+      <article class="finding" id="f08" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>Rect</code>를 값으로 넘겨 OpenCV 추적 결과가 버려진다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>OpenCV의 <code>meanShift(InputArray, Rect&amp; window, TermCriteria)</code>는 두 번째 인자를 <strong>참조로 받아 갱신</strong>하는 것이 전부인 API다. 그런데 <code>Tracker::cvMeanShift</code>는 <code>Rect</code>를 값으로 선언했다. 갱신은 지역 복사본에서 끝나고 호출자의 <code>cvRect</code>는 <code>initilize</code>(<code>:28</code>)에서 설정된 최초 ROI에 영원히 고정된다.</p>
           <p>즉 베이스라인은 매 프레임 같은 자리에서 다시 출발해 근처 모드로 수렴할 뿐, 상태를 이어받지 않는다. 추적이 아니라 매 프레임 독립 재검출이고, 목표가 최초 박스를 벗어나면 따라가지 못한다.</p>
@@ -231,8 +232,8 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>유일한 추적 실패 복구 로직이 도달 불가능한 데다, 도달해도 무효다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3>유일한 추적 실패 복구 로직이 도달 불가능한 데다, 도달해도 무효다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>프로젝트 전체에서 "대상을 잃었을 때"를 처리하는 코드는 <code>cvCamShift</code> 끝의 <code>:343–347</code>뿐이다. 박스가 1픽셀 이하로 쪼그라들면 탐색창을 다시 넓히는, 전형적인 CamShift 복구 패턴이다. 그런데 두 겹으로 죽어 있다.</p>
           <p>첫째, 이 분기에 들어갈 방법이 없다. <code>cvMeanshift</code>는 <code>cv_tracker.h:82</code>에서 <code>true</code>로 하드코딩된 <code>protected</code> 멤버이고 setter도, 이를 바꾸는 UI도, 명령행 옵션도 없다. <code>:126</code>의 분기는 항상 <code>meanShift</code> 쪽으로만 간다. 둘째, 설령 들어가도 <code>rc</code>가 값 복사본이라 재조정 결과가 함수 밖으로 나가지 못한다.</p>
@@ -250,8 +251,8 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>역방향 드래그가 ROI 가드를 통과해 예외로 죽는다</h3></header>
+      <article class="finding" id="f10" data-sev="major">
+        <header><span class="tier">중대</span><h3>역방향 드래그가 ROI 가드를 통과해 예외로 죽는다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>ROI는 <code>x - sPoint.x</code>, <code>y - sPoint.y</code>로 만들어지므로 오른쪽 아래→왼쪽 위로 끌면 width와 height가 <strong>둘 다 음수</strong>가 된다. 그리고 유효성 검사가 <code>rect.area() &gt; 100</code>이다. 음수 × 음수는 양수이므로 (200,200)→(100,100) 드래그는 넓이 10000으로 가드를 통과한다.</p>
           <p>그대로 <code>tracker.initilize</code>로 들어가면 <code>cv_tracker.cc:264</code>의 <code>Mat target(hsv, rc);</code>가 음수 크기 ROI에 대해 <code>cv::Exception</code>을 던진다. <code>try/catch</code>가 없으므로 프로그램이 종료된다. 사용자가 박스를 반대 방향으로 그렸다는 것이 유일한 조건이다.</p>
@@ -263,16 +264,16 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
 					p-&gt;updated = true;</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>컬러 모델 메뉴가 자작 추적기에는 아무 영향이 없다</h3></header>
+      <article class="finding" id="f11" data-sev="minor">
+        <header><span class="tier">경미</span><h3>컬러 모델 메뉴가 자작 추적기에는 아무 영향이 없다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main.cc:60</code>이 HSV / RGB / hue / gray 네 가지를 물어보지만, 자작 경로는 <code>initilize</code>(<code>cv_tracker.cc:18</code>)와 <code>run</code>(<code>:39</code>) 모두 무조건 <code>CV_BGR2HSV</code>로 변환하고, <code>matrixAt</code>(<code>:195</code>)은 <code>channel_ratio</code> <code>{0.5, 0.25, 0.25}</code>(<code>cv_tracker.h:48</code>)로 세 채널을 고정 비율 합산한다. 선택은 OpenCV 경로의 <code>switch</code>에만 닿는다. 사용자에게 네 개의 선택지를 주면서 실제로는 하나만 구현된 셈이다.</p>
           <p>입력 검증도 없다. <code>cin &gt;&gt; model</code> 뒤 <code>static_cast&lt;COLOR_MODEL&gt;(model - 1)</code>(<code>:65</code>)에 5를 넣으면 범위 밖 enum이 되어 <code>cvHistogram</code>의 <code>switch</code>가 아무 <code>case</code>도 타지 않고, <code>model3d</code>가 빈 채로 <code>calcBackProject</code>에 들어간다. 숫자가 아닌 입력이면 <code>model</code>이 0이 되어 <code>-1</code>이 된다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>첫 프레임 검사 누락과 의도적으로 주석 처리된 <code>delete</code></h3></header>
+      <article class="finding" id="f12" data-sev="minor">
+        <header><span class="tier">경미</span><h3>첫 프레임 검사 누락과 의도적으로 주석 처리된 <code>delete</code></h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>main.cc:120</code>의 <code>*vc &gt;&gt; frame;</code> 직후 <code>imshow</code>를 호출하는데 <code>frame.empty()</code> 검사가 없다. 파일은 열리지만 첫 프레임 디코딩에 실패하는 경우(코덱 불일치 등) 그대로 예외다. 루프 안의 두 번째 읽기에는 <code>:139</code>에 검사가 있으므로 영상 종료 처리 자체는 되어 있다.</p>
           <p><code>new VideoCapture</code>(<code>:50</code>)에 대응하는 <code>delete</code>는 <code>:66–67</code>에 주석으로 남아 있다. 프로세스 종료로 회수되긴 하지만, 지웠다가 문제가 생겨 되돌린 흔적으로 읽힌다. <code>cv_tracker.cc:94</code>의 <code>bRect = myRect = nRect;</code>에서 <code>bRect</code>로의 대입도 지역 변수의 마지막 쓰기라 죽은 코드다.</p>
@@ -288,8 +289,8 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
     <p class="prose"><code>docs/object_tracking.pptx</code> 18장을 텍스트 추출해 전부 읽었다. 발표자는 "배지운 이영수" 두 명으로 적혀 있고, 목차는 1. Set target object → 2. Back projection → 3. Mean shift process → 4. Updating → 5. Other functions → References로 이어진다. 구조 자체는 성실하고, 마지막 장이 "한양대학교 확률및통계 강의자료"를 출처로 밝힌 점도 정직하다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>13장의 "픽셀을 역투영 가중치로 mean shift 클러스터링"은 구현되지 않았다</h3></header>
+      <article class="finding" id="f13" data-sev="major">
+        <header><span class="tier">중대</span><h3>13장의 "픽셀을 역투영 가중치로 mean shift 클러스터링"은 구현되지 않았다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>슬라이드 13의 문구는 <em>"Mean shift clustering of pixels with back projected weights"</em>다. 이것이 강의자료가 가르치는 정석이다 — 각 <strong>픽셀</strong>에 역투영 값을 가중치로 주고, 그 가중치로 중심을 옮긴다.</p>
           <p>실제 <code>cv_tracker.cc:49–63</code>은 다르다. 성긴 격자 위의 <strong>후보 윈도</strong>들을 순회하며, 각 윈도 <em>전체</em>의 히스토그램을 새로 계산해 모델과의 유사도를 구하고, 그 값을 가중치로 윈도 좌표들의 가중평균을 낸다. 픽셀 단위 가중이 아니라 윈도 단위 가중이고, 커널 가중 밀도의 모드를 오르는 것이 아니라 샘플링된 후보 집합의 가중 중심을 구하는 것이다. 동작은 비슷해 보일 수 있으나 mean shift의 수렴 보장(밀도 상승 방향으로의 이동)이 성립하는 구조가 아니다.</p>
@@ -301,16 +302,16 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
 					nY += w * (temp.y + (temp.height / 2) + j);</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>OpenCV 예제 헤더를 커밋해 두고 파생 클래스에는 본인만 표기했다</h3></header>
+      <article class="finding" id="f14" data-sev="minor">
+        <header><span class="tier">경미</span><h3>OpenCV 예제 헤더를 커밋해 두고 파생 클래스에는 본인만 표기했다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>example/tracker_opencv/code/tracker_opencv.h</code>는 <em>"Written by darkpgmr (http://darkpgmr.tistory.com), 2013"</em>이라고 명시된 제3자 코드다. 그리고 <code>cv_tracker.h</code>의 OpenCV 경로 설계는 이 헤더와 상당히 겹친다 — <code>init</code>/<code>run</code> 형태의 공개 API, <code>hist_bins</code>·<code>max_itrs</code>·<code>color_model</code>을 담은 파라미터 구조체, <code>CM_GRAY</code>/<code>CM_HUE</code>/<code>CM_RGB</code>/<code>CM_HSV</code> enum, <code>m_model</code>/<code>m_model3d</code>에 대응하는 <code>model</code>/<code>model3d</code> 보호 멤버까지.</p>
           <p>참고 자료를 레포에 함께 남긴 것 자체는 오히려 투명한 행동이다. 다만 <code>cv_tracker.h:3–8</code>과 <code>main.cc:1–6</code>의 파일 헤더는 저자 본인의 GitHub 주소만 적고 있고, 발표자료 References 장에도 OpenCV 공식 문서와 강의자료만 있을 뿐 이 출처는 없다. 파생한 쪽에 한 줄 표기를 남기는 것이 맞다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>최상위 README가 구현에 대해 사실상 아무것도 말하지 않는다</h3></header>
+      <article class="finding" id="f15" data-sev="minor">
+        <header><span class="tier">경미</span><h3>최상위 README가 구현에 대해 사실상 아무것도 말하지 않는다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>README.md</code>는 13줄이고 그중 실질 내용은 <em>"using OpenCV to test image processing[object tracking]"</em> 한 줄과 데모 GIF 링크뿐이다. 빌드 방법, OpenCV 버전, 필요한 Visual Studio 구성, 조작법(마우스로 ROI를 끌고 ESC로 종료), 알고리즘 요약이 전부 없다. 정작 그 정보의 일부는 소스 파일 상단 주석(<code>cv_tracker.h:10–18</code>)에만 들어 있다. 문서가 코드보다 앞서가지 않는 대신, 아예 따라오지 않은 경우다.</p>
         </div>
@@ -328,8 +329,8 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
     <h2>D — 레포 위생과 이식성</h2>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>646줄짜리 과제를 위해 699MB를 커밋했다</h3></header>
+      <article class="finding" id="f16" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>646줄짜리 과제를 위해 699MB를 커밋했다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>작업 트리 699MB, <code>.git</code> 160MB다. 원인은 <code>TESTED/</code>의 미디어가 아니다 — 그쪽은 mp4 두 개 약 11MB와 gif 4MB로 전체의 2%에 불과하다. 압도적인 주범은 <strong>OpenCV 3.0 SDK 전체를 x86/x64 × vc11/vc12 네 조합으로 통째 커밋한 것</strong>이다.</p>
         </div>
@@ -343,19 +344,19 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
    ... opencv_world300*.dll 8개 합계 약 310MB, opencv_ts300*.lib 8개 합계 약 99MB
  7,383,466  imageProcessing/Debug/test.jpg   <span class="cm">// f93ca0a에서 커밋, 15b985e에서 삭제 — 히스토리에는 영구히 남음</span></pre>
         <div class="prose">
-          <p>덧붙일 점 셋. 첫째, 실제로 빌드에 쓰인 구성은 <code>Debug|Win32</code> 하나(<code>imageProcessing.vcxproj:92,97</code>, <code>opencv_world300d.lib</code>)이므로 나머지 세 조합의 라이브러리는 한 번도 쓰이지 않았다. 둘째, <code>example/.gitignore</code>가 <code>VTD_data_videos/</code>, <code>tracker_opencv/</code> 등을 나열하고 있지만 그 파일들은 이미 커밋된 뒤라(<code>901de66</code>, <code>295122a</code>) 아무 효과가 없다. 셋째, 당시 Visual Studio 프로젝트에서 SDK를 동봉하는 것이 드문 관행은 아니었으나, 그렇다고 60MB짜리 샘플 영상 <code>animal.avi</code>까지 함께 넣을 이유는 없었다.</p>
+          <p>덧붙일 점 셋. 첫째, 실제로 빌드에 쓰인 구성은 <code>Debug|Win32</code> 하나(<code>imageProcessing.vcxproj:92,97</code>, <code>opencv_world300d.lib</code>)이므로 나머지 세 조합의 라이브러리는 한 번도 쓰이지 않았다. 둘째, <code>example/.gitignore</code>가 <code>VTD_data_videos/</code>, <code>tracker_opencv/</code> 등을 나열하지만 그 파일들은 이미 커밋된 뒤라(<code>901de66</code>, <code>295122a</code>) 아무 효과가 없다. 셋째, 당시 Visual Studio 프로젝트에서 SDK를 동봉하는 것이 드문 관행은 아니었으나, 그렇다고 60MB짜리 샘플 영상 <code>animal.avi</code>까지 함께 넣을 이유는 없었다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>제3자 바이너리를 재배포하면서 라이선스 표기가 없다</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3>제3자 바이너리를 재배포하면서 라이선스 표기가 없다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>find</code>로 확인한 결과 레포 전체에 <code>LICENSE</code>, <code>COPYING</code>, <code>NOTICE</code> 류 파일이 <strong>하나도 없다.</strong> OpenCV는 3-clause BSD이고, 그 조항은 바이너리 형태로 재배포할 때 저작권 고지와 조건문을 동봉할 것을 요구한다. 지금 레포에서 BSD 전문이 존재하는 곳은 벤더링된 헤더 파일 내부 주석뿐이며(<code>include/opencv/cv.h</code> 등), <code>lib/</code> 아래 DLL·LIB 8쌍에 대응하는 고지는 없다. 저자 자신의 코드에 대한 라이선스도 명시되지 않아 재사용 조건이 불분명하다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>Windows 전용 구속과 빌드조차 되지 않는 x64 구성</h3></header>
+      <article class="finding" id="f18" data-sev="minor">
+        <header><span class="tier">경미</span><h3>Windows 전용 구속과 빌드조차 되지 않는 x64 구성</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>macOS에서는 빌드가 불가능하며 그 사실은 명확히 기록해 둔다 — <code>main.cc:20</code>이 <code>&lt;Windows.h&gt;</code>를 포함하고, 파일 선택 대화상자가 <code>OPENFILENAME</code>과 <code>::GetOpenFileName</code>(<code>main.cc:165–180</code>)으로 구현되어 있으며, <code>cv_tracker.h:23–26</code>의 include 경로가 역슬래시(<code>"opencv2\core\core.hpp"</code>)다. C++ 표준에서 역슬래시가 든 헤더명은 구현 정의 동작이고 POSIX 툴체인에서는 그대로 깨진다. 프로젝트도 <code>PlatformToolset v140</code>, <code>WindowsTargetPlatformVersion 8.1</code>에 묶여 있다. 따라서 아래 모든 판정은 빌드가 아니라 정독과 산술 포팅 시뮬레이션에 근거한다.</p>
           <p>그와 별개로 <code>Debug|x64</code> 구성은 Windows에서도 빌드되지 않았을 것이다. include 경로가 드라이브 루트 기준 <code>\include</code>이고 라이브러리 경로가 <code>\lib\x86\vc12\lib</code>, 즉 x64 구성이 <strong>x86 라이브러리</strong>를 루트 절대경로로 가리킨다. 다른 세 구성이 쓰는 프로젝트 상대경로 <code>.\include</code>와 대조된다.</p>

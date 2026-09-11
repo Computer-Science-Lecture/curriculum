@@ -33,6 +33,7 @@
       <div class="grade"><b>B-</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>2</b> 치명적</a><a class="chip s-major" href="#f01"><b>6</b> 중대</a><a class="chip s-minor" href="#f01"><b>4</b> 경미</a><span class="total">합계 12</span></div>
 
   <!-- ============ 총평 ============ -->
   <section>
@@ -65,8 +66,8 @@
     <p class="prose">스켈레톤(<code>*_main.cc</code>)이 주어지고 <code>fsa.cc</code>, <code>lr_parser.cc</code>/<code>.h</code>, <code>regexp_matcher.cc</code>를 채우는 과제다. 마감일(2017-05-31) 당일 새벽 06:32부터 23:28까지, 열네 개 커밋으로 전부 작성됐다. <code>make</code>는 경고 없이 통과한다(Apple clang 21, <code>-std=c++0x</code>).</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>FSA가 인식하는 언어가 입력 파일의 행 순서에 따라 달라진다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>FSA가 인식하는 언어가 입력 파일의 행 순서에 따라 달라진다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>next_lambda</code>는 어떤 상태의 엡실론 전이들이 그 상태의 블록 <em>맨 앞에 연속해서</em> 놓여 있다고 가정한다. 첫 줄이 엡실론이 아니면 즉시 <code>break</code>하고, 그 상태의 엡실론 폐포는 통째로 누락된다. 이건 정렬 요구사항이 아니라 그냥 숨은 전제다 — 명세 어디에도 입력 파일이 정렬되어 있다는 말은 없다.</p>
         </div>
@@ -81,8 +82,8 @@ input: 'ab'  = O          input: 'azb' = O</pre>
         <div class="prose"><p>제공된 <code>data/fsa10.txt</code>·<code>fsa11.txt</code>와 README 예제가 우연히 엡실론 행을 앞에 두고 있어서 이 버그가 드러나지 않는다. <code>isAccept</code> 끝에 붙은 사후 엡실론 폐포(<code>fsa.cc:179–185</code>)가 <em>마지막 상태</em>에 대해서만 한 번 더 보정해 주기 때문에 짧은 예제에서는 더더욱 티가 안 난다. 채점 데이터가 하나만 달랐어도 그대로 터졌을 코드다.</p></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>NFA 판별이 "직전 행"만 비교한다 — 떨어져 있는 비결정성을 놓친다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>NFA 판별이 "직전 행"만 비교한다 — 떨어져 있는 비결정성을 놓친다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>isNFA()</code>는 비결정성을 찾기 위해 각 행을 <strong>바로 앞 행 하나</strong>와만 비교한다. <code>pElements</code>가 매 반복마다 덮어쓰이기 때문이다. <code>(1,a)→2</code>와 <code>(1,a)→3</code> 사이에 <code>(1,b)→1</code> 한 줄만 끼어 있으면 DFA로 오판하고, <code>buildDFA()</code>는 부분집합 구성을 하지 않은 채 <code>{2,3}</code> 같은 다중 상태를 표에 넣는다. 그런데 표의 키는 단일 상태 집합뿐이라, 다음 글자에서 조회가 실패하고 조용히 거절한다.</p>
         </div>
@@ -104,8 +105,8 @@ input: 'ab'  = O          input: 'bab' = O       # 두 'a' 행이 붙어 있음 
         <div class="prose"><p>과제 요구사항은 "<code>RunFSA</code>와 <code>BuildFSA</code>가 DFA와 NFA 정의를 모두 처리할 것"이다. 처리하긴 하는데, 어느 쪽으로 처리할지를 파일 안의 줄 순서가 결정한다.</p></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>elements[j]</code> 범위 밖 읽기 — ASan으로 재현</h3></header>
+      <article class="finding" id="f03" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>elements[j]</code> 범위 밖 읽기 — ASan으로 재현</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>j</code>는 <code>element.next_state</code>를 시작 상태로 갖는 첫 원소의 인덱스를 찾는 루프의 결과다. 그런 원소가 없으면(= 나가는 전이가 없는 상태, 즉 대개 수용 상태) <code>j == elements.size()</code>가 되는데, 그 값으로 바로 <code>elements[j].str</code>을 읽는다. 같은 파일 <code>105행</code>의 <code>next_lambda</code> 진입부에는 <code>if (start &gt;= elements.size()) return;</code> 가드가 있는데 여기엔 없다.</p>
         </div>
@@ -128,8 +129,8 @@ ERROR: AddressSanitizer: heap-buffer-overflow ... READ of size 1
         <div class="prose"><p>정규식 <code>(a)</code> — 명세 예제보다 단순한 입력 — 하나로 터진다. 릴리스 빌드에서는 대개 조용히 지나가기 때문에 제출 당시엔 드러나지 않았을 것이다.</p></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>LR 파서: <code>find()</code> 결과를 검사 없이 역참조 → SIGSEGV</h3></header>
+      <article class="finding" id="f04" data-sev="major">
+        <header><span class="tier">중대</span><h3>LR 파서: <code>find()</code> 결과를 검사 없이 역참조 → SIGSEGV</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>안쪽 <code>find(nextInput)</code>은 <code>end()</code>와 제대로 비교해서 오류 입력을 <code>false</code>로 돌려준다. 그런데 <strong>바깥쪽</strong> <code>parse_table.find(stack[stack_index])</code>는 검사 없이 <code>-&gt;second</code>를 한다. 표에 행이 하나도 없는 상태로 shift되는 순간 널 역참조다. 같은 패턴이 <code>68행</code>·<code>76행</code>의 <code>rules.find(ruleNum)-&gt;second</code>에도 있다.</p>
         </div>
@@ -143,8 +144,8 @@ $ echo a | ./lr_parser bad.txt ; echo $?
         <div class="prose"><p>같은 이유로 <code>46행</code>의 <code>str[str_index]</code>도 경계 검사가 없다. 제공된 표는 상태 0–11이 모두 등장하므로 <code>data/test_parser.txt</code>로는 절대 재현되지 않는다.</p></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>정규식: <code>*</code>가 연속되면 상태가 병합되어 <code>a*b*</code>가 <code>ba</code>를 받아들인다</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3>정규식: <code>*</code>가 연속되면 상태가 병합되어 <code>a*b*</code>가 <code>ba</code>를 받아들인다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>*</code> 처리는 직전 상태와 현재 상태 사이에 <strong>양방향</strong> 엡실론 간선을 놓는다. 별표가 하나면 "건너뛰기 + 되돌아가기"로 올바르게 동작하지만, 양방향 엡실론은 두 상태를 동치로 만든다. 별표 붙은 항목이 연달아 나오면 그 동치 관계가 전이적으로 번져서, <code>a*b*</code>의 상태 1·2·3이 전부 한 덩어리가 되고 결과물은 <code>(a|b)*</code>가 된다.</p>
         </div>
@@ -164,8 +165,8 @@ $ ./regexp '(ab)*c'   ac  → X   ababc → O          # 정상</pre>
         <div class="prose"><p>명세의 다섯 예제에는 별표가 연속되는 패턴이 없어서 전부 통과한다. 톰슨 구성처럼 별표마다 새 상태를 만들었다면 생기지 않았을 문제다.</p></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>정규식 파서의 실제 지원 범위와 오류 처리</h3></header>
+      <article class="finding" id="f06" data-sev="minor">
+        <header><span class="tier">경미</span><h3>정규식 파서의 실제 지원 범위와 오류 처리</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>확인한 지원 연산자: 리터럴 <code>a-z</code>, <code>.</code>, <code>[...]</code>, <code>|</code>, <code>*</code>, <code>()</code>, 그리고 명세에 없는 <code>+</code>와 <code>?</code>(<code>109–123행</code>)까지. 우선순위는 <code>|</code>가 가장 낮게 올바르게 처리된다(<code>ab|cd</code>가 <code>abcd</code>를 거절, <code>ab*|c</code>가 <code>abb</code>와 <code>c</code>를 모두 수용).</p>
           <p>다만 <code>.</code>는 "any character"가 아니라 <code>a</code>–<code>z</code> 26자 전개다(<code>61행</code>). <code>./regexp 'a.b'</code>에 <code>aAb</code>·<code>a1b</code>를 넣으면 거절된다. 그리고 지원하지 않는 문자를 만나면 <code>REGEX_ERROR</code>, 즉 <code>exit(1)</code>이 전부다 — 메시지 한 줄도 없이 프로세스가 사라진다. <code>[a-c]</code>, <code>A</code>, <code>a1</code>, <code>(ab</code>, <code>ab)</code> 모두 무음 종료(rc=1)를 확인했다. <code>regexp_matcher.cc:35</code>의 <code>new FiniteStateAutomaton</code>은 대응하는 <code>delete</code>가 없다.</p>
@@ -173,10 +174,10 @@ $ ./regexp '(ab)*c'   ac  → X   ababc → O          # 정상</pre>
         <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ENE4014/blob/HEAD/Homework1/regexp_matcher.h#L22" target="_blank" rel="noopener"><b>Homework1/regexp_matcher.h</b></a><span>:22</span><button class="expand" type="button" data-repo="ENE4014" data-path="Homework1/regexp_matcher.h" data-start="22" data-end="22">전체 맥락</button></div><pre>#define REGEX_ERROR exit(1);</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>죽은 매크로와 남은 라벨</h3></header>
+      <article class="finding" id="f07" data-sev="minor">
+        <header><span class="tier">경미</span><h3>죽은 매크로와 남은 라벨</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
-          <p><code>#define lambda '#'</code>가 <code>fsa.h:19</code>와 <code>regexp_matcher.h:19</code>에 중복 정의되어 있으나 어디에서도 쓰이지 않는다(엡실론은 <code>fsa_main.cc:41</code>에서 빈 문자열로 변환된다). <code>lr_parser.cc:10–12</code>의 <code>LOG</code>는 <code>DISABLE_LOG false</code>로 켜져 있는데 그 파일에서 한 번도 호출되지 않는다 — 같은 매크로가 <code>fsa.cc:8</code>에서는 <code>true</code>다. 그리고 Homework1 디렉터리의 파일 여섯 개가 헤더 주석에 <code>// PL homework: hw2</code>를 달고 있다(<code>lr_parser.h:1</code>, <code>regexp_matcher.h:1</code> 등). <code>lr_parser.h</code>는 "구조를 직접 설계하라"는 지시로 실제 수정한 파일인데도 라벨이 그대로다.</p>
+          <p><code>#define lambda '#'</code>가 <code>fsa.h:19</code>와 <code>regexp_matcher.h:19</code>에 중복 정의되어 있으나 어디에서도 쓰이지 않는다(엡실론은 <code>fsa_main.cc:41</code>에서 빈 문자열로 변환된다). <code>lr_parser.cc:10–12</code>의 <code>LOG</code>는 <code>DISABLE_LOG false</code>로 켜져 있는데 그 파일에서 한 번도 호출되지 않는다 — 같은 매크로가 <code>fsa.cc:8</code>에서는 <code>true</code>다. 그리고 Homework1 디렉터리의 파일 여섯 개가 헤더 주석에 <code>// PL homework: hw2</code>가 달려 있다(<code>lr_parser.h:1</code>, <code>regexp_matcher.h:1</code> 등). <code>lr_parser.h</code>는 "구조를 직접 설계하라"는 지시로 실제 수정한 파일인데도 라벨이 그대로다.</p>
         </div>
       </article>
 
@@ -195,8 +196,8 @@ $ ./regexp '(ab)*c'   ac  → X   ababc → O          # 정상</pre>
     <p class="prose">이 환경에는 <code>ghc</code>/<code>runghc</code>/<code>stack</code>이 없다. <strong>Haskell 코드는 컴파일·실행으로 검증하지 못했다.</strong> 대신 세 파일을 파이썬으로 1:1 전사해 알고리즘 의미를 확인했고, 아래 실행 결과는 모두 그 전사본에서 나온 것이다(타입 검사·레이아웃 규칙 통과 여부는 미검증). 커밋된 <code>sudoku.py</code>는 실제로 실행해 확인했다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>.py 파일의 정체: 프로토타입이 아니라 나중에 만든 역이식물</h3></header>
+      <article class="finding" id="f08" data-sev="major">
+        <header><span class="tier">중대</span><h3>.py 파일의 정체: 프로토타입이 아니라 나중에 만든 역이식물</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>git 타임스탬프가 명확하다. <code>prime.hs</code>·<code>coin.hs</code>는 2017-06-10 05:33, <code>sudoku.hs</code>는 2017-06-13 07:06에 들어왔고, <code>coin.py</code>·<code>sudoku.py</code>는 <strong>그 뒤인 2017-06-13 18:03</strong>(커밋 <code>db6e888</code> "Update python code")에 한꺼번에 추가됐다. 파이썬이 먼저 있었다는 증거는 없다. 제출물을 파이썬으로 바꿔치기한 것도 아니다.</p>
           <p>다만 남겨둔 채로 제출한 건 그대로 감점 요인이다. 과제 명세는 "Optionally zip the source code (<strong>ONLY .hs files</strong>)"라고 못 박는다. 게다가 <code>coin.py</code>는 Python 2 전용이라 지금은 아예 실행되지 않고, <code>sudoku.py</code>는 <code>b7c5fed</code> "remove test var"에서 <code>.hs</code>에서 지웠던 하드코딩 테스트 데이터(<code>varList</code>/<code>blkList</code>)를 그대로 들고 있다. 정리하다 만 파일이 최종 제출에 남은 것이다.</p>
@@ -210,8 +211,8 @@ True
         <div class="prose"><p>참고로 <code>sudoku.py</code>의 <code>findNextCellToFill</code> / <code>isValid(grid, i, j, e)</code> / <code>solveSudoku(grid, i=0, j=0)</code>라는 함수 분해와 이름은 널리 퍼진 파이썬 스도쿠 풀이 스니펫과 일치한다. 여기에 <code>blk</code> 인자를 덧붙여 직소 규칙으로 고친 형태다 — <strong>추정</strong>이며 원본을 특정하지는 않았다.</p></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>flipCoin "THTHTH"</code>가 명세 예제와 다른 수열을 낸다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>flipCoin "THTHTH"</code>가 명세 예제와 다른 수열을 낸다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>전략은 "맨 위가 H면 1장만 뒤집고, 아니면 가장 아래쪽 T까지 뒤집는다"이다. <code>coin.hs:11–15</code>의 <code>count</code> 정의가 그것이다. 명세의 세 예제 중 <code>"HT"</code>→<code>[1,2,0]</code>과 <code>"HTTH"</code>→<code>[1,3,0]</code>은 정확히 맞지만, 세 번째가 어긋난다.</p>
         </div>
@@ -229,8 +230,8 @@ n=2..10 전수 검사(2046개 입력): 실패 0건 — 항상 종료하고 항�
         <div class="prose"><p>답이 틀린 건 아니다. 전수 검사 결과 <em>언제나</em> 모든 동전을 H로 만들고 종료한다. 하지만 명세가 요구하는 출력이 유일한지 최소인지가 불분명한 상태에서, <strong>주어진 예제 셋 중 하나를 재현하지 못한다.</strong> 예제를 그대로 돌려보는 TA에게는 오답으로 찍힌다. 전략 자체도 최소와는 거리가 멀어서 <code>"HHHHHTTTTT"</code>에 18회를 쓴다(맨 위 5장 뒤집고 전체를 뒤집으면 2회).</p></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>스도쿠: 하스켈 문법을 입은 가변 격자 자료 모델</h3></header>
+      <article class="finding" id="f10" data-sev="major">
+        <header><span class="tier">중대</span><h3>스도쿠: 하스켈 문법을 입은 가변 격자 자료 모델</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>질문이 "명령형 스타일인가"라면 답은 절반만 그렇다. 코드는 순수하고, 재귀적이고, 지연 평가를 <em>제대로</em> 쓴다 — <code>sudokuRec</code>의 <code>valid</code>는 9개 분기를 전부 계산하지 않고 <code>null valid</code>/<code>head valid</code>가 첫 성공까지만 강제하므로 사실상 조기 종료 백트래킹이다(<code>where</code> 바인딩이라 두 번 계산되지도 않는다). <code>do</code> 블록도 <code>IORef</code>도 없다.</p>
           <p>문제는 자료 모델이다. <code>Maybe</code>를 쓸 줄 알면서(<code>25–29행</code>에서 <code>Map.lookup</code>을 <code>case ... of Just/Nothing</code>으로 받는다) 정작 "다음 빈 칸"의 부재는 <code>(0, -1)</code>이라는 C 스타일 센티널로 표현하고, 성공/실패는 <code>Maybe [[Int]]</code>가 아니라 <code>(Bool, [[Int]])</code> 튜플로 나른다. <code>setMatrix</code>는 <code>take</code>/<code>drop</code>으로 리스트를 두 겹 쪼개 붙여 <code>grid[i][j] = e</code>를 흉내내고, <code>matrix!!x!!y</code>가 도처에 있다. 파이썬 풀이의 가변 격자를 그대로 옮긴 설계다.</p>
@@ -247,8 +248,8 @@ flatten xs = (\z n -&gt; foldr (\x y -&gt; foldr z y x) n xs) (:) []</pre></div>
         <div class="prose"><p><code>concat</code>이다. Prelude에 이미 있다. 그리고 이 파일의 <code>import Data.List</code>(<code>3행</code>)는 쓰이는 심볼이 하나도 없다 — 사용된 <code>filter</code>, <code>head</code>, <code>null</code>, <code>take</code>, <code>drop</code>, <code>foldr</code>, <code>zip</code>, <code>elem</code>, <code>all</code>, <code>any</code>는 전부 Prelude 소속이다.</p></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>초기 단서를 검증하지 않는다</h3></header>
+      <article class="finding" id="f11" data-sev="minor">
+        <header><span class="tier">경미</span><h3>초기 단서를 검증하지 않는다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>squigglySudoku</code>는 길이 81만 확인하고(<code>46–47행</code>) 주어진 값들이 서로 모순되는지는 보지 않는다. <code>nextStep</code>이 첫 호출에서 빈 칸을 못 찾으면 즉시 <code>(True, matrix)</code>이므로, 81칸이 전부 채워진 격자는 그것이 규칙 위반이어도 그대로 "해답"으로 반환된다.</p>
         </div>
@@ -256,8 +257,8 @@ flatten xs = (\z n -&gt; foldr (\x y -&gt; foldr z y x) n xs) (:) []</pre></div>
   → [1,1,1,1,1,1,1,1,1, ...]        # 모든 칸이 1인 격자가 '해답'으로 통과</pre>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>소수 판정이 O(n)이고, 음수 N은 오류 대신 0으로 대체된다</h3></header>
+      <article class="finding" id="f12" data-sev="minor">
+        <header><span class="tier">경미</span><h3>소수 판정이 O(n)이고, 음수 N은 오류 대신 0으로 대체된다</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>prime n</code>은 <code>[1..n]</code> 전체를 훑어 약수 리스트를 <em>끝까지</em> 만든 뒤 <code>== [1, n]</code>로 비교한다. 조기 종료도, <code>sqrt n</code> 상한도 없다. 후보 하나당 O(n)이므로 <code>findingPrimes 1000000 5</code> 같은 입력은 사실상 멈춘다. 명세가 성능을 요구하지 않으므로 등급을 크게 깎지는 않았다.</p>
           <p>명세는 "Report error if inputs is not correct"인데, <code>m &lt; 0</code>은 <code>error</code>를 던지는 반면 <code>n &lt; 0</code>은 조용히 0부터 세기 시작한다. <code>findingPrimes -5 3</code>이 <code>[2,3,5]</code>를 돌려준다 — 오류 보고가 아니다.</p>

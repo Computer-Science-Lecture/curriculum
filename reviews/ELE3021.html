@@ -33,6 +33,7 @@
       <div class="grade"><b>D+</b><span class="lbl">종합</span></div>
     </div>
   </header>
+  <div class="summary" role="group" aria-label="소견 요약"><span class="lbl">소견</span><a class="chip s-critical" href="#f01"><b>6</b> 치명적</a><a class="chip s-major" href="#f01"><b>9</b> 중대</a><a class="chip s-minor" href="#f01"><b>7</b> 경미</a><span class="total">합계 22</span></div>
 
   <section>
     <h2>총평</h2>
@@ -61,8 +62,8 @@
     <p class="prose">linux-4.1.38에 인자 없는 시스템 콜을 추가하고 <code>current</code> 태스크의 정보를 <code>printk</code>하는 과제다. 커밋 <code>70f709b</code>(<code>Week2 init</code>)가 원본 3개 파일을, <code>5c98e8c</code>(<code>Week2 done</code>)가 총 19줄의 변경을 담았다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>syscall 테이블의 ABI 컬럼이 <code>comoon</code>으로 오타 나 있다</h3></header>
+      <article class="finding" id="f01" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>syscall 테이블의 ABI 컬럼이 <code>comoon</code>으로 오타 나 있다</h3><a class="permalink" href="#f01" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>x86 syscall 테이블의 두 번째 컬럼은 <code>common</code>, <code>64</code>, <code>x32</code> 중 하나여야 한다. <code>comoon</code>은 그 어느 것도 아니다. <code>arch/x86/syscalls/syscalltbl.sh</code>는 이 컬럼을 대문자로 바꿔 <code>__SYSCALL_&lt;ABI&gt;(...)</code> 매크로 이름을 그대로 조립하므로, 생성되는 <code>syscalls_64.h</code>에는 정의된 적 없는 <code>__SYSCALL_COMOON(323, sys_get_task_info, sys_get_task_info)</code>이 들어간다. 즉 <strong>64비트 시스템 콜은 등록되지 않는다.</strong></p>
           <p>바로 윗줄 <code>322 64 execveat</code>과 비교하면 오타가 눈에 보인다. 32비트 테이블(<code>syscall_32.tbl:368</code>)의 <code>i386</code>은 정확히 적혀 있으므로, 이 과제는 32비트에서만 동작하고 64비트에서는 동작하지 않는 상태로 제출됐다. 참고로 두 줄 모두 번호 뒤가 탭이 아니라 공백인데, 이쪽은 스크립트가 공백 구분으로 읽으므로 무해하다.</p>
@@ -72,8 +73,8 @@
 323 <span class="hl">comoon</span>	get_task_info	sys_get_task_info   <span class="cm">&lt;- common 이어야 함</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>long</code>을 반환한다고 선언해 놓고 아무것도 반환하지 않는다</h3></header>
+      <article class="finding" id="f02" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>long</code>을 반환한다고 선언해 놓고 아무것도 반환하지 않는다</h3><a class="permalink" href="#f02" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>sys_get_task_info</code>는 <code>asmlinkage long</code>인데 함수 본문에 <code>return</code>이 없다. 시스템 콜의 반환값은 유저 공간이 성공/실패를 판정하는 유일한 채널이고, 여기서는 레지스터에 남아 있던 쓰레기값이 그대로 <code>errno</code> 해석 대상이 된다. 함수 전체가 9줄이고 그중 빠진 것이 <code>return 0;</code> 한 줄이다.</p>
           <p>덤으로 <code>task-&gt;state</code>는 4.1에서 <code>volatile long</code>인데 <code>%x</code>로 출력한다 — 상위 32비트가 잘린다. <code>task-&gt;flags</code>(<code>unsigned int</code>)와 <code>nr_dirtied</code>(<code>int</code>)는 맞다.</p>
@@ -87,15 +88,15 @@
 <span class="hl">}</span>   <span class="cm">&lt;- return 문 없음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>kernel/Makefile</code> 변경이 커밋되지 않았다</h3></header>
+      <article class="finding" id="f03" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>kernel/Makefile</code> 변경이 커밋되지 않았다</h3><a class="permalink" href="#f03" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>linux/kernel/get_task_info.c</code>를 새로 만들었지만, 이 파일을 빌드에 넣어 주는 <code>kernel/Makefile</code>의 <code>obj-y</code> 추가가 저장소에 없다. 저장소에 있는 Makefile은 <code>driver/Makefile</code> 하나뿐이다. README가 선언한 <em>"<code>Week(n) done</code>: 과제로 변경한 파일을 커밋한다"</em>는 규칙이 이 커밋에서 이미 지켜지지 않았다는 뜻이고, 선택지는 둘뿐이다 — 로컬에서 고쳤지만 커밋을 빠뜨렸거나(규칙 위반), 애초에 안 고쳐서 <code>get_task_info.o</code>가 링크되지 않았거나(빌드 실패). 어느 쪽이든 이 커밋만으로는 과제가 재현되지 않는다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>README가 없는 커널 트리를 가리킨다</h3></header>
+      <article class="finding" id="f04" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README가 없는 커널 트리를 가리킨다</h3><a class="permalink" href="#f04" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>README.md:6</code>은 <em>"directory <code>linux</code>: linux-4.1.38 kernel"</em>이라고 적었지만 <code>linux/</code>에 있는 것은 수정한 파일 4개뿐이다. 변경분만 커밋한 판단은 옳다 — 잘못된 것은 README의 문장이다.</p>
         </div>
@@ -109,8 +110,8 @@
     <p class="prose"><code>sender</code>/<code>psender</code>가 키 1234의 큐로 메시지를 보내고 <code>receiver</code>가 받아 우선순위 순으로 출력한다. 세 파일 모두 macOS에서는 <code>&lt;linux/unistd.h&gt;</code> 부재로 컴파일되지 않으나(<code>fatal error: 'linux/unistd.h' file not found</code>), 이 헤더는 세 파일 어디에서도 실제로 쓰이지 않는 불필요한 include다. <code>receiver.cpp</code>는 그 include가 없어 <code>-Wall -Wextra</code>로 깨끗이 컴파일된다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>큐를 만들기만 하고 아무도 지우지 않는다</h3></header>
+      <article class="finding" id="f05" data-sev="major">
+        <header><span class="tier">중대</span><h3>큐를 만들기만 하고 아무도 지우지 않는다</h3><a class="permalink" href="#f05" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>세 프로그램 전부 <code>msgget((key_t)1234, IPC_CREAT | 0666)</code>으로 큐를 생성하는데, 저장소 전체에 <code>IPC_RMID</code>가 한 번도 등장하지 않는다. <code>msgctl</code> 호출은 <code>receiver.cpp:36</code>의 <code>IPC_STAT</code> 하나뿐이다. SysV 메시지 큐는 프로세스가 아니라 커널에 매달린 자원이므로, 프로그램이 끝나도 키 1234의 큐는 남는다. 실습을 반복 실행하면 이전 회차의 잔여 메시지가 다음 회차 <code>receiver</code>로 들어간다 — 종료 조건이 <code>seq == 1000</code> 센티넬 2개를 세는 방식(<code>receiver.cpp:55–60</code>)이라, 잔여 센티넬 하나만 남아 있어도 결과가 뒤틀린다.</p>
           <p>생성/삭제 짝을 맞추는 것이 이 실습의 절반이다. <code>0666</code> 권한까지 붙여 아무나 읽고 쓸 수 있는 큐를 남기는 것은 덤이다.</p>
@@ -123,8 +124,8 @@ message_queue/receiver.cpp:38:		perror("msgctl error : ");</pre>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>msgrcv</code>에 버퍼보다 8바이트 큰 크기를 넘긴다</h3></header>
+      <article class="finding" id="f06" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>msgrcv</code>에 버퍼보다 8바이트 큰 크기를 넘긴다</h3><a class="permalink" href="#f06" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>msgrcv</code>의 <code>msgsz</code>는 <code>mtype</code>(<code>long</code>) <strong>뒤</strong>의 수신 가능 바이트 수다. 송신 측은 <code>sizeof(struct msg_buf) - sizeof(long)</code> = 264를 정확히 쓰는데(<code>sender.cpp:42</code>, <code>psender.cpp:51</code>), 수신 측만 <code>sizeof(struct msg_buf)</code> = 272를 넘긴다. 이 프로그램의 송신자들이 264바이트만 보내므로 지금 당장 터지지는 않지만, 264바이트를 넘는 메시지가 큐에 하나라도 있으면 커널이 <code>mybuf</code> 끝을 8바이트 넘겨 쓴다. 그리고 위 항목대로 이 큐는 지워지지 않고 권한이 0666이라, 다른 프로그램이 큐에 넣은 메시지가 들어올 수 있다.</p>
         </div>
@@ -132,8 +133,8 @@ message_queue/receiver.cpp:38:		perror("msgctl error : ");</pre>
 <span class="cm">// sizeof = 272, 그러나 mybuf에서 mtype 뒤 여유는 264바이트</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>"우선순위"가 IPC 메커니즘이 아니라 수신 후 정렬이다</h3></header>
+      <article class="finding" id="f07" data-sev="minor">
+        <header><span class="tier">경미</span><h3>"우선순위"가 IPC 메커니즘이 아니라 수신 후 정렬이다</h3><a class="permalink" href="#f07" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>receiver.cpp:48–65</code>는 모든 메시지를 <code>vector</code>에 모아 두었다가 끝에서 <code>prio</code> 필드로 <code>sort</code>한다. SysV 메시지 큐가 우선순위를 표현하는 수단은 <code>mtype</code>과 <code>msgrcv</code>의 음수 <code>msgtyp</code> 인자인데, 여기서는 <code>mtype</code>이 모든 메시지에서 4로 고정이고 우선순위는 페이로드 안의 그냥 정수다. 큐가 우선순위를 다루는 것을 보이는 실습에서, 큐는 우선순위와 아무 관련이 없고 <code>std::sort</code>가 전부를 한다.</p>
           <p>같은 맥락에서 <code>psender.cpp:31</code>의 <code>setpriority(PRIO_PROCESS, pid, 0)</code>은 nice 값을 0으로 두는 것이라 아무 효과가 없고, 반환값 <code>ret</code>은 어디에서도 읽히지 않는다.</p>
@@ -148,8 +149,8 @@ message_queue/receiver.cpp:38:		perror("msgctl error : ");</pre>
     <p class="prose">pthread 뮤텍스 예제, POSIX 세마포어 예제, 그리고 Tanenbaum의 식사하는 철학자 해법 세 개다. 앞의 둘은 강의 예제를 거의 그대로 옮긴 것이고, <code>dining.cpp</code>가 유일하게 판단이 필요한 코드다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>식사를 전역 락 안에서 수행해 철학자들이 완전히 직렬화된다</h3></header>
+      <article class="finding" id="f08" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>식사를 전역 락 안에서 수행해 철학자들이 완전히 직렬화된다</h3><a class="permalink" href="#f08" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>Tanenbaum 해법에서 <code>test()</code>가 하는 일은 <em>상태를 EATING으로 바꾸고 세마포어를 post</em>하는 것뿐이다. 실제 식사는 락을 놓은 뒤 각자의 스레드에서 일어난다. 이 구현의 <code>test()</code>는 <code>eat(i)</code>를 직접 호출하고, <code>eat()</code>은 <code>usleep(EAT_TIME * 10000)</code>으로 30ms를 잔다 — 그것도 <code>lock</code>을 쥔 채로. <code>get_chop</code>은 <code>sem_wait(&amp;lock)</code>과 <code>sem_post(&amp;lock)</code> 사이에서 <code>test(i)</code>를 부르므로, 한 철학자가 먹는 30ms 동안 나머지 넷은 전역 락에서 대기한다.</p>
           <p>이 과제가 존재하는 이유는 "이웃하지 않은 철학자 둘이 동시에 먹을 수 있는가"이고, 이 구현에서 그 답은 <strong>아니오</strong>다. 데드락이 없는 것은 맞지만, 그것은 회피 전략이 작동해서가 아니라 동시성이 하나도 없기 때문이다. 전역 락 하나로 모든 것을 감싸면 식사하는 철학자 문제는 성립하지 않는다.</p>
@@ -174,8 +175,8 @@ void get_chop(int i) {
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>도달 불가능한 <code>break</code>가 있고, 도달했다면 뮤텍스를 쥔 채 빠져나간다</h3></header>
+      <article class="finding" id="f09" data-sev="major">
+        <header><span class="tier">중대</span><h3>도달 불가능한 <code>break</code>가 있고, 도달했다면 뮤텍스를 쥔 채 빠져나간다</h3><a class="permalink" href="#f09" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>for (i = 0; i &lt; 10; i++)</code> 안에서 <code>i == 10</code>을 검사한다. 루프 조건상 <code>i</code>는 10이 될 수 없으므로 이 분기는 영원히 죽은 코드다. 문제는 만약 조건이 성립하도록 고쳤을 때 — <code>break</code>가 <code>pthread_mutex_unlock</code> <strong>앞</strong>에 있어서, 스레드는 뮤텍스를 쥔 채로 루프를 나가고 종료한다. 상대 스레드는 <code>do_ops2</code>의 <code>pthread_mutex_lock</code>에서 영구 대기하고, <code>main</code>의 <code>pthread_join</code>도 돌아오지 않는다. 대칭 함수인 <code>do_ops2</code>에는 이 분기가 아예 없어, 실수로 남은 코드임이 더 분명해진다.</p>
         </div>
@@ -190,8 +191,8 @@ void get_chop(int i) {
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>스켈레톤의 잔해가 그대로 남아 있다</h3></header>
+      <article class="finding" id="f10" data-sev="minor">
+        <header><span class="tier">경미</span><h3>스켈레톤의 잔해가 그대로 남아 있다</h3><a class="permalink" href="#f10" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>-Wall -Wextra</code>가 <code>dining.cpp</code>에서 미사용 변수를 다섯 개 잡아낸다: <code>t</code>(<code>:116</code>), <code>args</code>(<code>:117</code>), <code>minCount</code>·<code>maxCount</code>(<code>:118</code>), <code>left</code>·<code>right</code>(<code>:101</code>). <code>minCount</code>/<code>maxCount</code>는 <code>USHRT_MAX</code>로 초기화까지 해 놓고 쓰지 않는데, 철학자별 식사 횟수의 최소/최대를 비교해 기아를 판정하라는 스켈레톤의 의도가 그대로 드러난다 — 그 판정은 구현되지 않았다. <code>:126</code>의 <code>/* TODO: Thread create &amp; destroy */</code> 주석도 남아 있다. <code>sem_destroy</code>는 어디에도 없다.</p>
           <p>또 <code>dining</code>·<code>do_ops1</code>·<code>do_ops2</code>·<code>thread_func</code> 네 스레드 함수가 전부 <code>void*</code>를 선언하고 <code>return</code>하지 않는다(<code>-Wreturn-type</code>).</p>
@@ -203,8 +204,8 @@ dining.cpp:129:49: warning: cast to 'void *' from smaller integer type
                             'unsigned short' [-Wint-to-void-pointer-cast]</pre></div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>실행 시간 카운트다운이 밀리초를 초로 잘라 뺀다</h3></header>
+      <article class="finding" id="f11" data-sev="minor">
+        <header><span class="tier">경미</span><h3>실행 시간 카운트다운이 밀리초를 초로 잘라 뺀다</h3><a class="permalink" href="#f11" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>tick()</code>은 밀리초를 돌려주는데, <code>t -= tick()/1000 - start_time/1000;</code>은 두 값을 각각 초 단위로 <em>내림</em>한 뒤 뺀다. 한 번의 <code>get_chop</code>+<code>put_chop</code>은 50ms 남짓이므로 대부분의 반복에서 이 차이는 0이고, <code>t</code>는 벽시계의 초 경계를 넘을 때만 줄어든다. 결과적으로 3초 근처에서 끝나기는 하지만 그것은 경과 시간을 잰 결과가 아니라 초 경계를 세 번 넘은 결과다. <code>start_time</code>을 루프 밖으로 빼고 밀리초로 비교했으면 될 일이다.</p>
           <p>출력 쪽에도 같은 종류의 부주의가 있다. <code>:142</code>의 <code>printf("%lld.%lld sec", (end-start)/1000, (end-start)%1000)</code>은 하위 자리를 0으로 채우지 않아 1005ms를 <code>1.5 sec</code>로 찍는다.</p>
@@ -223,8 +224,8 @@ dining.cpp:129:49: warning: cast to 'void *' from smaller integer type
     <p class="prose">24줄짜리 프로그램으로 text/data/bss/heap/library/stack 여섯 영역의 주소를 출력한다. 과제의 산출물이 곧 이 여섯 줄의 출력이다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>보여 주어야 할 주소 여섯 개를 전부 32비트로 잘라 출력한다</h3></header>
+      <article class="finding" id="f12" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>보여 주어야 할 주소 여섯 개를 전부 32비트로 잘라 출력한다</h3><a class="permalink" href="#f12" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>여섯 줄 모두 포인터를 <code>%08x</code>로 넘긴다. x86-64에서 <code>%x</code>는 <code>unsigned int</code> 변환이므로 상위 32비트가 사라진다. 커밋된 바이너리 <code>memory/manage</code>는 ELF 64-bit x86-64이니, 이 프로그램은 자기가 실행되는 바로 그 아키텍처에서 주소를 잘못 찍는다. 컴파일러가 여섯 줄 전부를 <code>-Wformat</code>으로 지적한다.</p>
           <p>같은 코드를 macOS에서 빌드해 실행한 결과가 그 효과를 그대로 보여 준다. 실제 스택 주소가 <code>0x16f651d7c</code>일 때 <code>%08x</code>는 <code>0x6f651d7c</code>를 찍는다 — 최상위 니블이 통째로 사라져, 스택이 힙보다 낮은 주소에 있는 것처럼 보인다. 메모리 레이아웃을 관찰하는 것이 목적인 과제에서 레이아웃을 잘못 보여 주는 출력이다. <code>%p</code> 한 글자면 해결된다.</p>
@@ -242,8 +243,8 @@ heap   %08x -&gt; 0x00eb5d10   |  %p -&gt; <span class="hl">0x1</span>00eb5d10</
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>dlopen</code> 실패를 확인하지 않아 라이브러리 주소가 0으로 찍힌다</h3></header>
+      <article class="finding" id="f13" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>dlopen</code> 실패를 확인하지 않아 라이브러리 주소가 0으로 찍힌다</h3><a class="permalink" href="#f13" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>handle = dlopen("/lib/libc.so.6", RTLD_LAZY)</code>의 반환값을 검사하지 않고 곧바로 <code>dlsym(handle, "printf")</code>를 부른다. 경로가 하드코딩이라 멀티아치 배포판(<code>/lib/x86_64-linux-gnu/libc.so.6</code>)에서는 <code>handle</code>이 NULL이 된다. glibc에서 NULL 핸들은 <code>RTLD_DEFAULT</code>와 같은 값이라 우연히 동작할 수도 있는데, 그 "우연히 동작함"이야말로 검사를 넣어야 하는 이유다.</p>
           <p>실제로 같은 코드를 macOS에서 실행하면 <code>dlopen</code>이 실패해 <code>library: 0x00000000</code>이 출력된다. 프로그램은 오류 없이 0을 정답인 양 찍고 종료 코드 0으로 끝난다. <code>dlerror()</code> 호출은 파일 어디에도 없다.</p>
@@ -267,8 +268,8 @@ stack: 0x6f5fdd6c      <span class="cm">&lt;- 상위 니블 소실</span></pre>
     <p class="prose">4KB 링 아닌 선형 버퍼를 갖는 문자 디바이스를 <code>alloc_chrdev_region</code> + <code>cdev</code>로 등록하고 <code>read</code>/<code>write</code>를 구현한다. 이 저장소에서 스켈레톤 채우기가 아니라 저자의 설계가 드러나는 유일한 코드이며, 동시에 결함도 가장 많다.</p>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>초기화 실패 경로가 0(성공)을 반환하고, 그 전에 에러 포인터를 파괴한다</h3></header>
+      <article class="finding" id="f14" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>초기화 실패 경로가 0(성공)을 반환하고, 그 전에 에러 포인터를 파괴한다</h3><a class="permalink" href="#f14" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>class_create</code>가 실패하면 <code>IS_ERR(myclass)</code>가 참이 되어 두 가지 일이 연달아 일어난다. 첫째, <code>class_destroy(myclass)</code>가 <strong>에러 포인터를 실제 포인터처럼 역참조</strong>한다 — 실패한 객체를 해제하려는 시도이고, 커널 oops로 이어진다. 둘째, 반환값이 <code>PTR_ERR(myclass)</code>가 아니라 <code>PTR_ERR(mydevice)</code>다. <code>mydevice</code>는 <code>:15</code>에 선언만 되고 이 파일 어디에서도 대입되지 않는 전역이므로 값은 NULL이고, <code>PTR_ERR(NULL)</code>은 <strong>0</strong>이다.</p>
           <p>즉 <code>insmod</code>는 <em>성공</em>을 보고한다. 모듈은 클래스가 없고 <code>cdev</code>도 등록되지 않고 <code>mydrv_data</code>도 할당되지 않은 상태로 커널에 적재되며, 이후 <code>rmmod</code>가 <code>mydrv_cleanup</code>을 불러 NULL <code>mycdev</code>에 <code>cdev_del</code>을 시도한다. 실패를 성공으로 보고하는 것은 어떤 초기화 함수에서도 최악의 실패 모드이고, 여기서는 변수 이름 하나를 잘못 적어서 발생했다.</p>
@@ -281,8 +282,8 @@ if (IS_ERR(myclass)) {
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3><code>printk("%s", buf)</code>로 유저 포인터를 직접 역참조한다</h3></header>
+      <article class="finding" id="f15" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>printk("%s", buf)</code>로 유저 포인터를 직접 역참조한다</h3><a class="permalink" href="#f15" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p>벌크 전송에서는 <code>copy_to_user</code>/<code>copy_from_user</code>를 정확히 쓴다. 그런데 두 함수 모두 맨 첫 줄에서 유저 공간 포인터 <code>buf</code>를 <code>printk</code>의 <code>%s</code>에 그대로 넘긴다. 커널 문맥에서 유저 메모리를 직접 읽는 것이고, SMAP이 켜진 x86에서는 그 자리에서 폴트가 난다. SMAP이 없어도 문제다 — <code>%s</code>는 <code>count</code>를 모르므로 NUL을 만날 때까지 읽고, 유저가 보낸 데이터에 NUL이 없으면 매핑 경계를 넘어 커널 로그로 흘러 나간다.</p>
           <p><code>mydrv_read</code>의 경우는 한 겹 더 나쁘다. <code>:32</code>의 <code>printk</code>가 <code>:33</code>의 <code>buf == NULL</code> 검사보다 <strong>앞</strong>에 있어서, NULL을 걸러내려고 넣은 검사가 이미 NULL 역참조가 일어난 뒤에 실행된다. 게다가 <code>read</code>의 <code>buf</code>는 아직 채워지지 않은 출력 버퍼라, 찍히는 내용은 의미 없는 쓰레기다.</p>
@@ -298,16 +299,16 @@ static ssize_t mydrv_write(struct file *file, const char * buf, size_t count, lo
 	<span class="hl">printk("mydrv_write: %s\n", buf);</span>  <span class="cm">// NUL 없으면 count 를 넘겨 읽음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>device_create</code>를 부르지 않으면서 <code>device_destroy</code>는 두 곳에서 부른다</h3></header>
+      <article class="finding" id="f16" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>device_create</code>를 부르지 않으면서 <code>device_destroy</code>는 두 곳에서 부른다</h3><a class="permalink" href="#f16" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>grep device_create</code>의 결과가 비어 있다. 클래스는 만들지만 디바이스 노드는 만들지 않으므로 <code>/dev</code>에 아무것도 생기지 않고, 사용자는 <code>mknod</code>로 직접 만들어야 한다. 그런데 정리 코드는 만든 적 없는 디바이스를 두 번 파괴하려 한다 — <code>:84</code>(<code>cdev_add</code> 실패 경로)와 <code>:97</code>(<code>mydrv_cleanup</code>). 인자로 넘기는 <code>myclass</code>는 유효하므로 <code>device_destroy</code>는 해당 devt를 찾지 못하고 조용히 돌아가지만, 자원 획득/해제 짝이 애초에 맞지 않는다는 신호다.</p>
           <p>동봉된 유저 테스트는 이 불일치를 그대로 드러낸다. <code>usertest.c:10</code>은 <code>/dev/device_driver_test</code>를 여는데, 드라이버가 등록한 이름은 <code>DEVICE_NAME "mydrv"</code>(<code>:9</code>)다. 두 이름 중 어느 것도 자동으로 생성되지 않으므로, 이 테스트는 손으로 만든 노드 이름이 우연히 맞아떨어질 때만 동작한다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3><code>kmalloc</code> 반환값을 검사하지 않고, 정리 순서가 use-after-free를 만든다</h3></header>
+      <article class="finding" id="f17" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>kmalloc</code> 반환값을 검사하지 않고, 정리 순서가 use-after-free를 만든다</h3><a class="permalink" href="#f17" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>:89</code>의 <code>kmalloc(4096, GFP_KERNEL)</code>은 검사 없이 <code>mydrv_data</code>에 대입된다. NULL이면 이후 첫 <code>write</code>의 <code>copy_from_user(mydrv_data + offset, ...)</code>가 NULL 근처에 쓴다. <code>cdev_alloc()</code>(<code>:80</code>)의 반환값도 검사 없이 <code>mycdev-&gt;ops</code>로 역참조한다.</p>
           <p><code>mydrv_cleanup</code>은 순서가 거꾸로다. <code>kfree(mydrv_data)</code>가 <code>cdev_del(mycdev)</code>보다 먼저 실행되므로, 그 사이에 진행 중이던 <code>read</code>/<code>write</code>는 해제된 버퍼를 만진다. <code>cdev_del</code>을 먼저 불러 새 <code>open</code>을 차단한 뒤 버퍼를 놓아야 한다.</p>
@@ -321,16 +322,16 @@ static ssize_t mydrv_write(struct file *file, const char * buf, size_t count, lo
 }</pre></div>
       </article>
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>동시 접근 보호가 전혀 없고, 오프셋이 파일이 아니라 모듈에 달려 있다</h3></header>
+      <article class="finding" id="f18" data-sev="major">
+        <header><span class="tier">중대</span><h3>동시 접근 보호가 전혀 없고, 오프셋이 파일이 아니라 모듈에 달려 있다</h3><a class="permalink" href="#f18" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>grep</code>으로 <code>mutex</code>·<code>spin_lock</code>·<code>atomic</code>·<code>down(</code> 어느 것도 발견되지 않는다. <code>mydrv_read_offset</code>과 <code>mydrv_write_offset</code>은 모듈 전역이고 두 핸들러가 잠금 없이 읽고 쓴다. 두 프로세스가 동시에 <code>write</code>하면 <code>mydrv_write_offset += count</code>가 서로를 덮어쓰고, 버퍼는 겹쳐 쓰이며, <code>:52</code>의 경계 검사도 무의미해진다.</p>
           <p>구조적으로도 <code>ppos</code> 인자를 두 핸들러 모두 무시한다. 파일 오프셋이 <code>struct file</code>이 아니라 모듈에 달려 있으므로, 두 프로세스가 각자 <code>open</code>해도 커서를 공유한다 — 먼저 읽은 쪽이 전부 가져가고 두 번째는 0바이트를 받는다. 마지막으로 <code>:53</code>은 버퍼가 가득 찼을 때 <code>0</code>을 반환하는데, <code>write()</code>의 0 반환은 "진전 없음"이라 이를 재시도 루프로 처리하는 호출자를 무한 루프에 빠뜨린다. <code>-ENOSPC</code>여야 한다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>유저 테스트가 배열 끝을 두 칸 넘겨 쓴다</h3></header>
+      <article class="finding" id="f19" data-sev="minor">
+        <header><span class="tier">경미</span><h3>유저 테스트가 배열 끝을 두 칸 넘겨 쓴다</h3><a class="permalink" href="#f19" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>buf_out</code>은 <code>char[26]</code>인데 인덱스 27에 대입한다 — 유효 범위는 0..25이므로 두 칸 밖이다. 전역 배열이라 실제로는 인접한 <code>buf_in</code>의 어딘가를 건드릴 뿐 눈에 띄지 않지만, 컴파일러가 경고 한 줄로 잡아 준다. 같은 파일은 <code>&lt;unistd.h&gt;</code>를 include하지 않아 <code>read</code>/<code>write</code>/<code>close</code>가 선언 없이 쓰인다.</p>
         </div>
@@ -355,8 +356,8 @@ usertest.c:33:2: error: use of undeclared identifier 'close'</pre></div>
     <h2>저장소 위생</h2>
     <div class="stack-lg">
 
-      <article class="finding" data-sev="major">
-        <header><span class="tier">중대</span><h3>커밋된 <code>.o</code> 파일은 오브젝트가 아니라 링크된 실행 파일이다</h3></header>
+      <article class="finding" id="f20" data-sev="major">
+        <header><span class="tier">중대</span><h3>커밋된 <code>.o</code> 파일은 오브젝트가 아니라 링크된 실행 파일이다</h3><a class="permalink" href="#f20" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>file</code>로 확인하면 <code>mutex/mutex.o</code>, <code>message_queue/receiver.o</code> 등이 <em>ELF 64-bit LSB <strong>executable</strong>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2</em>다. 재배치 가능한 오브젝트가 아니다. <code>gcc -c foo.cpp</code> 대신 <code>gcc -o foo.o foo.cpp</code>로 빌드해 실행 파일에 <code>.o</code> 확장자를 붙인 것이고, 여섯 개가 전부 그렇다. 빌드 산출물을 커밋한 것보다, 자기 툴체인이 무엇을 만들었는지 확인하지 않은 쪽이 문제다.</p>
         </div>
@@ -368,15 +369,15 @@ usertest.c:33:2: error: use of undeclared identifier 'close'</pre></div>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3>추적 파일 35개 중 16개가 빌드 산출물이고, 그 안에 빌드 머신 경로가 박혀 있다</h3></header>
+      <article class="finding" id="f21" data-sev="minor">
+        <header><span class="tier">경미</span><h3>추적 파일 35개 중 16개가 빌드 산출물이고, 그 안에 빌드 머신 경로가 박혀 있다</h3><a class="permalink" href="#f21" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>.o</code> 6개, <code>.ko</code> 1개, <code>.mod.o</code>, <code>.cmd</code> 3개, <code>Module.symvers</code>(0바이트), <code>.tmp_versions/</code>, <code>modules.order</code>, 그리고 링크된 실행 파일 <code>memory/manage</code>·<code>driver/usertest</code> — 합쳐서 534KB, 소스 전체보다 훨씬 크다. <code>.gitignore</code>는 없다. 커널 빌드가 생성한 <code>.cmd</code>와 <code>modules.order</code>에는 빌드 머신의 절대 경로 <code>/home/practice/Workspace/ele3021</code>이 그대로 남아 있다. 시크릿은 아니지만, 아무도 열어 보지 않고 커밋했다는 증거다.</p>
         </div>
       </article>
 
-      <article class="finding" data-sev="minor">
-        <header><span class="tier">경미</span><h3><code>2018</code> 브랜치에는 명세 PDF만 있고 코드가 없다</h3></header>
+      <article class="finding" id="f22" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>2018</code> 브랜치에는 명세 PDF만 있고 코드가 없다</h3><a class="permalink" href="#f22" aria-label="이 소견으로 가는 링크">#</a></header>
         <div class="prose">
           <p><code>origin/2018</code>은 2017년 커밋 11개 위에 <code>Rebase</code>(<code>d9cc95e</code>, 2018-03-20) 하나를 얹은 브랜치다. 그 커밋이 하는 일은 2017년의 모든 소스 35개를 삭제하고 <code>project1/simple unix shell.pdf</code> 하나를 추가하는 것이다(3,596줄 삭제, 3줄 추가). README도 <code>- [ ] Simple User-level Unix Shell</code> 한 줄의 미체크 체크박스로 교체된다. 2018년에 같은 과목을 다시 들으면서 저장소를 비우고 시작했으나, 그 이후 커밋은 없다 — 체크박스는 8년째 비어 있다.</p>
           <p>기본 브랜치가 아닌 곳에 더 완성된 구현이 있는지 확인했고, 없다. <code>master</code>가 이 저장소의 전부다.</p>
