@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EWE8044 고급컴퓨터공학특론 2</title>
+<meta name="description" content="EWE8044 고급컴퓨터공학특론 2 코드 감사 보고서 — 근거 기반 평가와 등급">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="home" href="../index.html">CS 커리큘럼 감사</a>
+  <span class="crumb">EWE8044</span>
+  <a class="ext" href="https://github.com/jiunbae/EWE8044" target="_blank" rel="noopener">저장소 &#8599;</a>
+</nav>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="code">EWE8044 · HANYANG UNIV · 2019 FALL</div>
+    <h1>고급컴퓨터공학특론 2</h1>
+    <p class="sub">색 성분 엔트로피와 벡터 양자화 과제 노트북 두 권. 수식 설명은 정확하지만, 검증 가능한 보고 수치는 거의 전부 틀렸고 저자는 단 한 번도 그것을 의심하지 않았다.</p>
+    <div class="headrow">
+      <div class="stats">
+        <div class="stat"><span class="lbl">추적 파일</span><b>5,004</b></div>
+        <div class="stat"><span class="lbl">커밋</span><b>1</b></div>
+        <div class="stat"><span class="lbl">작성 시점</span><b>2019.10–11</b></div>
+        <div class="stat"><span class="lbl">스택</span><b>Python 3.6 / skimage</b></div>
+      </div>
+      <div class="grade"><b>C</b><span class="lbl">종합</span></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>총평</h2>
+    <div class="prose stack">
+      <p>노트북 두 권이 전부다. <code>EWE8044.ipynb</code>(Homework #1·#2)는 RGB / YUV / Lab 각 채널의 엔트로피, 조건부 엔트로피 <code>H(Y|RGB)</code>, Y와의 상관계수, 크로마 서브샘플링 PSNR을 다룬다. <code>EWE8044#3.ipynb</code>(Homework #3)는 8×8 패치의 벡터 양자화와 4개 가우시안 클래스 사이의 KL distance를 다룬다. Dogs vs Cats 데이터셋 5,000장이 함께 커밋돼 있지만 분류 과제가 아니라 단순 이미지 소스로만 쓰인다 — 학습 코드는 한 줄도 없다.</p>
+
+      <p>칭찬할 부분은 분명히 있다. markdown 셀의 수식 전개는 형식적 장식이 아니라 실제로 맞다. 조건부 엔트로피를 <code>E[-log P(X|Y)]</code>에서 <code>∑∑P(x,y)log(1/P(x|y))</code>까지 5단계로 직접 전개했고, PSNR을 MSE로부터 세 가지 동치 형태로 적었다. 코드도 짧고 관용적이다 — <code>zip</code>/<code>product</code>/dict comprehension을 자연스럽게 쓰고, 3채널 시각화를 한 캔버스에 슬라이스 인덱싱으로 조립하는 방식은 군더더기가 없다. <code>EWE8044.ipynb</code>의 <code>execution_count</code>는 1부터 27까지 빈틈 없이 순차적이다. 저장 직전에 위에서 아래로 한 번 완주했다는 뜻이고, 노트북 과제로서는 드문 미덕이다.</p>
+
+      <p>그런데 그 코드가 내놓은 숫자는 다르다. 이 레포에는 <strong>물리적으로 불가능한 보고값이 최소 세 개</strong> 있다. 크로마 서브샘플링 PSNR이 4.16 dB(정상 범위 35–45 dB), KL divergence가 음수(정의상 0 이상), 그리고 "상관계수"라고 찍힌 값 세 개가 두 셀 앞 조건부 엔트로피와 소수점 넷째 자리까지 동일하다. 셋 다 출력 셀에 그대로 저장돼 있는데, 뒤따르는 markdown 어디에도 이상하다는 언급이 없다. 오히려 <code>EWE8044#3.ipynb</code>는 그 음수 값들을 근거로 "The KL totally distance was reduced"라는 결론을 쓴다. 가장 치명적인 결함은 개별 버그가 아니라 <strong>자기 출력을 sanity check하지 않는다</strong>는 습관이다. 계산은 돌았고, 숫자는 나왔고, 그 숫자가 말이 되는지는 확인하지 않았다.</p>
+
+      <p>레포 위생은 별도로 감점 대상이다. 실제 소스는 6 MB인데 워킹 트리 258 MB, 팩 117.58 MiB를 커밋했다. 커밋은 단 1개(2020-04-07), 즉 과제를 다 끝낸 뒤 4~5개월 지나 통째로 덤프한 것이다. README도 .gitignore도 requirements도 없고, 3.4 MB짜리 <code>test1.zip</code>은 깨져서 열리지도 않으며 어느 노트북에서도 참조되지 않는다.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>과제</th><th>주제</th><th>핵심 판정</th><th>등급</th></tr></thead>
+        <tbody>
+          <tr><td class="num">HW #1·#2</td><td>색 성분 엔트로피 · 조건부 엔트로피 · 상관계수</td><td>상관계수 출력이 두 셀 앞 조건부 엔트로피 값 그대로. PSNR은 dtype 버그를 측정. 요구 항목 Bayer filter 미구현</td><td class="g g-mid">C</td></tr>
+          <tr><td class="num">HW #3</td><td>벡터 양자화 · KL distance</td><td>KL이 음수인데 그대로 결론에 사용. 클러스터링 전후 비교가 벡터 대 스칼라라 비교 자체가 성립하지 않음</td><td class="g g-lo">C-</td></tr>
+          <tr><td class="num">REPO</td><td>저장소 구성</td><td>소스 6 MB를 담기 위해 258 MB를 커밋. 커밋 1개, README·.gitignore 없음, 깨진 zip 방치</td><td class="g g-lo">D</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Homework #1·#2 — 색 성분 엔트로피 분석</h2>
+    <p class="prose">objective는 세 가지다. (1) RGB / YUV / Lab 각 채널 엔트로피, (2) <code>H(Y|R), H(Y|G), H(Y|B)</code>와 상관계수 <code>ρYR, ρYG, ρYB</code>, (3) 엔트로피 특성을 고려한 영상처리 사례 — YUV 압축과 color filter array(Bayer filter). 세 항목 중 (1)은 계산 방식에 흠이 있고, (2)의 상관계수는 실제로 답하지 못했으며, (3)의 Bayer filter는 아예 구현되지 않았다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>"상관계수"로 출력된 세 값은 두 셀 앞에서 계산한 조건부 엔트로피다</h3></header>
+        <div class="prose">
+          <p><code>In[11]</code>에서 <code>entropies</code>에 <code>H(Y|R), H(Y|G), H(Y|B)</code>를 담는다. <code>In[12]</code>는 이 변수를 초기화하지 않은 채 뒤에 세 개를 <code>append</code>하고, 정작 상관계수는 <code>corrcoef</code>라는 별도 리스트에 넣은 뒤 <strong>한 번도 사용하지 않는다</strong>. 마지막 <code>print</code>는 <code>corrcoef</code>가 아니라 <code>entropies</code>를 <code>zip(..., "RGB")</code>로 잘라 쓰므로 앞 3개, 즉 조건부 엔트로피가 그대로 나온다. objective #2의 절반이 답해진 것처럼 보이면서 실제로는 답해지지 않았다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L367" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:367, 422, 435–441</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="367" data-end="367">전체 맥락</button></div><pre>367| entropies = [cond_entropy(c, y) for c in [r, g, b]]   <span class="cm">← In[11]: H(Y|RGB)</span>
+    ...
+422|     entropies.append(entropy(channel))     <span class="cm">← In[12]: 초기화 없이 뒤에 3개 추가</span>
+    ...
+435|     temp = ((np.corrcoef(channel, y) + 1) * 127.5).astype(np.uint8)
+436|     <span class="hl">corrcoef.append(temp.mean())</span>           <span class="cm">← 계산해 놓고 어디서도 안 씀</span>
+441| print(f'Correlation Coefficient of each channel: ...
+         zip([round(e, 4) for e in <span class="hl">entropies</span>], "RGB") ...')</pre></div>
+        <div class="ev">
+          <div class="ev-head"><b>저장된 출력 — 두 셀의 숫자가 동일</b><span>:359 vs :398</span></div>
+<pre>359| H(Y|R): <span class="hl">4.5812</span>, H(Y|G): <span class="hl">4.5869</span>, H(Y|B): <span class="hl">4.7483</span>.   <span class="cm">In[11]</span>
+398| rho(RY): <span class="hl">4.5812</span>, rho(GY): <span class="hl">4.5869</span>, rho(BY): <span class="hl">4.7483</span>. <span class="cm">In[12]</span></pre>
+        </div>
+        <div class="prose" style="margin-top:14px">
+          <p>덧붙여, 버려진 <code>corrcoef</code> 값조차 맞지 않는다. <code>channel</code>과 <code>y</code>는 (374, 500) 2차원 배열이고 <code>np.corrcoef</code>는 행을 변수로 취급하므로 반환값은 <strong>(748, 748) 행 대 행 상관 행렬</strong>이다. 채널 간 상관이 아니다. 직접 재현해 확인했다: 같은 shape 입력으로 <code>np.corrcoef(r, y).shape == (748, 748)</code>, 그 평균은 0.0013으로 <code>np.corrcoef(r.ravel(), y.ravel())[0,1]</code>과 무관한 값이다. 이 잘못된 값이 <code>In[22]</code>의 "Correlation coefficient: 0.2553, 0.2644, 0.2624" 표로 이어진다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>PSNR 4.16 dB는 압축 손실이 아니라 dtype 불일치를 잰 값이다</h3></header>
+        <div class="prose">
+          <p><code>image</code>는 <code>io.imread</code>가 반환한 uint8(0–255), <code>revert</code>는 <code>color.yuv2rgb</code>가 반환한 float(0–1)다. 두 스케일을 그대로 빼면 MSE가 폭발하고, PSNR은 내용과 무관하게 4 dB 근처로 고정된다. 4:2:0 수준 크로마 서브샘플링의 정상 PSNR은 35–45 dB다.</p>
+          <p>numpy로 직접 확인했다. <strong>완전히 동일한 이미지</strong>를 하나는 uint8, 하나는 float(0–1)로 넣고 이 <code>psnr</code>을 호출하면 <code>4.78 dB</code>가 나온다. 노트북이 보고한 값은 <code>4.16 dB</code>다. 즉 보고된 "손실"의 거의 전부가 서브샘플링이 아니라 이 버그다. 서브샘플링의 실제 영향은 그 차이인 0.6 dB 안에 묻혀 있다. 이 절의 결론 자체가 성립하지 않는다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L475-L477" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:475–477, 537 · 출력 :505</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="475" data-end="477">전체 맥락</button></div><pre>475| def psnr(source: np.ndarray, target: np.ndarray) -&gt; float:
+476|     mse = np.mean((source - target) ** 2)
+477|     return 100 if mse == 0 else 20 * np.log10(255. / np.sqrt(mse))
+    ...
+537| print(f'PSNR: {psnr(<span class="hl">image</span>, <span class="hl">revert</span>):.2f}')   <span class="cm">uint8 0–255  vs  float 0–1</span>
+--- 저장된 출력 ---
+505| PSNR: <span class="hl">4.16</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>압축률 0.33은 산술이 틀렸다 — 실제로는 0.50</h3></header>
+        <div class="prose">
+          <p>출력 문자열은 "374 x 500 + 187 x 250 x 2"라고 찍지만, 실제 식은 <code>int(image.shape[1] * ratio) * 2</code>뿐이다. 세로(<code>shape[0]</code>)가 곱해지지 않아 U·V 두 채널이 <code>187×250×2 = 93,500</code>이 아니라 <code>250×2 = 500</code>으로 계산된다. 재현 확인: 코드가 내는 값은 <code>187,000 + 500 = 187,500</code> → 0.33, 라벨이 주장하는 값은 <code>187,000 + 93,500 = 280,500</code> → <strong>0.50</strong>. 후자가 4:2:0의 교과서 값이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L535-L536" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:535–536 · 출력 :504</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="535" data-end="536">전체 맥락</button></div><pre>535| print(f'Compressed image size: ... {int(image.shape[0] * ratio)} x {int(image.shape[1] * ratio)} x {2}
+              = {y.size + <span class="hl">int(image.shape[1] * ratio) * 2</span>}')   <span class="cm">← shape[0] 누락</span>
+536| print(f'Copressed ratio: {(y.size + int(image.shape[1] * ratio) * 2) / image.size:.2f}')
+--- 저장된 출력 ---
+504| Copressed ratio: <span class="hl">0.33</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>과제 objective에 적힌 Bayer filter가 구현되지 않았다</h3></header>
+        <div class="prose">
+          <p>노트북 첫 셀이 objective #3으로 "Image compression using YUV component"와 "color filter array (Bayer filter)" 두 가지를 명시한다. 앞의 것은 크로마 서브샘플링 절로 구현됐지만(비록 위의 PSNR 버그로 결론이 무효화됐지만), Bayer filter는 어디에도 없다. 두 노트북 전체에서 <code>bayer</code>, <code>color filter array</code> 문자열은 <strong>이 objective 목록에 각각 1회씩 등장하는 것이 전부</strong>이고, <code>mosaic</code>/<code>demosaic</code>/<code>cfa</code>는 0회다. 스스로 적은 목표를 스스로 지우지 않고 남겨둔 채 제출했다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L28" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:28 (objective 셀)</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="28" data-end="28">전체 맥락</button></div><pre>28|     - <span class="hl">color filter array (Bayer filter)</span>   <span class="cm">← 이 줄이 이 문자열의 유일한 등장</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>markdown은 "2500장씩", 코드는 32장</h3></header>
+        <div class="prose">
+          <p>클래스 간 차이를 분석하는 절의 설명 셀은 각 클래스 2,500장을 쓴다고 적었다. 바로 다음 코드 셀은 <code>imgs[:32]</code>다. 78배 차이다. 표본 32개로 낸 cat/dog 엔트로피 평균차(7.3791 vs 7.4807)는 분산 추정도 유의성 검정도 없이 제시된다. 5,000장을 전부 메모리에 올려놓고(<code>:78</code>) 정작 32장만 쓴다는 점도 모순이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L631" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:631 (markdown) vs :667 (code)</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="631" data-end="631">전체 맥락</button></div><pre>631| "Use <span class="hl">2500</span> images in each of the dog and cat classes."
+    ...
+667| entropies = {category: np.array(tuple(map(operation, imgs[<span class="hl">:32</span>]))) for category, imgs in images.items()}</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>train/test 분리는 했지만 두 지표의 축약 방식이 달라 비교가 불가능하다</h3></header>
+        <div class="prose">
+          <p>데이터 누수는 없다 — <code>imgs[:100]</code>과 <code>imgs[100:150]</code>은 겹치지 않고, 모델은 train에만 <code>fit</code>한 뒤 test에서 <code>predict</code>한다. 문제는 지표다. forward 방향은 <code>.sum()</code>, reverse 방향은 <code>.mean()</code>으로 축약한다. 표본 수로 나누느냐 마느냐의 차이만으로 두 숫자가 0.413 대 5138.007로 벌어졌는데, 노트북은 이 둘을 나란히 출력한다. 스케일도 다르다(확률 0–1 대 명도 0–255). 어느 쪽도 상대 비교의 근거가 될 수 없다.</p>
+          <p>또한 분리해 계산한 train/test 조건부 엔트로피를 마지막에 하나로 합쳐 평균 내므로, 이 절이 원래 보려던 "train과 test에서 조건부 엔트로피가 어떻게 다른가"는 끝내 확인되지 않는다. 그 줄은 동시에 모듈 전역의 <code>cond_entropy</code> <strong>함수를 배열로 덮어쓴다</strong> — 이 셀 이후 해당 함수를 부르면 <code>TypeError</code>다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044.ipynb#L819" target="_blank" rel="noopener"><b>EWE8044.ipynb</b></a><span>:819, 825, 831</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044.ipynb" data-start="819" data-end="819">전체 맥락</button></div><pre>819|     mse = np.square(predict.squeeze() - test_targets)<span class="hl">.sum()</span>
+    ...
+825|     rse = np.square(predict.squeeze() - test_inputs)<span class="hl">.mean()</span>
+    ...
+831|     <span class="hl">cond_entropy</span> = np.array((*train_cond, *test_cond))   <span class="cm">← 함수명을 배열로 덮어씀</span>
+--- 저장된 출력 ---
+    Expected squared error: 0.413238
+    Reverse expected squared error: 5138.006873</pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>RGB는 원해상도, YUV·Lab은 160×160 리사이즈 후 엔트로피 — 같은 표에 나란히 놓았다</h3></header>
+        <div class="prose">
+          <p><code>H(R)=7.5203</code>은 374×500 원본에서, <code>H(Y)=7.6070</code>은 <code>transform.resize</code>로 160×160까지 줄인 뒤 계산됐다(<code>:220–221</code>, <code>:230–231</code>). 리사이즈는 보간으로 값 분포를 바꾸고 표본 수를 1/7로 줄이므로 엔트로피 추정값에 직접 영향을 준다. "RGB보다 Y의 엔트로피가 높다" 같은 비교를 이 표로 하면 안 된다. 같은 전처리를 거치게 하는 데 한 줄이면 충분했다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>seed가 전혀 없다</h3></header>
+        <div class="prose">
+          <p>이 노트북 코드 셀 전체에 <code>seed</code>는 0회 등장한다(JSON 본문의 <code>seed</code> 일치는 전부 base64 이미지 문자열 내부였고, 셀 소스만 파싱해 확인했다). 대표 이미지 선택(<code>choice</code>), 썸네일 샘플링, 32장 무작위 추출이 모두 실행마다 달라진다. 보고서에 인용된 모든 수치는 재실행하면 재현되지 않는다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>execution_count</code>가 1부터 27까지 결번 없이 순차적이다. 저장 직전에 커널을 재시작해 위에서 아래로 완주했다는 뜻으로, 노트북 과제에서 흔한 "위 셀을 다시 못 돌리는 상태로 제출"을 피했다. 그리고 조건부 엔트로피 유도(<code>In[10]</code>과 <code>In[11]</code> 사이 markdown 셀)는 <code>E[-log P(X|Y)]</code>에서 <code>∑ₓ∑ᵧ P(x,y) log(1/P(x|y))</code>까지 중간 단계를 빠뜨리지 않고 직접 전개했다. 정의를 베낀 것이 아니라 이해한 흔적이다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Homework #3 — 벡터 양자화와 KL distance</h2>
+    <p class="prose">전반부는 2500×1562 그레이스케일 이미지에서 8×8 패치를 뽑아 k-means로 코드북을 만들고 엔트로피 변화를 보는 것, 후반부는 4개 정규분포 클래스의 평균 사이 KL distance를 클러스터링 전후로 비교하는 것이다. 전반부는 실험은 돌았으나 해석이 없고, 후반부는 계산 대상 자체가 KL divergence가 아니다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>KL divergence가 음수인데 그 값으로 결론을 냈다</h3></header>
+        <div class="prose">
+          <p><code>KL(P‖Q) ≥ 0</code>은 정의에서 나오는 성질이고, 등호는 <code>P = Q</code>일 때만 성립한다. 노트북의 출력 6개 중 4개가 음수다. 원인은 명확하다: <code>points[s].mean(0)/100</code>은 좌표 평균 2개짜리 벡터를 100으로 나눈 것일 뿐, 합이 1인 확률분포가 아니다. 정규화되지 않은 두 벡터에 KL 공식을 적용하면 부호 제약이 사라진다.</p>
+          <p>seed가 <code>8044</code>로 고정돼 있어 이 부분을 그대로 재현했다. numpy에서 같은 시드로 points를 만들어 같은 <code>KL</code>을 돌린 결과 <strong>노트북에 저장된 출력과 소수점 넷째 자리까지 일치</strong>했다(<code>mean=0.2003, std=0.8998</code>). 따라서 위 진단은 추정이 아니라 확인된 사실이다. 그런데 이 음수들 아래에 어떤 의문도 적혀 있지 않다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044#3.ipynb#L367-L368" target="_blank" rel="noopener"><b>EWE8044#3.ipynb</b></a><span>:367–368, 393 · 출력 :382</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044#3.ipynb" data-start="367" data-end="368">전체 맥락</button></div><pre>367| def KL(source, target, epsilon=1e-8):
+368|     return np.sum(source * np.log((source + epsilon) / (target + epsilon)))
+    ...
+393|     total.append(KL(<span class="hl">points[s].mean(0)/100</span>, points[t].mean(0)/100))
+         <span class="cm">← 2원소 좌표 평균. 합이 1이 아님 (A의 경우 1.4609)</span>
+--- 저장된 출력 ---
+382| Distance A-D: <span class="hl">-0.1031</span>    Distance B-C: <span class="hl">-0.3640</span>
+     Distance B-D: <span class="hl">-0.4120</span>    Distance C-D: <span class="hl">-0.1162</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>클러스터링 전후 비교가 벡터 대 스칼라라 비교 자체가 성립하지 않는다</h3></header>
+        <div class="prose">
+          <p>클러스터링 전(<code>In[35]</code>)은 <code>points[s].mean(0)</code>, 즉 (10000, 2) 배열을 축 0으로 줄인 <strong>2원소 벡터</strong>에 KL을 건다. 클러스터링 후(<code>In[36]</code>)의 <code>next_mean[s]</code>는 이미 <code>codebook</code>의 한 행, 즉 shape (2,)다. 여기에 다시 <code>.mean(0)</code>을 걸면 두 좌표의 평균인 <strong>스칼라</strong>가 된다. 즉 앞은 2항 합, 뒤는 1항이다. 재현으로 확인했다: shape (2,) 배열에 <code>.mean(0)</code>을 하면 <code>np.float64</code> 스칼라가 나온다.</p>
+          <p>그래서 "거리가 줄었다"는 마지막 결론은 클러스터링 효과가 아니라 합산 항이 둘에서 하나로 줄어든 결과일 수 있다. 이 노트북의 유일한 결론 문장이 그 위에 서 있다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044#3.ipynb#L476-L477" target="_blank" rel="noopener"><b>EWE8044#3.ipynb</b></a><span>:476–477, 502, 511</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044#3.ipynb" data-start="476" data-end="477">전체 맥락</button></div><pre>476|     dists = [(np.linalg.norm(point - new_point), new_point) for new_point in codebook*100]
+477|     next_mean[k] = sorted(dists, key=lambda x: x[0])[0][1]   <span class="cm">← shape (2,)</span>
+    ...
+502|     total.append(KL(next_mean[s]<span class="hl">.mean(0)</span>/100, next_mean[t].mean(0)/100))
+         <span class="cm">← (2,).mean(0) = 스칼라. In[35]는 (2,) 벡터였다</span>
+    ...
+511| "<span class="hl">The KL totally distance was reduced.</span>"</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>execution_count가 뒤엉켰고 실행 8회분의 코드가 남아 있지 않다</h3></header>
+        <div class="prose">
+          <p><code>EWE8044.ipynb</code>와 달리 이 노트북은 위에서 아래로 재실행된 상태가 아니다. 실행 번호 <strong>22, 24, 25, 26, 27, 28, 29, 34</strong>가 통째로 비어 있다 — 실행됐지만 지워졌거나 다른 셀로 대체된 코드가 최소 8개라는 뜻이고, 그 코드가 현재 커널 상태에 무엇을 남겼는지는 노트북만 보고 알 수 없다. 셀 32(<code>exec=23</code>)가 셀 30(<code>exec=35</code>)보다 먼저 실행됐다는 사실도 파일 순서와 어긋난다. 다행히 seed 덕에 KL 부분은 재현됐지만(위 참조), 그건 운이지 설계가 아니다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044#3.ipynb" target="_blank" rel="noopener"><b>EWE8044#3.ipynb</b></a><span>· 전체 execution_count 순서</span></div><pre>1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 <span class="hl">35</span> <span class="hl">23</span> <span class="hl">30 31 32 33</span> <span class="hl">36</span> null
+                                                       ↑ 파일 순서대로 읽으면 여기서 역전
+결번: 22, 24, 25, 26, 27, 28, 29, 34  (8회분)
+비교: EWE8044.ipynb = 1 … 27 (결번 없음)</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>markdown이 코드보다 두 자릿수 앞서간다 — 패치 100만 대 1만, 코드북 크기 대 반복 횟수</h3></header>
+        <div class="prose">
+          <p>설명 셀은 "8×8 패치 약 100만 개"를 뽑는다고 적었으나 코드는 <code>patch_counts = 10000</code>이다. 100배 차이고, 2500×1562 이미지에서 겹침을 허용해 1만 개를 뽑으면 커버리지는 전체 화소의 0.16%다. 또 "k-means clustering 10, 20, 30, 40 times to analyze codeward and entropy changes"라고 적었지만, 코드는 클러스터 수를 2000으로 <strong>고정</strong>하고 <code>max_iter</code>만 바꾼다. 코드북 크기를 바꿔가며 엔트로피 변화를 보는 것이 VQ 과제의 핵심인데, 실제로 바뀐 것은 수렴 반복수다.</p>
+          <p>그 결과 네 조건의 엔트로피가 8.0473 / 8.0164 / 8.0181 / 8.0255로 총 0.03 bit 안에서 움직인다. 사실상 신호가 없는 결과인데, 이 출력 뒤에는 해석 셀이 없다. 숫자를 내고 그대로 다음 주제로 넘어간다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044#3.ipynb#L28-L29" target="_blank" rel="noopener"><b>EWE8044#3.ipynb</b></a><span>:28–29 (markdown) vs :107, :253–254 (code)</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044#3.ipynb" data-start="28" data-end="29">전체 맥락</button></div><pre>28| "extract 8 * 8 patches (<span class="hl">about 1 million</span>)."
+29| "perform k-means clustering <span class="hl">10, 20, 30, 40 times</span> to analyze codeward and entropy changes."
+    ...
+107| patch_counts = <span class="hl">10000</span>
+    ...
+253| for it in [10, 20, 30, 40]:
+254|     model = KMeans(n_clusters=<span class="hl">2000</span>, <span class="hl">max_iter=it</span>)   <span class="cm">← 코드북 크기는 고정</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>astype(np.int8)</code> — 오버플로는 이번 시드에서만 피했고, 절사 편향은 실제로 발생했다</h3></header>
+        <div class="prose">
+          <p><code>np.int8</code>의 표현 범위는 −128–127인데 <code>loc</code>는 <code>randint(100)</code>, <code>scale</code>은 최대 10이다. 재현해 보니 이 시드에서 최대 표본은 107.4로 범위를 넘지 않았다 — 여유가 겨우 20이었다. <code>randint</code>가 몇 만 더 큰 값을 냈다면 조용히 음수로 wrap 됐을 것이다. 반면 절사 편향은 실제로 발생했다: <code>.astype</code>은 반올림이 아니라 0 방향 절사이므로 네 클래스 전부 평균이 정확히 0.5씩 낮아졌다(A: 74.04 → 73.55). 좌표를 정수로 만들 이유 자체가 없었다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/EWE8044#3.ipynb#L296" target="_blank" rel="noopener"><b>EWE8044#3.ipynb</b></a><span>:296, 299</span><button class="expand" type="button" data-repo="EWE8044" data-path="EWE8044#3.ipynb" data-start="296" data-end="296">전체 맥락</button></div><pre>296|     loc=(np.random.randint(100), np.random.randint(100)),
+297|     scale=(np.random.uniform(.1, 10.), np.random.uniform(.1, 10.)),
+299| ).<span class="hl">astype(np.int8)</span> for k in 'ABCD'}
+--- 재현 결과 ---
+A: float mean=[74.04 73.04]  →  int8 mean=[73.55 72.54]   (정확히 −0.5)
+C: float max=[102.9 84.0],  D: float max=[107.4 68.7]   (int8 상한 127까지 여유 20)</pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>한 노트북에서 서로 다른 두 k-means 구현을 쓴다</h3></header>
+        <div class="prose">
+          <p>전반부는 <code>sklearn.cluster.KMeans</code>(In[14]), 후반부는 <code>scipy.cluster.vq.kmeans</code>(In[23])다. 초기화 전략도, 반복 종료 조건도, 반환 형태(<code>labels_</code> 대 <code>(codebook, distortion)</code>)도 다르다. 한 과제 안에서 이유 없이 갈아탄 것이라 두 절의 결과를 서로 참조할 수 없다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>seed가 벡터 양자화 절 <em>뒤</em>에 놓여 있다</h3></header>
+        <div class="prose">
+          <p>이 노트북의 유일한 <code>np.random.seed(8044)</code>는 <code>In[16]</code>, 즉 KL 절 바로 앞이다. 그런데 패치 추출(<code>In[7]</code>, <code>np.random.randint</code>)과 썸네일 샘플링(<code>In[8]</code>, <code>np.random.choice</code>)은 그보다 앞에서 실행된다. 결과적으로 노트북의 절반은 재현 가능하고 절반은 아니다. seed를 import 직후로 한 셀만 올리면 해결될 문제였다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>KL이 비대칭이라는 성질을 알고 있고, 그래서 조합을 <code>combinations('ABCD', 2)</code> 6쌍으로 한정한다는 점을 markdown에 명시했다("KL-dist is not symmetric, so consider only (A,B) (A,C) ..."). 개념은 정확히 이해했다. 구현에서 정규화를 빠뜨렸을 뿐이다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>저장소 구성</h2>
+    <p class="prose">이 레포에서 사람이 쓴 것은 노트북 두 개, 합쳐서 6 MB(대부분 base64 출력 이미지)다. 나머지는 전부 남의 데이터다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Kaggle 학습 데이터셋 5,000장을 git에 커밋했다</h3></header>
+        <div class="prose">
+          <p>추적 파일 5,004개 중 5,000개가 <code>train/</code> 아래 Dogs vs Cats 이미지다(cat 2,500 + dog 2,500). 워킹 트리 258 MB, <code>.git</code> 129 MB, pack 117.58 MiB. 이 레포를 clone하려는 사람은 노트북 두 권을 읽기 위해 118 MB를 받아야 한다.</p>
+          <p>이건 단순한 용량 문제가 아니다. git은 바이너리에 델타 압축이 거의 듣지 않으므로 데이터가 한 번 들어가면 히스토리에서 영구히 빠지지 않는다. 그리고 이 데이터는 Kaggle 대회 데이터로 재배포 조건이 따로 있다 — 노트북은 출처 링크를 성실히 달아 뒀으면서(<code>Requirements</code> 셀), 정작 링크만 남기고 데이터를 통째로 올리는 쪽을 택했다. 올바른 처리는 <code>.gitignore</code>에 <code>train/</code>을 넣고 README에 다운로드 절차를 적는 것, 한 줄과 세 줄이면 됐다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>커밋이 1개다 — 개발 이력이 존재하지 않는다</h3></header>
+        <div class="prose">
+          <p><code>bd3c34b</code>, <code>2020-04-07</code>, 메시지 "Update EWE8044". 브랜치는 <code>master</code> 하나뿐이고 origin에도 다른 브랜치가 없다. 노트북 markdown에 적힌 작성일은 각각 2019/10/21과 2019/11/06이므로, 과제 제출로부터 <strong>약 5개월 뒤</strong>에 완성본을 통째로 밀어 넣은 것이다.</p>
+          <p>실질적 손실이 있다. 이 레포에는 "어디서 막혔고 어떻게 풀었는가"를 보여주는 증거가 하나도 없다 — 위에서 지적한 PSNR 4 dB나 음수 KL 같은 문제를 저자가 중간에 발견했다가 놓친 것인지, 처음부터 못 본 것인지 구분할 방법이 없다. git을 버전 관리로 쓴 것이 아니라 완성품 업로드용 드라이브로 쓴 결과다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>test1.zip</code> 3.4 MB — 깨져서 열리지 않고, 어느 노트북도 참조하지 않는다</h3></header>
+        <div class="prose">
+          <p>파일 앞 4바이트는 정상 zip 시그니처 <code>PK\x03\x04</code>지만 end-of-central-directory 레코드가 없다. 잘린 파일이라 <code>unzip</code>이 거부한다. 크기는 정확히 3,571,712 바이트다. 그리고 두 노트북의 코드 셀 전체에서 <code>test1</code> 문자열은 <strong>0회</strong> 등장한다 — 쓰이지도 않는 깨진 바이너리가 3.4 MB 자리를 차지하고 있다. 같은 커밋에 <code>cat.jpg</code>(2500×1562, 388 KB)도 있는데 이쪽은 <code>EWE8044#3.ipynb</code>가 실제로 쓴다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/EWE8044/blob/HEAD/test1.zip" target="_blank" rel="noopener"><b>test1.zip</b></a><span>· file / unzip -t</span></div><pre>$ file test1.zip
+test1.zip: Zip archive data, at least v2.0 to extract, compression method=store
+$ head -c 8 test1.zip | xxd
+00000000: 504b 0304 1403 0000                      PK......
+$ unzip -t test1.zip
+  <span class="hl">End-of-central-directory signature not found.</span>  Either this file is not
+  a zipfile, or it constitutes one disk of a multi-part archive.
+$ grep -c test1 EWE8044.ipynb 'EWE8044#3.ipynb'
+EWE8044.ipynb:<span class="hl">0</span>   EWE8044#3.ipynb:<span class="hl">0</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README, .gitignore, requirements가 모두 없다</h3></header>
+        <div class="prose">
+          <p>루트에 <code>README</code>도 <code>.gitignore</code>도 <code>requirements.txt</code>도 <code>environment.yml</code>도 없다. 실행 환경 정보는 우연히 남았다 — <code>In[9]</code>의 stderr 경고가 <code>/home/jiun/conda/lib/python3.7/site-packages/skimage/...</code>를 노출해 conda + Python 3.7 환경임을 알려주고, 노트북 metadata에는 3.6.9로 적혀 있어 서로 어긋난다. 의존성 목록에 가장 가까운 것은 <code>EWE8044.ipynb</code>의 "Requirements" markdown 셀인데 버전이 없다.</p>
+          <p>파일명 <code>EWE8044#3.ipynb</code>의 <code>#</code>도 사소하지만 실질적 문제다. URL fragment 구분자라 GitHub 링크나 <code>nbconvert</code> 인자로 넘길 때마다 이스케이프가 필요하다.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>반복되는 패턴</h2>
+    <ol class="rank">
+      <li><div><strong>출력을 sanity check하지 않는다.</strong> 이 레포의 모든 치명적 결함이 여기서 나온다. 4.16 dB PSNR, 음수 KL, 두 셀 앞 값과 똑같은 "상관계수", 0.33 압축률 — 넷 다 저장된 출력에 그대로 남아 있고, 넷 다 도메인 지식으로 5초 안에 "이건 아닌데"가 나와야 하는 값이다. 계산을 돌리는 능력과 결과를 의심하는 습관은 별개이고, 이 저자는 전자만 갖췄다.</div></li>
+      <li><div><strong>markdown이 코드보다 앞서간다.</strong> "2500 images" 대 <code>imgs[:32]</code>, "about 1 million patches" 대 <code>patch_counts = 10000</code>, "k-means 10/20/30/40" 대 <code>n_clusters=2000, max_iter=it</code>, objective의 Bayer filter 대 구현 0줄. 네 건 모두 설명이 구현보다 크거나 다르다. 계획을 적고 축소 구현한 뒤 설명을 고치지 않는 순서다.</div></li>
+      <li><div><strong>결과를 내고 해석하지 않는다.</strong> VQ 엔트로피 네 값(8.0473 / 8.0164 / 8.0181 / 8.0255)은 0.03 bit 안에서 움직이는데 아무 코멘트 없이 다음 절로 넘어간다. cat/dog 엔트로피 비교표도 분산이나 유의성 없이 평균만 나열한다. 유일하게 해석을 붙인 곳(<code>The KL totally distance was reduced</code>)이 하필 비교가 성립하지 않는 곳이다.</div></li>
+      <li><div><strong>상태 관리가 느슨하다.</strong> 초기화하지 않은 <code>entropies</code>에 <code>append</code>해 이전 절 값을 끌고 가고, <code>cond_entropy</code> 함수를 같은 이름 배열로 덮어쓰고, <code>b</code>를 blue 채널과 Lab의 b에 번갈아 바인딩한다. 셀 경계가 스코프 경계가 아니라는 점을 이용만 하고 방어하지는 않는다 — 가장 치명적인 상관계수 버그가 정확히 이 습관의 산물이다.</div></li>
+      <li><div><strong>계산은 하되 쓰지 않는 코드가 남는다.</strong> <code>corrcoef</code> 리스트는 채워지고 버려진다. <code>test1.zip</code>은 3.4 MB를 차지하고 참조되지 않는다. 이미지 5,000장을 전부 메모리에 로드하고 32장만 쓴다. 정리 단계가 없다.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>지금 손본다면</h2>
+    <ol class="rank">
+      <li><div><strong><code>print</code> 변수를 <code>entropies</code>에서 <code>corrcoef</code>로 바꾸고, <code>np.corrcoef(r.ravel(), y.ravel())[0,1]</code>로 계산하라.</strong> 두 줄 수정으로 objective #2의 미답 항목이 답해진다. 현재는 답한 것처럼 보이기까지 해서 더 나쁘다.</div></li>
+      <li><div><strong><code>psnr</code> 진입부에서 두 입력을 같은 스케일로 정규화하라.</strong> <code>skimage.img_as_float</code> 한 번, 혹은 <code>compress</code> 반환값에 <code>*255</code> 한 번. 그 다음 다시 돌리면 4.16 dB가 아니라 크로마 서브샘플링의 실제 손실이 보이고, 비로소 이 절이 주장하려던 것을 주장할 수 있다.</div></li>
+      <li><div><strong>KL 입력을 확률분포로 정규화하고(<code>p / p.sum()</code>), 클러스터링 전후의 입력 shape를 통일하라.</strong> 후자는 <code>next_mean[s].mean(0)</code>에서 <code>.mean(0)</code>을 지우기만 하면 된다. 두 수정 뒤에도 "거리가 줄었다"가 성립하는지가 이 과제의 실제 질문이다.</div></li>
+      <li><div><strong><code>.gitignore</code>에 <code>train/</code>, <code>*.zip</code>을 넣고 히스토리를 다시 만들어라.</strong> 커밋이 1개뿐이므로 비용이 거의 없다 — 지금이 이 레포를 118 MB에서 6 MB로 줄일 수 있는 마지막이자 가장 싼 시점이다. 동시에 README에 Kaggle 다운로드 절차와 conda 환경(Python 3.7 + numpy/skimage/sklearn/scipy/matplotlib)을 적으면 재현 가능해진다.</div></li>
+      <li><div><strong>노트북 첫 셀에 <code>np.random.seed()</code>와 <code>random.seed()</code>를 두고, 제출 전 Restart &amp; Run All을 하라.</strong> <code>EWE8044.ipynb</code>는 이미 순차 실행 상태이므로 seed 두 줄만 추가하면 완전 재현 가능해지고, <code>EWE8044#3.ipynb</code>는 결번 8개가 사라지면서 현재 무엇이 커널에 남아 있는지 알 수 없는 문제가 함께 해결된다.</div></li>
+      <li><div><strong>VQ 실험의 변수를 <code>max_iter</code>에서 <code>n_clusters</code>로 바꿔라.</strong> markdown이 원래 말한 것이 그것이고, 코드북 크기를 10/20/30/40으로 바꾸면 엔트로피가 0.03 bit가 아니라 실제로 움직인다. 해석할 것이 생긴다.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>평가 대상: <code>github.com/jiunbae/EWE8044</code> · 커밋 1개(<code>bd3c34b</code>) · 마지막 푸시 2020-04-07 · 추적 파일 5,004개 중 5,000개가 데이터셋 이미지</p>
+    <p>검증 방식: 노트북 두 권(코드·markdown 셀 81개)과 저장된 출력 전부를 JSON 파싱해 정독. 인용한 행 번호는 모두 <code>.ipynb</code> 파일의 실제 행이며 <code>grep -n</code>으로 확인했다.</p>
+    <p>독립 재현(numpy 2.4.6, 학습은 실행하지 않음): (1) seed 8044로 <code>points</code> 생성 후 <code>KL</code> 재실행 → 저장된 출력과 소수점 넷째 자리까지 일치, 음수 확인; (2) int8 절사 편향 −0.5 및 오버플로 여유 측정; (3) shape (2,) 배열의 <code>.mean(0)</code>이 스칼라임을 확인; (4) 압축률 식 187,500 대 280,500 대조; (5) 동일 이미지를 uint8/float로 넣은 PSNR 4.78 dB 측정; (6) <code>np.corrcoef</code>가 2차원 입력에서 (748, 748)을 반환함을 확인. <code>unzip -t</code>로 <code>test1.zip</code> 손상 확인.</p>
+    <p>실행하지 않은 것: 노트북 셀 자체(원 환경 skimage/sklearn 미설치), k-means 및 5,000장 전체 순회.</p>
+  </footer>
+
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

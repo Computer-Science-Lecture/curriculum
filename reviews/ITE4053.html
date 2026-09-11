@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITE4053 딥러닝 방법론과 응용</title>
+<meta name="description" content="ITE4053 딥러닝 방법론과 응용 코드 감사 보고서 — 근거 기반 평가와 등급">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="home" href="../index.html">CS 커리큘럼 감사</a>
+  <span class="crumb">ITE4053</span>
+  <a class="ext" href="https://github.com/jiunbae/ITE4053" target="_blank" rel="noopener">저장소 &#8599;</a>
+</nav>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="code">ITE4053 · HANYANG UNIV · 2019 SPRING</div>
+    <h1>딥러닝 방법론과 응용</h1>
+    <p class="sub">손으로 미분한 역전파는 정확했고 README의 정확도 표는 7년 뒤에도 소수점까지 재현된다. 그런데 그 표에는 코드상 존재할 수 없는 실험이 한 칸 섞여 있고, 나머지 두 과제에는 아예 숫자가 없다.</p>
+    <div class="headrow">
+      <div class="stats">
+        <div class="stat"><span class="lbl">파일</span><b>73</b></div>
+        <div class="stat"><span class="lbl">커밋</span><b>42</b></div>
+        <div class="stat"><span class="lbl">기간</span><b>2019.03–2020.06</b></div>
+        <div class="stat"><span class="lbl">파이썬</span><b>2,441 LOC</b></div>
+      </div>
+      <div class="grade"><b>C+</b><span class="lbl">종합</span></div>
+    </div>
+  </header>
+
+  <!-- ============ 총평 ============ -->
+  <section>
+    <h2>총평</h2>
+    <div class="prose stack">
+      <p>세 개의 과제가 들어 있다. <code>NumpyNeuralNetwork</code>는 numpy만으로 Keras 흉내를 낸 미니 프레임워크로 2층 시그모이드 분류기를 학습시키고 TensorFlow 구현과 정확도를 비교한다. <code>ImageDenoising</code>은 CIFAR-10에 가우시안 노이즈를 얹어 5층 CNN으로 제거하는 과제이고, <code>SuperResolution</code>은 2배 확대 SR을 CNN과 직접 만든 vanilla RNN 두 가지로 푼다.</p>
+      <p>가장 잘한 것은 첫 번째 과제다. 역전파를 라이브러리 없이 직접 유도해 구현했는데, 수치 미분과 대조해보니 상대오차 최대 <code>1.86e-07</code>로 정확하다. 더 인상적인 것은 재현성이다. README의 NNN 행 일곱 개 수치(97.27 / 96.88 / 69.92 / 97.27 / 95.94 / 95.86 / 96.45)를 현재 numpy 2.4에서 그대로 돌려보니 <b>일곱 개 모두 소수점 둘째 자리까지 일치</b>했다. 학부 과제 리포트에서 이 정도로 시드·설정이 정직하게 기록된 경우는 드물다.</p>
+      <p>가장 치명적인 것도 같은 표에 있다. <code>--loss mean_squared_error</code> 열은 존재할 수 없는 실험이다. <code>Sequential.backward</code>가 BCE 미분을 상수처럼 하드코딩하고 있어서(<code>nnn/modules.py:30</code>) 어떤 손실 함수를 컴파일하든 그래디언트가 동일하다. 실제로 두 설정의 <code>dW</code>가 비트 단위로 같고, 그래서 표의 Base 칸과 Loss[MSE] 칸이 둘 다 97.27로 똑같이 찍혀 있다. 손실 함수를 바꾼 실험이 아니라 같은 실험을 두 번 적은 것이다.</p>
+      <p>나머지 두 과제는 성격이 다르다. 여기서는 틀린 숫자를 적은 것이 아니라 <b>숫자를 아예 적지 않았다.</b> <code>ImageDenoising</code>에는 README도, PSNR 값도, 베이스라인도 없고 결과 PNG 세 장만 있다. 그리고 검증 제너레이터가 학습 데이터를 그대로 읽는다. <code>SuperResolution</code>은 train/test 분리는 제대로 했지만, SR 과제에서 반드시 있어야 할 bicubic 베이스라인 PSNR — 심지어 입력 텐서가 곧 bicubic 결과라서 공짜로 계산되는 값 — 을 끝내 계산하지 않았다. 프레임워크는 과하게 짓고 측정은 비워둔 레포다.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>과제</th><th>주제</th><th>핵심 판정</th><th>등급</th></tr></thead>
+        <tbody>
+          <tr><td class="num">A1</td><td>NumpyNeuralNetwork</td><td>역전파는 검증 통과, 수치는 완전 재현. 다만 보고한 실험 한 칸이 코드상 불가능</td><td class="g g-mid">B-</td></tr>
+          <tr><td class="num">A2</td><td>SuperResolution (CNN)</td><td>데이터 분리는 정상. 베이스라인·보고 수치·시드 고정이 전부 없음</td><td class="g g-mid">C</td></tr>
+          <tr><td class="num">A3</td><td>SuperResolution (RNN)</td><td>입력 전처리가 이미지를 섞어버리고, 셀 내부에서 매번 Conv2D를 새로 만든다</td><td class="g g-lo">D</td></tr>
+          <tr><td class="num">A4</td><td>ImageDenoising</td><td>검증셋이 학습셋. skip 모드는 정답에 도달할 수 없는 구조</td><td class="g g-lo">D</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ A1 ============ -->
+  <section>
+    <h2>Assignment 1 — NumpyNeuralNetwork</h2>
+    <p class="prose">과제는 <code>X² &gt; Y</code>를 판별하는 2차원 이진 분류를 2층 신경망으로 풀되, numpy로 직접 구현한 것과 TensorFlow 구현의 성능을 비교하는 것이다. 저자는 여기서 멈추지 않고 <code>nnn</code>이라는 Keras 클론 패키지(Layer / Activation / Optimizer / Loss / Metric, <code>compile</code>·<code>fit</code>·<code>evaluate</code>)를 만들어 <code>--mode np|tf</code> 한 플래그로 두 백엔드를 갈아끼울 수 있게 했다. 610줄.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>손실 함수를 바꿔도 그래디언트가 바뀌지 않는다. README의 Loss[MSE] 열은 실험이 아니다</h3></header>
+        <div class="prose">
+          <p><code>Sequential.backward</code>는 <code>self.loss</code>를 전혀 참조하지 않고 BCE의 미분식 <code>-(Y/A - (1-Y)/(1-A))</code>를 직접 써 넣는다. <code>Loss</code> 클래스 계층에는 <code>backward</code>가 아예 정의되어 있지도 않다. 즉 <code>--loss mean_squared_error</code>로 컴파일해도 순전파 후 찍히는 손실값만 MSE로 바뀔 뿐, 파라미터 갱신에 쓰이는 그래디언트는 BCE 그대로다.</p>
+          <p>직접 확인했다. 같은 시드로 두 모델을 만들어 각각 <code>binary_crossentropy</code>와 <code>mean_squared_error</code>로 컴파일한 뒤 1스텝 역전파를 돌리면 <code>layer0.dW</code>가 <code>[[0.001737, 0.005505], [-0.000279, -0.00089]]</code>로 완전히 동일하다. README 비교표의 NNN 행에서 Base와 Loss[MSE]가 나란히 97.27로 적혀 있는 것은 우연이 아니라 같은 학습을 두 번 기록한 결과다. 전체 7개 설정을 재현해 봤을 때도 두 값은 소수점까지 똑같이 97.27%로 나왔다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/NumpyNeuralNetwork/nnn/modules.py#L26-L34" target="_blank" rel="noopener"><b>NumpyNeuralNetwork/nnn/modules.py</b></a><span>:26–34</span><button class="expand" type="button" data-repo="ITE4053" data-path="NumpyNeuralNetwork/nnn/modules.py" data-start="26" data-end="34">전체 맥락</button></div><pre>    def backward(self, Y: np.ndarray) \
+            -&gt; np.ndarray:
+        super(Sequential, self).backward(Y)
+
+        <span class="hl">grad = -(np.divide(Y, self._last_output) - np.divide(1 - Y, 1 - self._last_output))</span>   <span class="cm"># ← self.loss 는 어디에도 쓰이지 않음</span>
+
+        result = reduce(lambda g, layer: layer.backward(g), [grad, *reversed(self.layers)])
+
+        return result</pre></div>
+        <div class="ev">
+          <div class="ev-head"><b>검증 출력</b><span>scratchpad/verify_nnn.py</span></div>
+          <pre><span class="cm">=== [4] MSE loss: does backward use MSE gradient? ===</span>
+  gradients identical for BCE vs MSE compile: <span class="hl">True</span>
+  layer0.dW under 'binary_crossentropy' = [[ 0.001737  0.005505]
+ [-0.000279 -0.00089 ]]
+  layer0.dW under 'mean_squared_error'   = [[ 0.001737  0.005505]
+ [-0.000279 -0.00089 ]]</pre>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>--optimizer Adam</code>은 첫 스텝에서 죽는다</h3></header>
+        <div class="prose">
+          <p>argparse의 <code>choices</code>에 <code>Adam</code>이 등록되어 있고 README도 "<code>SGD</code>와 <code>Adam</code>이 구현되어 있다"고 적고 있지만, 실제로는 한 번도 돌아간 적이 없는 코드다. <code>get_update</code>는 <code>params</code>를 레이어 파라미터 행렬(형상 <code>(out_dim, in_dim+1)</code>)로 받으면서 결과 버퍼를 1차원 <code>np.zeros(np.size(params, 0))</code>로 잡는다. 그리고 57행에서 길이 <code>in_dim+1</code>짜리 벡터를 그 1차원 배열의 스칼라 칸에 대입한다.</p>
+          <p>실행하면 <code>ValueError: setting an array element with a sequence.</code>가 즉시 난다. 같은 함수 45행에는 <code>self.deacy</code> 오타도 남아 있는데, <code>decay &gt; 0</code>일 때만 평가되는 삼항식 안에 있어서 기본 설정에서는 터지지 않고 숨어 있다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/NumpyNeuralNetwork/nnn/optimizers.py#L45" target="_blank" rel="noopener"><b>NumpyNeuralNetwork/nnn/optimizers.py</b></a><span>:45, 48, 57</span><button class="expand" type="button" data-repo="ITE4053" data-path="NumpyNeuralNetwork/nnn/optimizers.py" data-start="45" data-end="45">전체 맥락</button></div><pre>        lr = self.lr * ((1. / (1. + <span class="hl">self.deacy</span> * self.iteration)) if self.initial_decay &gt; 0. else 1) * \
+             (np.sqrt(1. - np.power(self.beta2, 1+self.iteration)) / (1. - np.power(self.beta1, 1+self.iteration)))
+
+        <span class="hl">results = np.zeros(np.size(params, 0))</span>   <span class="cm"># ← 1차원 버퍼</span>
+        ...
+            <span class="hl">results[i]</span> = (p - lr * self.ms[i] / (np.sqrt(self.vs[i]) + self.epsilon))<span class="hl">.reshape(params[i].shape)</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>BCE에 클리핑이 없어서 README가 권하는 ReLU 설정은 20개 시드 중 19개에서 NaN이 된다</h3></header>
+        <div class="prose">
+          <p><code>BCELoss.forward</code>는 <code>np.log(inputs)</code>와 <code>np.log(1 - inputs)</code>를 아무 보호 없이 계산한다. float64에서 <code>sigmoid(37) == 1.0</code>이 성립하므로 출력이 포화하는 즉시 <code>log(0) = -inf</code>, 그리고 <code>Sequential.backward</code>의 <code>np.divide(1 - Y, 1 - A)</code>가 0으로 나눠 NaN이 전파된다.</p>
+          <p>과제 기본 설정(2-2-1 sigmoid, lr 0.1, 5000 epoch)에서는 가중치가 포화 영역까지 가지 않아 실제로 터지지는 않는다 — 재현 실행 7종 모두 non-finite loss 0회. 그러나 README 30–31행이 예시로 보여주는 <code>activation='relu'</code>를 쓰면 출력이 정확히 0이 될 수 있어 바로 무너진다. 시드 0–19에 대해 2-4-1 ReLU 망을 200 epoch 돌려본 결과 <b>19개 시드에서 손실이 non-finite</b>가 됐고 그중 10개는 0 epoch에서 즉사했다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/NumpyNeuralNetwork/nnn/functional.py#L45-L48" target="_blank" rel="noopener"><b>NumpyNeuralNetwork/nnn/functional.py</b></a><span>:45–48</span><button class="expand" type="button" data-repo="ITE4053" data-path="NumpyNeuralNetwork/nnn/functional.py" data-start="45" data-end="48">전체 맥락</button></div><pre>        size = np.size(inputs, -1)
+        cost = -1 / size * (np.dot(targets, <span class="hl">np.log(inputs)</span>.T) + np.dot(1 - targets, <span class="hl">np.log(1 - inputs)</span>.T))
+
+        return np.squeeze(cost)   <span class="cm"># ← epsilon 클리핑 없음</span></pre></div>
+        <div class="ev">
+          <div class="ev-head"><b>검증 출력</b><span>scratchpad/relu2.py — README 예시 설정(relu) 재현</span></div>
+          <pre>  seed=0: loss became non-finite at epoch 0, output range=[0.0,0.0]
+  seed=2: loss became non-finite at epoch 64, output range=[0.0,0.5001742458909859]
+  seed=7: loss became non-finite at epoch 1, output range=[1.0119984048752273,1.0192380548504565]
+  <span class="cm">... 20개 시드 중 19개 실패</span></pre>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>"only numpy" 프레임워크가 TensorFlow 없이는 import되지 않는다</h3></header>
+        <div class="prose">
+          <p>README 20행은 NNN을 "neural network framework based on only numpy"라고 소개한다. 그런데 <code>main.py:4</code>가 <code>from nnn import utils</code>를 하고, <code>nnn/utils/__init__.py:4</code>가 무조건 <code>import tensorflow as tf</code>를 한다. <code>--mode np</code>로만 쓰려는 사용자도 TensorFlow를 깔아야 한다. 실제로 numpy·tqdm만 설치한 환경에서 <code>import nnn</code>은 통과하지만 <code>from nnn import utils</code>는 <code>ModuleNotFoundError: No module named 'tensorflow'</code>로 실패한다.</p>
+          <p>덧붙여 같은 파일 10행의 <code>tf.random.set_random_seed</code>는 TF 1.x 전용 API다. <code>requirements.txt</code>는 <code>tensorflow&gt;=1.0.0</code>이라 TF 2.x가 설치되면 시드 고정 자체가 예외로 죽는다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README가 데이터 분포를 반대로 설명하고, 이미지 링크 두 개가 404다</h3></header>
+        <div class="prose">
+          <p>README 85행은 "Dataset은 <code>np.random.randn</code>으로 standard normal에서 샘플을 만든다. <code>--normal</code> 플래그로 normalized dataset을 설정한다"고 적는다. 코드는 정반대다. <code>Dataset.__init__</code>의 <code>generator = np.random.randn if normal else np.random.rand</code>이고 <code>--normal</code>은 <code>store_true</code>라 기본값이 <code>False</code> — 즉 <b>기본 실행은 균등분포 <code>rand</code></b>이고 <code>--normal</code>을 줘야 정규분포가 된다. 비교표의 Base 열과 Data[Normal] 열의 관계가 README 설명과 뒤집혀 있다.</p>
+          <p>그리고 2019년 6월 커밋 <code>73b23d0</code>에서 프로젝트를 <code>NumpyNeuralNetwork/</code> 하위로 옮기면서 README의 이미지 경로를 고치지 않았다. 79행과 132행이 가리키는 <code>master/assets/network.png</code>, <code>master/assets/results.png</code>는 존재하지 않는다(실제 위치는 <code>master/NumpyNeuralNetwork/assets/</code>). <code>functional.py:7,22</code>의 <code>__int__</code> 오타(<code>__init__</code>이어야 함)도 "Update MSE" 커밋(<code>448d881</code>)에서 그 줄을 직접 건드리면서도 고쳐지지 않고 남았다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>역전파를 수치 미분으로 검증했다. 2-2-1 시그모이드 망에 대해 <code>Dense.dW</code>·<code>db</code>를 중앙차분과 대조한 결과 전 파라미터 최대 상대오차가 <code>1.86e-07</code>로, 체인룰이 layer→activation 경계에서 정확히 연결되어 있다. 특히 <code>Dense.backward</code>가 <code>1/m</code>을 손실 미분이 아니라 <code>dW</code>·<code>db</code> 단계에서 곱하는데도 결과가 맞는다.</p>
+      <p>그리고 README 비교표의 NNN 행 7개 수치를 2026년의 numpy 2.4.6에서 그대로 재현했다 — 97.27 / 96.88 / 69.92 / 97.27 / 95.94 / 95.86 / 96.45, 전부 소수점 둘째 자리까지 일치. 시드(2), 크기(128), epoch(5000), lr(0.1)이 README에 정확히 적혀 있고 코드 기본값과도 맞아서 가능한 일이다. <code>parameters.npz</code>에 저장된 가중치 역시 README 표의 <code>-5.4167 / 4.1429 / 1.1458</code>과 정확히 일치한다. 이 레포 전체에서 가장 값어치 있는 부분이다.</p>
+    </div>
+  </section>
+
+  <!-- ============ A2/A3 ============ -->
+  <section>
+    <h2>Assignment 2/3 — SuperResolution</h2>
+    <p class="prose">2배 확대 SR 과제. 학습은 T91·291 데이터셋에서 32×32 크롭을 뜨고, 16×16으로 줄였다가 bicubic으로 되키운 것을 입력으로 쓴다. 평가는 Set5. 두 가지 백본을 <code>--mode cnn|rnn</code>으로 고르는데, CNN은 3층 3×3 conv(64-64-1)이고 RNN은 Keras <code>Layer</code>를 상속해 직접 만든 vanilla RNN 셀이다. 470줄.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>RNN 전처리가 이미지를 3번 복제하는 대신 픽셀을 섞어버린다</h3></header>
+        <div class="prose">
+          <p><code>_preprocess</code>의 의도는 명확하다 — 같은 입력 이미지를 <code>repeat=3</code> 타임스텝짜리 시퀀스로 만들어 RNN에 먹이는 것. 그런데 <code>tf.tile(..., [1, repeat, repeat])</code>로 <b>공간축을 3×3으로 타일링</b>한 뒤 <code>reshape(-1, repeat, *shape)</code>로 자르기 때문에, 타일 경계와 reshape 경계가 전혀 맞지 않는다.</p>
+          <p>numpy로 동일 연산을 재현해 확인했다. 4×4 입력 <code>[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]</code>을 넣으면 타임스텝 0이 <code>[[0,1,2,3],[0,1,2,3],[0,1,2,3],[4,5,6,7]]</code>, 타임스텝 1이 <code>[[4,5,6,7],[4,5,6,7],[8,9,10,11],[8,9,10,11]]</code>이 된다. 원본과 같은 타임스텝은 하나도 없고, 세 타임스텝이 서로 같지도 않다. 배치 크기도 3배로 부풀어(<code>(B,4,4,1) → (3B,3,4,4)</code>) <code>_postprocess</code>의 <code>output[repeat-1::repeat]</code>로 다시 1/3을 골라내는데, 이때 살아남는 샘플이 원래 어느 이미지인지에 대한 보장도 없다. 이 상태에서 학습한 PSNR 곡선은 해석할 수 있는 값이 아니다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/SuperResolution/network/rnn.py#L69-L75" target="_blank" rel="noopener"><b>SuperResolution/network/rnn.py</b></a><span>:69–75</span><button class="expand" type="button" data-repo="ITE4053" data-path="SuperResolution/network/rnn.py" data-start="69" data-end="75">전체 맥락</button></div><pre>        def _preprocess(image):
+            image = tf.reshape(<span class="hl">tf.tile(tf.squeeze(inputs, -1), [1, repeat, repeat])</span>, [-1, repeat, *shape])
+            image = tf.expand_dims(image, -1)
+            return image   <span class="cm"># ← 인자 image 를 무시하고 바깥 변수 inputs 를 참조</span>
+
+        def _postprocess(output):
+            return output[repeat-1::repeat]</pre></div>
+        <div class="ev">
+          <div class="ev-head"><b>검증 출력</b><span>scratchpad/verify_misc.py — 동일 연산 numpy 재현</span></div>
+          <pre>  input[0]:            out[0,0] (timestep0):
+   [[ 0  1  2  3]       [[0 1 2 3]
+    [ 4  5  6  7]        [0 1 2 3]
+    [ 8  9 10 11]        [0 1 2 3]
+    [12 13 14 15]]       [4 5 6 7]]
+
+  timestep0 == original image?  <span class="hl">False</span>
+  all 3 timesteps identical?    <span class="hl">False</span></pre>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>RNN 셀의 <code>call</code> 안에서 매번 새 Conv2D 레이어를 만든다</h3></header>
+        <div class="prose">
+          <p><code>build()</code>에서 <code>add_weight</code>로 정식 등록한 것은 세 개의 <code>units×units</code> 커널과 바이어스뿐이다. 정작 공간 정보를 다루는 두 개의 Conv2D는 <code>call()</code> 본문에서 <code>KL.Conv2D(...)(inputs)</code> 형태로 그 자리에서 생성된다. 레이어 객체가 지역 변수라 <code>self.trainable_weights</code>에 잡히지 않고, 타임스텝 간 가중치 공유라는 RNN의 전제도 성립하지 않는다. <code>model.save()</code>로 떨어지는 체크포인트에도 이 가중치는 담기지 않는다.</p>
+          <p>같은 셀에 <code>self.latest</code>라는 파이썬 속성이 텐서를 담고 다니는데(41–44, 56행), 배치나 에폭 경계에서 초기화되지 않는다. <code>get_initial_state</code>는 <code>(batch, units, units, units)</code> 4차원을 돌려주면서 <code>self.state_size</code>는 스칼라 <code>units</code>로 선언되어 있고, <code>compute_output_shape</code>는 conv 출력과 무관한 <code>(batch, units)</code>를 반환한다. 셀 계약이 세 군데에서 서로 어긋난다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/SuperResolution/network/rnn.py#L41-L56" target="_blank" rel="noopener"><b>SuperResolution/network/rnn.py</b></a><span>:41–56</span><button class="expand" type="button" data-repo="ITE4053" data-path="SuperResolution/network/rnn.py" data-start="41" data-end="56">전체 맥락</button></div><pre>        if self.latest is None:
+            <span class="hl">self.latest = inputs</span>
+
+        inputs = tf.concat([inputs, self.latest], axis=-1)
+
+        inputs = <span class="hl">KL.Conv2D(32, (3, 3), padding="SAME", name="layer1")(inputs)</span>   <span class="cm"># ← call() 안에서 레이어 생성</span>
+
+        h = K.dot(inputs, self.input_kernel) + K.dot(prev_hidden, self.hidden_kernel) + self.hidden_bias
+
+        output = K.relu(K.dot(h, self.output_kernel) + self.output_bias)
+
+        output = <span class="hl">KL.Conv2D(1, (3, 3), padding="SAME", name="layer2")(output)</span>
+
+        self.latest = output</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>bicubic 베이스라인 PSNR이 없다. 입력 텐서가 곧 그 베이스라인인데도</h3></header>
+        <div class="prose">
+          <p>SR 결과를 판단하려면 "아무것도 안 한 bicubic 업샘플링" 대비 몇 dB를 벌었는지가 있어야 한다. 이 과제에서는 그 값이 공짜로 나온다 — <code>source_transforms</code>가 <code>Resize(16×16) → Resize(32×32)</code>로 만든 <code>sources</code>가 정확히 bicubic 결과이므로, <code>tf.image.psnr(targets, sources)</code> 한 줄이면 끝이다. 그 한 줄이 어디에도 없다.</p>
+          <p>게다가 README 어디에도 실제 PSNR 숫자가 없다. 24–28행은 "2500 epoch만 돌렸지만 1000 epoch 이후 PSNR과 loss가 saturate했다"고만 적고 곡선 이미지 링크를 건다. 학습이 수렴했다는 진술만 있고 성능에 대한 진술이 없다. 평가지표 자체에도 흠이 있다 — <code>cnn.py:23–26</code>의 마지막 conv에는 활성화도 클리핑도 없어서 예측값이 [0,1]을 벗어날 수 있는데, <code>tf.image.psnr(..., max_val=1.)</code>을 클리핑 없이 그대로 적용한다. SR 표준 프로토콜의 경계 shave도 없다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/SuperResolution/README.md#L24-L28" target="_blank" rel="noopener"><b>SuperResolution/README.md</b></a><span>:24–28</span><button class="expand" type="button" data-repo="ITE4053" data-path="SuperResolution/README.md" data-start="24" data-end="28">전체 맥락</button></div><pre>## Results
+
+In terms of time, it was only 2500 epoch. However, PSN and loss is saturated
+after 1000 epoch. Model parameters is saved on `model.hdf5` using keras model
+save method.   <span class="cm">← dB 수치, 베이스라인, Set5 평균 그 무엇도 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>배치 인덱싱이 <code>np.roll</code>이라 연속 배치가 127/128 겹치고, <code>__len__</code>은 배치 수가 아니라 이미지 수다</h3></header>
+        <div class="prose">
+          <p><code>keras.utils.Sequence</code>의 <code>__len__</code>은 에폭당 배치 수를 반환해야 한다. 여기서는 이미지 개수를 돌려주고, <code>lib/model.py:31</code>이 그걸 <code>steps_per_epoch</code>로 그대로 쓴다. T91+291이면 약 382장 × 배치 128 = 한 "에폭"에 48,896 샘플이 흐른다. README가 말하는 "2500 epoch"의 실제 의미가 무엇인지 아무도 알 수 없다.</p>
+          <p>더 나쁜 것은 <code>__getitem__</code>이 인덱스를 <code>np.roll(self.indices, item)</code>로 <b>한 칸씩 회전</b>시킨 뒤 앞에서 <code>batch</code>개를 뜯는다는 점이다. batch 0과 batch 1이 128개 중 127개를 공유한다. 배치가 데이터셋의 분할이 아니라 슬라이딩 윈도우라서, 같은 이미지가 한 에폭에 128번씩 등장한다.</p>
+          <p>같은 함수 58–60행에는 더 조용한 지뢰가 있다. 크롭 결과 형상이 <code>self.size</code>와 다르면 루프 <b>안에서</b> <code>sources</code>·<code>targets</code>를 <code>np.empty</code>로 다시 할당한다. 그 시점까지 채운 <code>b</code>개 샘플은 전부 버려지고 초기화되지 않은 메모리로 대체된다. 현재 설정에서는 크롭 크기가 항상 32×32라 발동하지 않지만, 크롭 크기를 바꾸는 순간 학습 배치의 대부분이 쓰레기가 된다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/SuperResolution/utils/data.py#L40-L60" target="_blank" rel="noopener"><b>SuperResolution/utils/data.py</b></a><span>:40–60</span><button class="expand" type="button" data-repo="ITE4053" data-path="SuperResolution/utils/data.py" data-start="40" data-end="60">전체 맥락</button></div><pre>    def __len__(self) -&gt; int:
+        return <span class="hl">len(self.images)</span>        <span class="cm"># ← 배치 수가 아니라 이미지 수</span>
+    ...
+        indices = <span class="hl">np.roll(self.indices, item)</span>   <span class="cm"># ← batch0=[0,1,2,3] batch1=[9,0,1,2]</span>
+
+        for b in range(self.batch):
+            ...
+            if self.size != target.shape:
+                <span class="hl">sources = np.empty((self.batch, *target.shape, self.channels), dtype=np.float32)</span>
+                <span class="hl">targets = np.empty((self.batch, *target.shape, self.channels), dtype=np.float32)</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>TensorFlow 시드를 한 번도 고정하지 않는다. 대신 쓰지도 않는 PyTorch 시드를 고정한다</h3></header>
+        <div class="prose">
+          <p>이 프로젝트는 전부 TensorFlow/Keras다. 그런데 <code>utils.init</code>은 <code>random</code>, <code>numpy</code>, 그리고 <code>torch</code>를 시드한다. <code>tf.random.set_seed</code>는 없다. 가중치가 <code>kernel_initializer='random_uniform'</code>으로 초기화되므로, 같은 <code>--seed 42</code>로 두 번 돌려도 초기 가중치가 다르다. 첫 번째 과제에서는 시드를 제대로 잡아 7년 뒤 재현까지 됐는데, 여기서는 그 습관이 사라졌다.</p>
+          <p>동시에 <code>workers=4, use_multiprocessing=True</code>로 <code>Sequence</code>를 돌린다. fork 방식에서 4개 워커가 동일한 numpy RNG 상태를 복사해 가므로 랜덤 크롭·랜덤 스케일 증강이 워커마다 똑같이 나온다. 증강 다양성이 의도의 1/4로 줄어든다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/SuperResolution/utils/__init__.py#L11-L18" target="_blank" rel="noopener"><b>SuperResolution/utils/__init__.py</b></a><span>:11–18</span><button class="expand" type="button" data-repo="ITE4053" data-path="SuperResolution/utils/__init__.py" data-start="11" data-end="18">전체 맥락</button></div><pre>def init(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    <span class="hl">torch.manual_seed(seed)</span>        <span class="cm"># ← torch 는 이 프로젝트에서 쓰이지 않음</span>
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+                                    <span class="cm"># ← tf.random.set_seed 가 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README-RNN이 적은 손실 함수가 구현되어 있지 않다</h3></header>
+        <div class="prose">
+          <p><code>README-RNN.md:11–13</code>은 손실을 <code>Σ(n=0..2) ||y_gt − y_n||²</code>, 즉 세 타임스텝 전부에 감독을 거는 multi-step loss로 명시한다. 구현(<code>network/rnn.py:91–93</code>)은 <code>K.mean(K.square(y_pred - y_true))</code> 한 줄이고, <code>KL.RNN(..., return_sequences=False)</code> + <code>_postprocess</code>로 마지막 출력만 남긴다. 중간 타임스텝에는 손실이 걸리지 않는다.</p>
+          <p>같은 문서 25행과 <code>README.md:5,20,22</code>는 코드를 <code>lib/network.py</code>, <code>utils/callbacks.py</code>에 있다고 안내하는데 실제 경로는 <code>network/cnn.py</code>, <code>network/rnn.py</code>, <code>utils/callback.py</code>다. <code>README.md:34</code>는 "train samples" 캡션을 달고 <code>loss_psnr_cnn.png</code>를 링크한다 — <code>train_samples_cnn.png</code>가 바로 옆에 있는데도.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>커밋된 <code>model.hdf5</code>는 지금 코드가 만든 것이 아니다</h3></header>
+        <div class="prose">
+          <p>486KB짜리 <code>model.hdf5</code>가 저장소에 들어 있다. 내부 config를 열어 보면 모델 이름이 <code>"SR"</code>인데 현재 <code>network/cnn.py:28–29</code>는 <code>name='SRN'</code>으로 만든다. 컴파일 정보도 <code>"loss": "mean_squared_error"</code> 문자열인데 <code>lib/model.py:25</code>는 커스텀 함수 <code>self.klass.loss</code>를 넘긴다. 즉 커밋된 체크포인트는 지금 소스와 다른 버전의 산출물이다. RNN 가중치는 들어 있지 않은데 <code>README-RNN.md:31</code>은 "Model parameters is saved on <code>model.hdf5</code>"라고 적고 있다.</p>
+          <p><code>network/__pycache__/*.cpython-36.pyc</code> 세 개와, <code>.gitignore</code>로 무시되는 <code>data/</code> 안의 빈 파일 <code>data/pass</code>도 함께 커밋되어 있다. <code>main.py:51–53</code>의 위치 인자 <code>command</code>(<code>train</code>/<code>eval</code>)는 파싱만 되고 <code>main()</code>에서 읽히지 않아 <code>eval</code>을 줘도 학습이 시작된다. argparse 설명 문자열은 <code>'Evaluate Multi Object Tracking'</code> — 다른 프로젝트에서 복사해 온 흔적이다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>train/test 분리는 제대로 했다. 학습은 <code>data/91</code>·<code>data/291</code>, 검증은 <code>data/Set5</code>로 디렉터리 수준에서 갈라 두어 누수가 없다(<code>main.py:14–39</code>). SR에서 Set5를 테스트 세트로 쓰는 것은 표준 관행이고, 두 번째·세 번째 과제 중 데이터 위생이 지켜진 유일한 곳이다.</p>
+      <p><code>CustomCallback</code>이 <code>interval</code>마다 (저해상 입력, 예측, 정답)을 가로로 붙여 TensorBoard 이미지 서머리로 남기게 만든 것도 실용적이다(<code>utils/callback.py:36–39</code>). 숫자는 안 남겼지만 눈으로 볼 증거는 <code>assets/cnn/</code>, <code>assets/rnn/</code>에 실제로 남아 있다.</p>
+    </div>
+  </section>
+
+  <!-- ============ A4 ============ -->
+  <section>
+    <h2>Assignment 4 — ImageDenoising</h2>
+    <p class="prose">CIFAR-10 이미지에 <code>N(0, 0.1)</code> 가우시안 노이즈를 더해 5층 3×3 conv(64×4 + 3)로 복원하는 과제. <code>--mode base|skip|bn</code> 세 변형을 비교하는 것이 과제의 핵심으로 보인다. README가 없고, 결과는 512×512 PNG 세 장(<code>scripts/Model1~3.png</code>)이 전부다. 1,361줄 중 960줄이 <code>scripts/</code>의 3중 복사본이다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>검증 제너레이터가 학습 데이터를 읽는다. <code>train</code> 인자는 받아서 버린다</h3></header>
+        <div class="prose">
+          <p><code>main.py:17–18</code>은 <code>utils.data.Dataset(train=False, batch=1, ...)</code>로 검증 세트를 만든다. 호출부만 보면 완벽하다. 그런데 <code>Dataset.__init__</code>은 <code>train</code> 파라미터를 시그니처에 선언해 놓고 본문에서 한 번도 읽지 않는다. 35행은 인자와 무관하게 <code>self.is_training = True</code>로 못 박고, 38행은 무조건 <code>self.images = self.x_train</code>을 쓴다. <code>x_test</code>는 로드해서 즉시 버린다.</p>
+          <p>결과적으로 <code>fit_generator</code>에 넘어가는 <code>validation_data</code>가 학습 세트다. <code>lib/model.py:33</code>의 <code>validation_steps=100</code>이 뽑는 100개 샘플은 전부 학습에 쓰인 이미지이고, 로그에 찍히는 <code>val_loss</code>·<code>val_psnr</code>은 학습 성능일 뿐이다. <code>train()</code>·<code>eval()</code> 메서드(46–50행)도 정의만 되어 있고 저장소 어디에서도 호출되지 않는다. 이 과제에서 보고된 검증 수치가 없다는 점이 역설적으로 다행인데, 있었다면 전부 무효였을 것이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/ImageDenoising/utils/data.py#L27-L44" target="_blank" rel="noopener"><b>ImageDenoising/utils/data.py</b></a><span>:27–44</span><button class="expand" type="button" data-repo="ITE4053" data-path="ImageDenoising/utils/data.py" data-start="27" data-end="44">전체 맥락</button></div><pre>    def __init__(self, <span class="hl">train: bool = True</span>,          <span class="cm"># ← 선언만 되고 본문에서 사용되지 않음</span>
+                 source_transforms: List[Transform] = None,
+                 target_transforms: List[Transform] = None,
+                 batch: int = 32, shuffle: bool = True):
+
+        self.batch = batch
+        self.shuffle = shuffle
+        self.channels = 3
+        <span class="hl">self.is_training = True</span>                       <span class="cm"># ← train 인자 무시</span>
+
+        (self.x_train, _), (<span class="hl">self.x_test</span>, _) = keras.datasets.cifar10.load_data()
+        self.images = <span class="hl">self.x_train</span>                     <span class="cm"># ← 검증 인스턴스도 학습셋을 본다</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>skip</code>/<code>bn</code> 모드는 구조적으로 정답에 도달할 수 없다</h3></header>
+        <div class="prose">
+          <p>네트워크의 마지막 연산이 <code>KL.ReLU()</code>다(50행). 회귀 문제의 출력 헤드에 ReLU를 붙였으니 예측은 항상 0 이상이고, 한 번 음수로 넘어간 픽셀은 그래디언트가 끊겨 영구히 죽는다. 이것만으로도 문제인데, <code>skip</code>과 <code>bn</code> 모드는 여기에 <code>KL.average([x, inputs])</code>를 얹는다.</p>
+          <p><code>average</code>는 <b>덧셈이 아니라 산술 평균</b>이다. 최종 출력은 <code>(f(x) + noisy) / 2</code>이고 <code>f(x) ≥ 0</code>이므로 <b>출력의 하한이 <code>noisy/2</code>로 고정</b>된다. 노이즈가 위쪽으로 튄 픽셀 — 예컨대 깨끗한 값 0.30에 노이즈가 얹혀 0.90이 된 픽셀 — 의 정답은 0.30인데 모델이 낼 수 있는 최솟값이 0.45다. 구조적으로 도달 불가능하다. DnCNN 계열의 residual 연결은 <code>input − noise_estimate</code> 또는 <code>Add</code>이지 <code>Average</code>가 아니다. 세 모드의 비교 실험 자체가 공정한 비교가 아니게 된다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/ImageDenoising/network/denoising.py#L44-L53" target="_blank" rel="noopener"><b>ImageDenoising/network/denoising.py</b></a><span>:44–53</span><button class="expand" type="button" data-repo="ITE4053" data-path="ImageDenoising/network/denoising.py" data-start="44" data-end="53">전체 맥락</button></div><pre>        x = KL.Conv2D(3, (3, 3), padding="SAME", ... name="layer5")(x)
+        if mode == 'bn':
+            x = KL.BatchNormalization()(x)
+        <span class="hl">x = KL.ReLU()(x)</span>                          <span class="cm"># ← 회귀 출력 헤드에 ReLU</span>
+
+        if mode == 'skip' or mode == 'bn':
+            <span class="hl">x = KL.average([x, inputs])</span>           <span class="cm"># ← Add 가 아니라 Average: 출력 ≥ noisy/2</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>320줄짜리 파일을 세 번 복사했다. 두 줄만 다르다</h3></header>
+        <div class="prose">
+          <p><code>scripts/Model1.py</code>, <code>Model2.py</code>, <code>Model3.py</code>는 각각 320줄이고 <code>diff</code>로 확인한 차이가 정확히 두 줄이다 — 97행의 출력 파일명(<code>'Model1.png'</code> / <code>'Model2.png'</code> / <code>'Model3.png'</code>)과 297행의 <code>--mode</code> 기본값(<code>'base'</code> / <code>'skip'</code> / <code>'bn'</code>). 그런데 이 두 값은 <b>이미 CLI 인자로 노출되어 있다.</b> 같은 저장소의 <code>main.py</code>가 <code>--mode</code>를 받고 모듈 구조도 멀쩡한데, 제출을 위해 전부 한 파일로 인라인한 뒤 세 벌 복제했다.</p>
+          <p>같은 코드가 세 벌이면 버그도 세 벌이다. 위에서 지적한 검증셋 오염(<code>Model*.py:111–112</code>)과 출력 ReLU/average 문제(<code>Model*.py:195,197–198</code>)가 세 파일에 그대로 복제되어 있다. 그리고 이 과제에는 README가 없다 — 어떤 모드가 몇 dB였는지, 노이즈 σ가 얼마였는지, 무엇을 비교해 무슨 결론을 냈는지 저장소 어디에도 문장으로 남아 있지 않다. PNG 세 장이 전부다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/ImageDenoising/scripts/Model2.py" target="_blank" rel="noopener"><b>diff Model1.py Model2.py</b></a><span>ImageDenoising/scripts/</span></div><pre>97c97
+&lt;         filename = 'Model1.png'
+---
+&gt;         filename = 'Model2.png'
+297c297
+&lt;     parser.add_argument("--mode", default='base', choices=['base', 'skip', 'bn'],
+---
+&gt;     parser.add_argument("--mode", default='skip', choices=['base', 'skip', 'bn'],
+<span class="cm">320줄 중 2줄. Model3 도 동일하게 'bn' 한 단어만 다름</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>결과 파일명에서 점이 사라지고, 학습은 RGB인데 추론은 BGR이다</h3></header>
+        <div class="prose">
+          <p><code>Eval.to_png</code>는 확장자를 분리해 놓고 다시 붙일 때 점을 빠뜨린다. <code>noisy.png</code>를 넣으면 <code>noisy-resultpng</code>가 나온다 — 확장자 없는 파일이라 <code>cv2.imwrite</code>가 포맷을 결정하지 못한다. <code>scripts/</code>의 세 복사본에서는 이 줄이 <code>filename = 'Model1.png'</code> 하드코딩으로 "해결"되어 96행의 <code>*path, ext = filename.split('.')</code>이 결과를 쓰지 않는 죽은 줄로 남았다.</p>
+          <p>채널 순서도 어긋난다. 학습 데이터는 <code>keras.datasets.cifar10.load_data()</code>로 RGB인데, 추론 입력은 <code>cv2.imread(filename)</code>으로 BGR이다(<code>utils/data.py:15</code>). 거기에 CIFAR-10 32×32에서 σ=0.1로 학습한 모델을 노이즈 수준을 알 수 없는 512×512 사진에 그대로 적용한다. 정답 이미지가 없으니 PSNR도 낼 수 없다 — 제출물이 눈으로 보는 PNG 세 장에서 끝나는 구조적 이유다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4053/blob/HEAD/ImageDenoising/utils/data.py#L21-L24" target="_blank" rel="noopener"><b>ImageDenoising/utils/data.py</b></a><span>:21–24</span><button class="expand" type="button" data-repo="ITE4053" data-path="ImageDenoising/utils/data.py" data-start="21" data-end="24">전체 맥락</button></div><pre>    def to_png(self, filename: str):
+        *path, ext = filename.split('.')
+        filename = '.'.join(path) + '-result' + ext   <span class="cm"># ← 'noisy.png' → 'noisy-resultpng'</span>
+        cv2.imwrite(filename, self.image)</pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>로깅 콜백은 주석 처리되어 있고, 주석을 풀면 실행되지 않는다</h3></header>
+        <div class="prose">
+          <p><code>lib/model.py:38–39</code>에서 <code>CustomCallback</code>이 통째로 주석 처리되어 콜백 리스트가 비어 있다. 학습 중 어떤 이미지 서머리도 남지 않는다. 그리고 주석을 풀어도 동작하지 않는다 — 2020년 6월 커밋에서 TF2로 기계적으로 치환하면서 <code>utils/callback.py:42</code>가 <code>tf.compat.v1.summary(value=...)</code>가 되었는데 <code>tf.compat.v1.summary</code>는 모듈이라 호출할 수 없고, 38행의 <code>tf.summary.Image</code>는 TF2에 존재하지 않는 이름이다. 고치는 대신 주석으로 덮었다.</p>
+          <p><code>Dataset.__len__</code>이 50,000(CIFAR 학습셋 크기)을 반환하고 그것이 <code>steps_per_epoch</code>로 쓰이므로, 기본 <code>--epoch 100</code>은 배치 32 기준 1.6억 샘플을 의미한다. SuperResolution과 같은 <code>np.roll</code> 배치 중복 문제도 동일하게 있다(<code>utils/data.py:67</code>).</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 반복 패턴 ============ -->
+  <section>
+    <h2>반복되는 패턴</h2>
+    <ol class="rank">
+      <li><div><strong>인터페이스를 선언하고 본문에서 무시한다.</strong> <code>Dataset(train=False)</code>의 <code>train</code>, <code>main.py</code>의 위치 인자 <code>command</code>, <code>Sequential.compile(loss=...)</code>의 <code>loss</code>. 셋 다 호출부만 읽으면 정확해 보이고 셋 다 아무 효과가 없다. 이 레포의 가장 위험한 습관인데, 코드 리뷰가 아니라 실행 결과로만 검증할 경우 절대 드러나지 않기 때문이다.</div></li>
+      <li><div><strong>스캐폴드는 과하게, 측정은 비워둔다.</strong> Keras 클론 프레임워크, Transform 파이프라인, 커스텀 TensorBoard 콜백을 다 만들었다. 반면 SR에는 bicubic 베이스라인이 없고, Denoising에는 README와 PSNR 수치 자체가 없고, 세 과제 어디에도 테스트나 그래디언트 체크 코드가 한 줄도 없다(<code>assert</code> 4개는 전부 <code>mode in [...]</code> 검사).</div></li>
+      <li><div><strong>문서가 코드보다 앞서간다.</strong> "only numpy"인데 TensorFlow를 import하고, "Adam 구현"인데 첫 스텝에서 죽고, README-RNN이 명시한 3-step 손실은 구현되지 않았고, 데이터 분포 설명은 플래그 의미와 반대다. 예외적으로 NNN의 정확도 표만은 정직해서, 7년 뒤 재현이 된다.</div></li>
+      <li><div><strong>배치 파이프라인을 <code>np.roll</code>로 만든다.</strong> SuperResolution과 ImageDenoising의 <code>Dataset.__getitem__</code>이 동일하게 인덱스를 한 칸씩 회전시킨다. 두 번째 과제의 설계 결함이 세 번째 과제로 복사되었고, 중간에 점검이 없었다.</div></li>
+      <li><div><strong>제출 직전에 파일을 통째로 복제한다.</strong> <code>ImageDenoising/scripts/</code>의 320줄 × 3, 그리고 <code>SuperResolution</code>의 <code>README.md</code>/<code>README-RNN.md</code> 분기. 옵션 하나를 위해 파일을 복사하므로, 이후의 수정은 반드시 세 곳에 따로 들어가야 하고 실제로 들어가지 않았다.</div></li>
+    </ol>
+  </section>
+
+  <!-- ============ 권고 ============ -->
+  <section>
+    <h2>지금 손본다면</h2>
+    <ol class="rank">
+      <li><div><strong><code>Loss</code>에 <code>backward</code>를 추가하고 <code>Sequential.backward</code>가 그것을 호출하게 한다.</strong> 20줄 미만. 이것만으로 README 비교표의 Loss[MSE] 열이 실제 실험이 되고, 프레임워크가 광고한 확장성이 사실이 된다. 지금은 손실 함수를 추가해도 학습에 영향을 줄 수 없는 구조다.</div></li>
+      <li><div><strong><code>ImageDenoising/utils/data.py:38</code>을 <code>self.images = self.x_train if train else self.x_test</code>로 고친다.</strong> 한 줄. 검증 수치가 비로소 의미를 갖는다. 동시에 <code>__len__</code>을 <code>len(self.images) // self.batch</code>로, <code>np.roll</code>을 <code>self.indices[item*batch:(item+1)*batch]</code>로 바꾸면 "1 에폭"이 실제로 1 에폭이 된다.</div></li>
+      <li><div><strong>bicubic 베이스라인 PSNR을 찍는다.</strong> <code>sources</code>가 이미 bicubic 업샘플 결과이므로 <code>tf.image.psnr(targets, sources, max_val=1.)</code> 한 줄이면 된다. SR 결과를 "몇 dB 벌었다"로 말할 수 있게 되는 유일한 조치이고, 비용은 사실상 0이다. 예측을 <code>tf.clip_by_value(y_pred, 0., 1.)</code>로 클리핑한 뒤 PSNR을 재는 것도 같이.</div></li>
+      <li><div><strong>BCE에 <code>np.clip(inputs, eps, 1-eps)</code>를 넣고 Adam의 <code>get_update</code>를 배열 단위 연산으로 다시 쓴다.</strong> 각각 한 줄, 다섯 줄. 지금은 README가 권하는 ReLU 설정에서 20개 시드 중 19개가 NaN이 되고 Adam은 선택 자체가 불가능하다.</div></li>
+      <li><div><strong><code>skip</code> 모드의 <code>KL.average</code>를 <code>KL.add</code>로 바꾸고 출력 ReLU를 제거한다.</strong> 두 줄. 세 모드 비교가 공정해진다. 지금 구조에서는 <code>skip</code>·<code>bn</code> 모드가 <code>noisy/2</code> 아래의 값을 낼 수 없어서, 비교 결과가 모델의 성능이 아니라 제약의 차이를 재고 있다.</div></li>
+      <li><div><strong><code>scripts/Model{1,2,3}.py</code> 세 벌을 지우고 <code>main.py --mode</code>로 되돌린다.</strong> 960줄이 사라지고, 위의 수정들이 한 곳에만 들어가면 되는 상태가 된다. 필요하다면 실행 명령 세 줄을 README에 적는 것으로 충분하다.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>평가 대상: <code>github.com/jiunbae/ITE4053</code> · 커밋 42개(master 단독, 다른 브랜치 없음) · 실질 작업 2019-03-15 ~ 2020-06-08 · 마지막 푸시 2021-08-09(계정명 변경 커밋) · 파이썬 2,441줄</p>
+    <p>검증 방식: 세 프로젝트의 전체 파이썬 소스와 노트북 정독. <code>NumpyNeuralNetwork</code>는 numpy 2.4.6 환경에서 실제 실행 — 역전파 수치 미분 대조(최대 상대오차 1.86e-07), README 비교표 NNN 행 7개 설정 전량 재현(7/7 일치), Adam 크래시 재현, BCE NaN 20시드 스윕, <code>parameters.npz</code>와 README 파라미터 표 대조. <code>SuperResolution</code> RNN의 <code>_preprocess</code> 텐서 변형은 numpy로 동일 연산 재현해 검증. <code>model.hdf5</code>는 내부 config 문자열을 직접 확인.</p>
+    <p>미검증: TensorFlow가 설치되지 않은 환경이라 <code>--mode tf</code> 경로, <code>SuperResolution</code>/<code>ImageDenoising</code>의 실제 학습, 콜백 실행은 돌리지 않았다(브리프의 대용량 학습 금지 조항에도 해당). 해당 부분 지적은 모두 정적 분석과 저장소에 남은 산출물에 근거한다. <code>data/91</code>·<code>291</code>·<code>Set5</code>는 저장소에 없어 중복 여부는 확인하지 못했다.</p>
+  </footer>
+
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

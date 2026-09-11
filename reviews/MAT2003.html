@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAT2003 선형대수</title>
+<meta name="description" content="MAT2003 선형대수 코드 감사 보고서 — 근거 기반 평가와 등급">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="home" href="../index.html">CS 커리큘럼 감사</a>
+  <span class="crumb">MAT2003</span>
+  <a class="ext" href="https://github.com/jiunbae/MAT2003" target="_blank" rel="noopener">저장소 &#8599;</a>
+</nav>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="code">MAT2003 · HANYANG UNIV · 2015 FALL</div>
+    <h1>선형대수</h1>
+    <p class="sub">선형대수 프로젝트 4번 — 네트워크 유량 문제를 MCMF로 푼 1학년 과제. 제출 답(18, 109)은 독립 구현으로 검증한 결과 정확하다. 문제는 답이 아니라, 저자가 스스로 붙인 벤치마크 10개 중 7개가 답을 내지 못한 채 <code>0</code>을 출력하고 있고 보고서가 그 위에 분석을 쌓았다는 점이다.</p>
+    <div class="headrow">
+      <div class="stats">
+        <div class="stat"><span class="lbl">추적 파일</span><b>37</b></div>
+        <div class="stat"><span class="lbl">커밋</span><b>16</b></div>
+        <div class="stat"><span class="lbl">기간</span><b>2015.11–12</b></div>
+        <div class="stat"><span class="lbl">소스</span><b>C++11 · 894 LOC</b></div>
+      </div>
+      <div class="grade"><b>B-</b><span class="lbl">종합</span></div>
+    </div>
+  </header>
+
+  <!-- ============ 총평 ============ -->
+  <section>
+    <h2>총평</h2>
+    <div class="prose stack">
+      <p><strong>먼저 과제의 정체를 바로잡는다.</strong> 레포 이름은 선형대수지만 가우스 소거도 행렬식도 없다. 첨부된 <code>선형대수 프로젝트 보고서.docx</code>에서 확인한 바로는 저자가 선택한 것은 <em>4번 문제</em>이고, 그 내용은 네트워크 <code>G(V,E)</code>에 용량 <code>c</code>와 통신료 <code>d</code>가 주어졌을 때 (1) <code>s=0</code>에서 <code>t=13</code>까지의 최대 유량과 (2) <code>M=9</code>를 보내는 최소 비용을 구하는 문제다. 즉 <code>MCMF.png</code>는 이상한 첨부물이 아니다. 보고서 결론부가 직접 밝히듯 "얼마 전 ACM-ICPC 본선에서 못 풀었던 MCMF 문제"의 문제지 스캔이고, 과제와의 연결고리는 저자 본인이 문서에 명시해 두었다. 이 레포에서 수치선형대수적 결함(피벗팅, 부동소수점 비교, 특이행렬 판정)을 찾는 것은 잘못된 질문이다. 전부 정수 그래프 알고리즘이다.</p>
+      <p><strong>가장 잘한 것.</strong> 제출 답이 맞다. 필자가 파이썬으로 SPFA 기반 successive-shortest-path MCMF를 독립 구현해 <code>data/graph0</code>(과제에서 주어진 그래프)에 돌린 결과 <code>achieved flow=9, mincost=109</code>로, 저자의 <code>Problem2/2i/2ii</code> 세 구현이 모두 내놓은 109와 일치한다. 최대 유량 18도 <code>Problem1</code>과 <code>Problem1i</code>가 10개 그래프 전부에서 서로 일치한다. 1학년이 Johnson potential(<code>label</code> 배열)까지 얹은 MCMF를 직접 굴려 정답을 냈고, 게다가 <code>out.bat</code>으로 실행 로그(<code>*.out</code>)를 레포에 남겨 재현 가능하게 해 뒀다. 학부 과제에서 드문 위생이다.</p>
+      <p><strong>가장 치명적인 것.</strong> 저자가 스스로 만든 벤치마크 그래프 10개 중 <code>graph1, 4, 5, 6, 7, 8, 9</code> 일곱 개는 최대 유량이 <code>M=9</code>에 미치지 못한다. 세 MCMF 구현은 이 경우 <code>if (tflow &lt; f) return 0;</code>로 빠져나와 "<code>cost: 0</code>"을 출력한다. 실패와 "비용이 진짜 0"이 같은 값으로 인쇄된다. 그런데 보고서의 Problem 2 Analysis 절은 바로 그 <code>graph1</code>의 실행 시간(1.63 / 0.75 / 0.58초)을 알고리즘 개선의 근거로 제시한다. 답을 못 낸 실행의 소요 시간을 성능 근거로 쓴 셈이다. 문서 어디에도 이 사실이 적혀 있지 않다.</p>
+      <p><strong>문서와 코드의 일치도.</strong> 브리프가 짚은 핵심 평가 포인트다. 결과는 셋 중 하나만 합격이다. Problem1i의 "개선"은 보고서가 설명하는 방식(포화 간선을 확정하는 방식)과 코드가 전혀 다르고, Problem2i의 "priority queue로 최적 경로만 선택"은 그 priority queue가 거리가 아니라 <em>정점 번호</em>로 정렬되어 있어 Dijkstra가 아니다. Problem2ii의 "중복 방문 제거"만이 코드(<code>found</code> 배열)와 맞는다. 반면 보고서가 "Problem1i가 graph8, 9에서는 더 느리다"고 스스로 불리한 결과를 적어 둔 것은 커밋된 로그와 정확히 일치한다. 정직성은 있다. 정확성이 부족할 뿐이다.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>구성물</th><th>주제</th><th>핵심 판정</th><th>등급</th></tr></thead>
+        <tbody>
+          <tr><td class="num">Problem1</td><td>Max flow (BFS 증가경로)</td><td>정확. 인접행렬 BFS로 <code>O(V²)</code>/회, 조기 종료 없음</td><td class="g g-hi">B+</td></tr>
+          <tr><td class="num">Problem1i</td><td>Max flow "개선판"</td><td>결과는 일치·실제로 빠름. 그러나 보고서가 설명한 알고리즘이 아님 + 포인터 UB</td><td class="g g-mid">C+</td></tr>
+          <tr><td class="num">Problem2</td><td>MCMF (Bellman-Ford + potential)</td><td>109 독립 검증 통과. 불가능 케이스를 <code>0</code>으로 반환</td><td class="g g-hi">B</td></tr>
+          <tr><td class="num">Problem2i</td><td>MCMF "Dijkstra + PQ"</td><td>PQ가 정점 번호로 정렬됨 → Dijkstra 아님. 죽은 <code>break</code></td><td class="g g-lo">C</td></tr>
+          <tr><td class="num">Problem2ii</td><td>MCMF "중복 제거"</td><td>진짜 <code>O(V²)</code> Dijkstra. 가장 빠르고 정확. 문서의 계보 설명만 틀림</td><td class="g g-hi">B</td></tr>
+          <tr><td class="num">headers/</td><td>graph · measure · fileIO</td><td>입력 검증 0, 스트림 상태 미확인, <code>new</code>/<code>malloc</code> 전량 누수</td><td class="g g-lo">C-</td></tr>
+          <tr><td class="num">data/ + 측정</td><td>벤치마크 데이터셋</td><td>10개 중 7개가 <code>M=9</code> 불가능, graph2는 선언 E와 실제 E 불일치</td><td class="g g-lo">D+</td></tr>
+          <tr><td class="num">보고서</td><td>12쪽 프로젝트 문서</td><td>내용은 실하나 반복 횟수 오기(1000 vs 10000), 미검증 주장 2건</td><td class="g g-mid">B-</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ Problem 2 ============ -->
+  <section>
+    <h2>Problem 2 — 최소 비용 유량 (MCMF)</h2>
+    <p class="prose">과제는 <code>M=9</code>를 <code>s=0</code>에서 <code>t=13</code>로 보낼 때의 최소 비용을 요구했다. 저자는 Johnson potential을 쓴 successive shortest path를 세 가지(Bellman-Ford / PQ / <code>O(V²)</code> Dijkstra)로 구현하고 10개 그래프에 각각 10000회 돌려 비교했다. 답 109는 맞다. 비교 설계가 무너져 있다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>불가능한 요청과 "비용 0"이 같은 값으로 반환된다 — 그리고 벤치마크의 70%가 여기에 걸린다</h3></header>
+        <div class="prose">
+          <p><code>tflow</code>가 요구 유량 <code>f</code>에 도달하지 못하면 <code>0</code>을 돌려준다. 호출자는 "9를 보낼 수 없다"와 "9를 공짜로 보냈다"를 구분할 방법이 없다. 세 구현(<code>Problem2.cc:112</code>, <code>Problem2i.cc:112</code>, <code>Problem2ii.cc:115</code>) 모두 동일하다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/Problem2.cc#L109-L114" target="_blank" rel="noopener"><b>LinearAlgebra/Problem2.cc</b></a><span>:109–114</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/Problem2.cc" data-start="109" data-end="114">전체 맥락</button></div><pre>		<span class="cm">//when tflow == f(given flow) finish loop</span>
+		if (tflow == f)
+			break;
+	}
+	<span class="hl">if (tflow &lt; f)
+		return 0;</span>          <span class="cm">// ← 실패도 0, 진짜 비용 0도 0</span>
+	return tcost;</pre></div>
+        <div class="prose">
+          <p>이론적 지적이 아니다. 커밋된 <code>Problem2ii.out</code>은 10개 그래프 중 7개에 대해 <code>cost: 0</code>을 기록하고 있고, 이는 <code>problem1.out</code>의 최대 유량(graph1=4, 4=5, 5=4, 6=2, 7=2, 8=2, 9=0)이 전부 9 미만인 것과 정확히 일치한다. 즉 저자의 벤치마크 데이터셋 중 실제로 답이 나오는 것은 <code>graph0</code>(109), <code>graph2</code>(136), <code>graph3</code>(18) 세 개뿐이다.</p>
+          <p>필자가 <code>g++ -std=c++14 -Wall -Wextra -O2</code>로 빌드해 재현한 결과도 커밋된 로그와 동일했고, 모호성을 직접 확인하기 위해 두 개의 최소 입력을 만들어 돌렸다. 용량 9·비용 0인 간선 하나짜리 <em>실현 가능</em> 그래프와, 용량 1짜리 <em>실현 불가능</em> 그래프가 같은 문자열을 인쇄한다.</p>
+        </div>
+        <div class="ev">
+          <div class="ev-head"><b>실행 결과</b><span>재현 빌드 · 입력은 필자가 작성</span></div>
+          <pre><span class="cm">$ ./Problem2ii data/zerocost 9   # "2 1 / 0 1 9 0" — 가능, 참값 0</span>
+result: given flow: 9, cost: <span class="hl">0</span>
+<span class="cm">$ ./Problem2ii data/infeas   9   # "2 1 / 0 1 1 7" — 불가능</span>
+result: given flow: 9, cost: <span class="hl">0</span>
+<span class="cm">$ ./Problem2ii data/graph1   9   # 최대 유량 4 &lt; 9</span>
+result: given flow: 9, cost: <span class="hl">0</span>
+<span class="cm">$ ./Problem2  data/graph1   4   # 실현 가능한 유량으로 바꾸면</span>
+result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2, 2i, 2ii 모두 80</span></pre>
+        </div>
+        <div class="prose">
+          <p>이 결함이 보고서까지 오염시킨다. Problem 2의 Analysis 절은 "<code>V=12, E=12</code>로 주어진 Graph1에 대한 결과로 각각 1.63, 0.75, 0.58초"를 세 구현의 성능 차이 근거로 제시하는데, graph1은 답이 나오지 않는 그래프다. 측정된 것은 "M=9를 만드는 비용"이 아니라 "더 이상 증가 경로가 없을 때까지 탐색하다 포기하는 비용"이다. 워크로드 자체가 다르다. 반면 같은 절의 Graph2(4.38 / 2.67 / 1.03초)는 <code>cost: 136</code>이 나오는 유효한 케이스이므로 이 비교만 유효하다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>Problem2i의 priority queue는 거리가 아니라 정점 번호로 정렬된다 — Dijkstra가 아니다</h3></header>
+        <div class="prose">
+          <p>보고서는 "Dijkstra Algorithm도 priority queue(우선순위 큐)를 간선에 따라 정리하여 최적의 경로만 선택하도록 하여 속도를 더 올릴 수 있다"고 적고 그 구현이 <code>problem2i.cc</code>라고 명시한다. 그런데 큐에 들어가는 쌍은 <code>{정점, 거리}</code> 순서이고 <code>std::priority_queue&lt;pair&lt;int,int&gt;&gt;</code>는 <code>first</code>부터 비교하는 <em>최대</em> 힙이다. 결과적으로 매번 "거리가 가장 짧은 정점"이 아니라 "번호가 가장 큰 정점"이 뽑힌다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/Problem2i.cc#L41-L63" target="_blank" rel="noopener"><b>LinearAlgebra/Problem2i.cc</b></a><span>:41–63</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/Problem2i.cc" data-start="41" data-end="63">전체 맥락</button></div><pre>		priority_queue&lt;pair&lt;int,int&gt;&gt; qu;   <span class="cm">// 기본: first 기준 max-heap</span>
+		...
+				dist[t] = value;
+				parent[t] = { s, dir };
+				width[t] = min(cap, width[s]);
+				<span class="hl">qu.push({t, dist[t]});</span>        <span class="cm">// ← (정점, 거리) 순서. 키가 정점 번호다</span>
+		...
+		while (qu.size())
+		{
+			u = qu.top(); qu.pop();
+			<span class="hl">if(u.first == V)</span>                  <span class="cm">// ← u.first ∈ [0,V). 절대 참이 아님 = 죽은 코드</span>
+				break;</pre></div>
+        <div class="prose">
+          <p>게다가 settled(확정) 집합이 없다. 완화될 때마다 무조건 다시 push하므로 이 루프는 Dijkstra가 아니라 pop 순서가 뒤틀린 label-correcting(SPFA 계열) 알고리즘이다. <strong>답은 맞다</strong> — 재현 실행에서 <code>Problem2i</code>는 10개 그래프 모두 <code>Problem2</code>·<code>Problem2ii</code>와 동일한 값을 냈다. label-correcting은 pop 순서와 무관하게 수렴하기 때문이다. 그래서 이 버그는 오답이 아니라 <em>주장의 붕괴</em>로 나타난다. 보고서가 설명한 개선 기제(최적 경로 우선 선택)는 코드에 존재하지 않으며, <code>Problem2i.out</code>이 보여주는 <code>Problem2</code> 대비 속도 향상(graph0에서 3.166→2.594초)은 문서가 설명하는 이유 때문이 아니라 단순히 전체 <code>V×V</code> 스윕을 반복하는 대신 변화가 있는 정점만 재방문하기 때문이다.</p>
+          <p>같은 절이 <code>problem2ii.cc</code>를 "중복해서 방문하지 않도록 중복을 제거해주는 방식으로 Dijkstra를 최적화"한 것으로 소개하는데, 실제 <code>Problem2ii.cc:38,61,64</code>는 <code>found</code> 배열을 두고 매 단계 미방문 정점 중 최소 <code>dist</code>를 선형 탐색하는 교과서적 <code>O(V²)</code> Dijkstra다. 2i에 무언가를 <em>더한</em> 것이 아니라 priority queue를 <em>들어낸</em> 것이다. 셋 중 가장 정직하게 Dijkstra인 구현이 가장 빠르다는 결과(graph0 0.734초)는 옳지만, 보고서의 개선 서사는 계보를 거꾸로 적고 있다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>potential 갱신이 도달 불가 정점에서 INF로 오염된다</h3></header>
+        <div class="prose">
+          <p>세 구현 모두 <code>label[k] = min(label[k] + dist[k], INF);</code>(<code>Problem2.cc:74</code>, <code>Problem2i.cc:74</code>, <code>Problem2ii.cc:77</code>)로 potential을 갱신한다. 도달 불가 정점은 <code>dist[k] == INF</code>이므로 <code>label[k]</code>가 INF로 고정되고, 다음 라운드의 <code>value = dist[s] + label[s] - label[t] + cost</code>에서 INF끼리 상쇄되며 의미 없는 값이 만들어진다. 지금 데이터셋에서는 그 정점들이 결국 증가 경로에 포함되지 않아 결과가 바뀌지 않았지만(재현 결과가 커밋 로그와 일치), 안전한 구현은 도달 불가 정점의 potential을 건드리지 않는다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>Johnson potential을 직접 쓴 것. 보고서는 "시작 비용이 음수가 없다면 진행 중에 절대로 음수인 간선이 생길 수 없다"는 주장을 최단경로에 포함된 간선 비용 <code>a</code>와 포함되지 않은 간선 <code>b</code>에 대해 <code>b ≥ a</code>이므로 <code>-a + b &lt; 0</code>이 모순이라는 논증으로 전개한다. 증명으로서는 헐겁지만(일반 그래프에서 그 부등식은 성립하지 않는다) 왜 역간선의 음수 비용을 상쇄해야 하는지를 스스로 붙잡고 있었다는 증거이고, 실제 코드는 그 직관에 맞게 <code>label</code> 배열로 reduced cost를 계산한다. 1학년이 "Dijkstra는 음수 간선에서 안 된다"에서 멈추지 않고 potential까지 간 것은 구체적으로 칭찬할 만하다.</p>
+    </div>
+  </section>
+
+  <!-- ============ Problem 1 ============ -->
+  <section>
+    <h2>Problem 1 — 최대 유량</h2>
+    <p class="prose">과제는 s에서 t로 1초간 보낼 수 있는 최대 데이터량을 요구했다. 보고서는 먼저 컷 논증으로 손계산 18을 유도한 뒤 일반해로 BFS 증가 경로를 구현하고, 그것을 "개선"한 <code>Problem1i.cc</code>를 덧붙인다. 두 구현 모두 10개 그래프 전부에서 같은 값을 냈다(<code>18 4 12 16 5 4 2 2 2 0</code>). 문제는 그 "개선"이 무엇인지에 대한 설명이다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>보고서가 설명한 최적화가 코드에 없고, 그 최적화의 전제 자체가 거짓이다</h3></header>
+        <div class="prose">
+          <p>보고서 Problem 1 Improve 절의 주장은 두 단계다. (1) "주어진 그래프에서 <code>f(u,v)=c(u,v)</code>이 성립하는 간선은 무조건 지나야 하는 것을 알 수 있다", (2) "이를 이용하여 지나야만 하는 간선을 확정하는 방식으로 문제를 해결해 볼 수 있다. 이를 이용한 풀이는 Problem1i.cc에 작성되었으며".</p>
+          <p>(1)은 성립하지 않는다. 어떤 최대 유량 해에서 포화된 간선이 <em>모든</em> 최대 유량 해에 포함될 필요는 없다. 용량이 같은 두 경로가 병렬로 존재하기만 해도 반례가 된다. (2)는 코드에 없다. <code>Problem1i.cc</code>에 포화 간선을 미리 확정하는 코드는 한 줄도 없다. 실제로 있는 것은 인접행렬(<code>Problem1.cc:25</code>의 <code>vector&lt;vector&lt;int&gt;&gt; res</code>) 대신 인접 리스트 잔여 그래프를 세우고, BFS 한 번에 t로 들어오는 간선들을 훑으며 여러 경로를 한꺼번에 흘리는 Dinic 계열 변형이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/Problem1i.cc#L27-L41" target="_blank" rel="noopener"><b>LinearAlgebra/Problem1i.cc</b></a><span>:27–41, 69–71</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/Problem1i.cc" data-start="27" data-end="41">전체 맥락</button></div><pre>	vector&lt;vector&lt;Edge&gt;&gt; G(g.V);            <span class="cm">// 인접행렬 → 인접 리스트</span>
+	...
+	for (int i = 0; i &lt; g.V; i++)
+		for (pair&lt;size_t, int&gt; p : g.to_flow[i])
+			addEdge(i, p.first, p.second);   <span class="cm">// 역간선 쌍 생성</span>
+	...
+		<span class="hl">for (int i = 0; i &lt; G[t].size(); i++)</span>  <span class="cm">// ← BFS 1회당 t로 오는 간선마다 증가</span>
+		{
+			Edge * edge = &amp;G[G[t][i].to][G[t][i].index];</pre></div>
+        <div class="prose">
+          <p>속도 향상 자체는 진짜다. 커밋된 로그에서 graph0 10000회 기준 0.833초 → 0.343초다. 하지만 그 이유는 보고서가 적은 이유가 아니라 (a) <code>O(V²)</code> 인접행렬 스캔이 <code>O(E)</code> 인접 리스트 순회로 바뀐 것, (b) BFS 한 번에 복수 경로를 흘리는 것이다. 보고서는 자신이 실제로 한 최적화를 설명하지 못하고 있다. 성능 수치는 정직한데 인과가 틀렸다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>배열 첫 원소 앞을 가리키는 sentinel 포인터 — 정의되지 않은 동작</h3></header>
+        <div class="prose">
+          <p>경로 역추적의 종료 표식으로 <code>G[0]</code>의 첫 원소 <em>하나 앞</em> 주소를 만든다. C++ 표준이 허용하는 것은 "마지막 원소 하나 뒤"까지이고, 하나 앞은 계산하는 것만으로 UB다. 또 <code>G[0]</code>가 비어 있으면(정점 0에서 나가는 간선이 없는 그래프) <code>&amp;G[0][0]</code> 자체가 이미 UB다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/Problem1i.cc#L43-L46" target="_blank" rel="noopener"><b>LinearAlgebra/Problem1i.cc</b></a><span>:43–46, 73</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/Problem1i.cc" data-start="43" data-end="46">전체 맥락</button></div><pre>		vector&lt;Edge *&gt; parent(g.V, (Edge*)NULL);
+		vector&lt;int&gt; qu(g.V);
+		<span class="hl">parent[s] = &amp;G[0][0] - 1;</span>            <span class="cm">// ← one-before-begin. UB</span>
+		...
+			for (Edge *e = edge; bot &amp;&amp; <span class="hl">e != parent[s]</span>; e = parent[e-&gt;from])</pre></div>
+        <div class="prose">
+          <p><code>-fsanitize=address,undefined</code>로 빌드해 <code>data/graph0</code>를 돌렸을 때는 아무것도 잡히지 않았고 답 18이 나왔다. 실제로 터지지는 않는다는 뜻이지, 합법이라는 뜻은 아니다. <code>nullptr</code>이 이미 "부모 없음"으로 쓰이고 있으니 별도의 sentinel 값이나 <code>parent[s]</code>를 특별 취급하는 분기로 대체하면 된다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>BFS가 t에 도달한 뒤에도 그래프 전체를 계속 순회한다</h3></header>
+        <div class="prose">
+          <p><code>Problem1.cc:47–55</code>의 BFS 루프는 큐가 빌 때까지 돌고 마지막에 <code>visited[t]</code>만 확인한다. t를 찾은 순간 끊으면 증가 경로 탐색 비용이 줄어든다. 증가 경로가 많은 graph0에서는 매 라운드마다 쓸모없는 순회가 반복된다. <code>-Wall -Wextra</code>로 재현 빌드했을 때 나온 경고 2건(<code>Problem1.cc:66:24</code>, <code>:69:24</code>)도 같은 함수에 있는데, <code>for (size_t v = t; v != s; ...)</code>에서 <code>size_t</code>와 <code>int</code>를 비교하고 있다. 지금은 BFS 성공 후에만 실행되어 무해하지만, <code>parent[v]</code>가 <code>-1</code>인 채로 <code>size_t</code>에 대입되면 곧장 거대한 인덱스가 되어 범위 밖 접근이 된다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>Problem1i.cc:31–36</code>의 <code>addEdge</code>가 자기 루프(<code>from == to</code>)일 때 <code>G[from].back().index++</code>로 역간선 인덱스를 보정한다. 간선 쌍 인덱싱에서 자기 루프가 왜 특수한지 알고 있었다는 뜻이고, 데이터셋에 자기 루프가 없는데도 처리해 두었다. 1학년 과제에서 보기 드문 디테일이다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 공통 인프라 ============ -->
+  <section>
+    <h2>공통 인프라 — headers/ 와 측정 코드</h2>
+    <p class="prose">보고서 Presets 절은 "입/출력과 시간 측정하는 부분을 공통되도록 작성"하고 "구현 부분의 함수를 제외한 코드는 모두 같게" 했다고 밝힌다. 공정한 비교를 의식한 설계이고 실제로 다섯 개 <code>main</code>은 거의 동일하다. 그 공통 기반 자체가 부실하다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>입력 파서가 스트림 실패를 확인하지 않는다 — 벤치마크 그래프 하나가 조용히 변조되어 있다</h3></header>
+        <div class="prose">
+          <p><code>operator&gt;&gt;</code>는 <code>while (g.E--)</code>로 선언된 간선 수만큼 무조건 읽고, 매번 <code>is</code>의 상태를 확인하지 않는다. 파일이 일찍 끝나면 C++11 이후 <code>operator&gt;&gt;</code>는 실패 시 대상을 <code>0</code>으로 설정하므로, 존재하지 않는 간선이 <code>0 0 0 0</code>으로 그래프에 삽입된다. 마지막 줄 <code>g.E = g.edges.size()</code>가 간선 수를 다시 맞춰주기 때문에 호출자 입장에서는 아무 이상이 없어 보인다. 정점 번호가 <code>V</code> 이상인지도 검사하지 않아, 잘못된 파일 하나면 <code>g.cost[from][to]</code>가 벡터 범위 밖 쓰기가 된다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/headers/graph.h#L30-L40" target="_blank" rel="noopener"><b>LinearAlgebra/headers/graph.h</b></a><span>:30–40</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/headers/graph.h" data-start="30" data-end="40">전체 맥락</button></div><pre>	while (g.E--)
+	{
+		edge * edge_ = new edge();
+		<span class="hl">is &gt;&gt; edge_-&gt;from &gt;&gt; edge_-&gt;to &gt;&gt; edge_-&gt;flow &gt;&gt; edge_-&gt;cost;</span>  <span class="cm">// 실패 확인 없음</span>
+		g.to_cost[edge_-&gt;from].push_back({ edge_-&gt;to,edge_-&gt;cost });
+		...
+		g.edges.push_back(edge_);
+	}
+	<span class="hl">g.E = g.edges.size();</span>   <span class="cm">// ← 절단 사실을 덮어버림</span></pre></div>
+        <div class="prose">
+          <p>추정이 아니다. 실제로 걸린 파일이 있다. <code>data/graph2</code>는 첫 줄에 <code>12 36</code>을 선언하지만 파일에는 간선이 34개뿐이다(토큰 138개 = 2 + 34×4). 필자가 저자의 <code>graph.h</code>를 그대로 링크한 최소 프로그램으로 확인했다.</p>
+        </div>
+        <div class="ev">
+          <div class="ev-head"><b>실행 결과</b><span>저자의 headers/graph.h를 그대로 사용</span></div>
+          <pre>V=12 E(reported)=36 edges.size=36
+  edge[33] = 10 11 cap=3 cost=3
+  edge[34] = <span class="hl">0 0 cap=0 cost=0</span>     <span class="cm">// ← 파일에 없는 유령 간선</span>
+  edge[35] = <span class="hl">0 0 cap=0 cost=0</span></pre>
+        </div>
+        <div class="prose">
+          <p>용량이 0이라 정답은 바뀌지 않지만, <code>graph2</code>는 보고서가 "<code>V=12, E=36</code>으로 <code>V≪E</code>인 경우"라며 두 문제 모두에서 대표 케이스로 내세우는 그래프다. 실제 간선 수는 34다. 자기 벤치마크의 파라미터를 잘못 보고하고 있고, 파서가 그 사실을 숨겨서 알아챌 수 없게 만들었다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>할당한 메모리를 한 번도 반환하지 않는다</h3></header>
+        <div class="prose">
+          <p><code>graph.h:32</code>의 <code>new edge()</code>는 매 간선마다 할당되지만 <code>graph</code>의 소멸자는 <code>~graph() {}</code>(<code>graph.h:13</code>)로 비어 있다. 10개 그래프 × 구현 5개를 순회하는 <code>main</code>에서 <code>graph</code> 객체가 반복 생성·파괴되므로 간선 객체가 전부 샌다. 소유권을 넘길 곳도 없다 — <code>g.edges</code>는 파서가 채운 뒤 다섯 개 <code>.cc</code> 어디에서도 읽히지 않는다. 순수한 누수다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/MAT2003/blob/HEAD/LinearAlgebra/headers/measure.h#L33-L37" target="_blank" rel="noopener"><b>LinearAlgebra/headers/measure.h</b></a><span>:33–37</span><button class="expand" type="button" data-repo="MAT2003" data-path="LinearAlgebra/headers/measure.h" data-start="33" data-end="37">전체 맥락</button></div><pre>		void start()
+		{
+			...
+			<span class="hl">this-&gt;result = (double*)malloc(sizeof(double) * this-&gt;repeat + sizeof(double));</span>
+			lapStart();
+		}                                        <span class="cm">// free() 없음. 소멸자도 ~time(){} 로 비어 있음</span></pre></div>
+        <div class="prose">
+          <p>측정기도 같다. 반복 10000회 × 그래프 10개마다 80KB씩 할당하고 아무도 해제하지 않으며, <code>result</code> 배열에 저장한 랩타임은 <code>total</code>에 더하는 용도로만 쓰여 배열 자체가 불필요하다. C++ 파일에서 <code>malloc</code>을 쓴 것도 일관성이 없다 — 같은 프로젝트의 나머지는 전부 STL 컨테이너다. <code>vector&lt;double&gt;</code> 한 줄이면 누수와 캐스팅이 동시에 사라진다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>graph.h만 include guard가 없다</h3></header>
+        <div class="prose">
+          <p><code>fileIO.h:1</code>, <code>measure.h:1</code>, <code>to_string.h:1</code>은 모두 <code>#pragma once</code>로 시작하는데 <code>graph.h</code>에는 없다. 지금은 각 <code>.cc</code>가 한 번씩만 include해서 드러나지 않지만, <code>graph.h</code>가 두 번 포함되는 순간 <code>struct edge_</code>와 <code>operator&gt;&gt;</code> 재정의로 컴파일이 깨진다. 헤더 네 개 중 셋에 있는 것이 넷째에 빠진 전형적인 누락이다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>include 경로가 백슬래시라 Windows 밖에서는 빌드되지 않는다</h3></header>
+        <div class="prose">
+          <p>다섯 개 <code>.cc</code> 전부가 <code>#include "headers\graph.h"</code>(각 파일 10–12행)로 되어 있고 데이터 경로도 <code>"data\\graph"</code>(예: <code>Problem1.cc:104</code>)다. 손대지 않은 원본을 macOS의 <code>g++</code>로 빌드하면 즉시 실패한다.</p>
+        </div>
+        <div class="ev">
+          <div class="ev-head"><b>빌드 시도</b><span>원본 그대로</span></div>
+          <pre>$ g++ -std=c++14 -Wall -Wextra -o /dev/null Problem1.cc
+<span class="hl">Problem1.cc:10:10: fatal error: 'headers\graph.h' file not found</span>
+   10 | #include "headers\graph.h"
+1 error generated.</pre>
+        </div>
+        <div class="prose">
+          <p>2015년 MinGW 환경에서 쓴 코드이므로 당시로서는 문제가 없었고, <code>to_string.h</code>의 주석("<code>with MinGW(gcc for windows) can't find to_string function</code>")이 그 맥락을 솔직히 남겨두고 있다. 슬래시로만 바꾸면 <code>-Wall -Wextra</code>에서 <code>Problem2</code> 계열 셋은 경고 0건, <code>Problem1</code> 계열은 sign-compare 경고 5건으로 깨끗이 빌드된다. 한 글자 차이로 이식성을 버린 셈이다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>out.bat</code>이 디렉터리의 모든 <code>.exe</code>를 순회하며 <code>*.out</code> 로그를 갱신하고, 그 로그가 레포에 커밋되어 있다. 덕분에 3년 전 Windows 실행 결과와 오늘 macOS 재현 결과를 직접 대조할 수 있었고(값이 전부 일치했다) 이 보고서의 지적 상당수가 추정이 아닌 확인이 되었다. "돌렸다고 주장만 하고 증거는 없는" 학부 과제 대비 명확한 우위다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 문서 대조 ============ -->
+  <section>
+    <h2>보고서 문서와 코드의 대조</h2>
+    <p class="prose">브리프가 지정한 핵심 평가 포인트다. <code>선형대수 프로젝트 보고서.docx</code>(12쪽, Introduction / Related Works / Presets / Problem1 / Problem2 / Concluding Remarks / Reference)의 주장을 하나씩 코드와 로그에 대봤다.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>보고서의 주장</th><th>대조 결과</th><th>판정</th></tr></thead>
+        <tbody>
+          <tr><td>graph0의 최대 유량은 18</td><td><code>problem1.out</code>·재현 실행·독립 구현 모두 18</td><td class="g g-hi">일치</td></tr>
+          <tr><td>graph0의 최소 비용은 109</td><td>세 구현 모두 109. 필자의 파이썬 MCMF도 <code>flow=9, cost=109</code></td><td class="g g-hi">일치</td></tr>
+          <tr><td>Problem1i는 "지나야만 하는 간선을 확정하는 방식"</td><td>해당 로직 없음. 인접 리스트 + BFS당 복수 경로 증가. 전제 명제도 거짓</td><td class="g g-lo">불일치</td></tr>
+          <tr><td>Problem2i는 "PQ로 최적 경로만 선택"</td><td>PQ가 정점 번호 기준 max-heap. settled 집합 없음 → Dijkstra 아님</td><td class="g g-lo">불일치</td></tr>
+          <tr><td>Problem2ii는 "중복 제거로 Dijkstra 최적화"</td><td><code>found</code> 배열 존재. 다만 2i의 PQ를 더한 게 아니라 들어낸 것</td><td class="g g-mid">부분 일치</td></tr>
+          <tr><td>"1000번 실행하는데 0.078초" 등 Solution 절 수치</td><td>코드는 <code>TIME_TEST(test, 10000)</code>. 로그도 <code>execution time(10000)</code></td><td class="g g-mid">단위 오기</td></tr>
+          <tr><td>Analysis 절 수치(graph1 1.63/0.75/0.58 등)</td><td><code>Problem2*.out</code>의 10000회 수치(1.589/0.735/0.547)와 일치</td><td class="g g-hi">일치</td></tr>
+          <tr><td>"graph8, 9에서는 Problem1i가 더 느리다"</td><td>로그 확인: graph8 0.063→0.078, graph9 0.062→0.094</td><td class="g g-hi">일치</td></tr>
+          <tr><td>graph2는 <code>V=12, E=36</code></td><td>파일의 실제 간선은 34개. 파서가 <code>0 0 0 0</code> 두 개를 채워 넣음</td><td class="g g-lo">불일치</td></tr>
+          <tr><td>M=9에 대한 성능 비교 (Problem 2 Analysis)</td><td>근거로 든 graph1은 최대 유량 4. 비용을 구한 적이 없는 실행</td><td class="g g-lo">불일치</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose stack" style="margin-top:22px">
+      <p>같은 문서에서 Solution 절은 "1000번", Analysis 절은 실제 10000회 수치를 쓰고 있다. 두 절의 숫자가 대략 10배 차이 나는데 둘 다 같은 단위로 서술되어 있으므로, 문서만 읽는 채점자는 Problem2(0.331초)가 Problem2ii(0.078초)보다 4배 느리다고 읽고, 같은 문서 뒤쪽에서 graph1에 대해 1.63초 대 0.58초라는 3배 차이를 본다. 어느 쪽도 틀리지 않았지만 나란히 놓으면 앞뒤가 맞지 않는다. 소스의 주석 <code>//test 1000 times</code>(<code>Problem1.cc:112</code> 등)가 <code>TIME_TEST(test, 10000)</code> 바로 위에 남아 있는 것으로 보아 개발 도중 1000에서 10000으로 올리고 문서와 주석을 갱신하지 않은 것으로 추정된다.</p>
+      <p>한편 <code>MCMF.png</code>는 과제물이 아니다. Concluding Remarks가 "얼마 전에 치러진 ACM-ICPC 본선 대회에서 나온 문제 중 하나였고, 우리 팀은 팀 노트에 이 MCMF의 코드를 미리 적어가지 않아서 … 풀지 못했던 문제였다. (문제는 첨부된 mcmf.png)"라고 명시한다. 601×808 PNG 한 장이고, 문서가 그 출처를 밝히고 있으므로 이 첨부는 정당하다. 선형대수 과제에 유량 알고리즘이 들어온 것도 마찬가지로 정당하다 — 4번 문제가 원래 네트워크 유량 문제였다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 레포 위생 ============ -->
+  <section>
+    <h2>레포 위생</h2>
+    <div class="stack-lg">
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>Windows 실행 파일 5개가 커밋되어 있고, .gitignore는 그것을 막지 않는다</h3></header>
+        <div class="prose">
+          <p><code>git ls-files</code> 기준 추적 파일 37개, 총 3,370,801바이트. 이 중 <code>*.exe</code> 다섯 개가 1,490,518바이트(약 44%)다. <code>file</code>로 확인하면 전부 <code>PE32 executable (console) Intel 80386 (stripped to external PDB), for MS Windows</code>, 즉 macOS·Linux에서는 실행조차 되지 않는 산출물이다.</p>
+          <p>아이러니한 것은 <code>.gitignore</code>가 3,121바이트짜리 Visual Studio 표준 템플릿이라는 점이다. <code>[Dd]ebug/</code>, <code>[Bb]in/</code>, <code>[Oo]bj/</code>는 무시하지만 <code>*.exe</code> 항목이 없고, <code>git check-ignore -v LinearAlgebra/Problem1.exe</code>는 아무것도 반환하지 않는다. 빌드 산출물을 프로젝트 루트에 직접 떨어뜨렸기 때문에 디렉터리 기반 규칙을 전부 비껴갔다. 커밋 이력상 <code>da066e3 finished code</code>, <code>4174a3b MCMF Improved!!</code>, <code>5575894 FINSH PROJECT</code> 세 번에 걸쳐 추가되었으므로 한 번의 실수가 아니라 습관이다.</p>
+          <p>텍스트 로그인 <code>*.out</code>(1.1–1.3KB)은 사정이 다르다. 재현 대조에 실제로 쓰였고 크기도 작아 커밋할 이유가 있다. 지적 대상은 <code>.exe</code>다.</p>
+        </div>
+      </article>
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>같은 보고서가 세 벌, 서로 다른 내용으로 들어 있다</h3></header>
+        <div class="prose">
+          <p>루트에 <code>선형대수 프로젝트 보고서.docx</code>(702KB)와 <code>.pdf</code>(594KB)가 있고, 별도로 <code>LinearAlgebra/report.pdf</code>(285KB)가 있다. 세 번째 파일은 앞의 PDF와 md5가 다르고 크기도 절반 이하이므로 동일본이 아니다(이전 초안으로 <strong>추정</strong>된다 — 환경에 <code>pdftotext</code>가 없어 내용 대조는 하지 못했다). 어느 것이 제출본인지 레포만 보고는 알 수 없다. <code>README.md</code>는 세 줄뿐이라 도움이 되지 않는다.</p>
+        </div>
+      </article>
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>커밋 16개 중 3개가 에디터 연동 테스트다</h3></header>
+        <div class="prose">
+          <p><code>cc5306e commit test @ sublimetext3</code>, <code>73ad072 git commit test sublimeText3</code>, <code>0d1bff3 git commit test sublimetext3</code>가 2015-11-29 하루에 연달아 있다. 이력의 19%가 내용이 없는 커밋이고, <code>5575894 FINSH PROJECT</code>에는 오타가 있다. 과제 규모를 감안하면 치명적이지 않지만, 이력 자체가 산출물의 일부라는 감각은 아직 없다.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 반복 패턴 ============ -->
+  <section>
+    <h2>반복되는 패턴</h2>
+    <ol class="rank">
+      <li><div><strong>문서가 코드보다 앞서간다.</strong> 세 개의 "개선" 중 둘은 문서가 설명한 기제가 코드에 없다. Problem1i의 포화 간선 확정, Problem2i의 거리 기반 우선순위 큐. 흥미로운 것은 두 경우 모두 <em>결과</em>는 맞고 <em>속도 향상</em>도 실재한다는 점이다. 저자는 무언가를 개선했지만 자기가 개선한 것이 무엇인지 설명하지 못했다. 코드를 고친 뒤 문서를 갱신하지 않은 흔적(<code>//test 1000 times</code> 주석 대 <code>TIME_TEST(test, 10000)</code>)이 같은 패턴의 작은 판본이다.</div></li>
+      <li><div><strong>실패를 정상값으로 인코딩한다.</strong> MCMF의 <code>return 0</code>, 파서가 EOF 이후 간선을 <code>0 0 0 0</code>으로 채우고 <code>g.E</code>를 덮어쓰는 것. 두 경우 모두 호출자가 실패를 알 수 없게 만든다. 그리고 두 경우 모두 실제로 데이터셋에서 발동했다(벤치마크 10개 중 7개, graph2 1개). 예외나 <code>optional</code>이 없던 시절 코드라는 점을 감안해도, 최소한 <code>-1</code>을 돌려주거나 <code>cerr</code>에 한 줄 찍는 선택지는 있었다.</div></li>
+      <li><div><strong>측정 인프라는 세우는데 측정 대상은 검증하지 않는다.</strong> 공통 <code>main</code>, 공통 타이머, 10000회 반복, 배치 로그 스크립트까지 갖췄다. 비교 공정성을 진지하게 의식했다는 증거다. 그런데 그 정성을 "내가 재는 실행이 실제로 답을 내고 있는가"에는 한 번도 쓰지 않았다. 로그에 <code>cost: 0</code>이 일곱 줄 찍혀 있는데도 그냥 지나쳤다. 도구는 만들 줄 알지만 도구가 내놓은 숫자를 의심하는 습관이 아직 없다.</div></li>
+      <li><div><strong>정직성은 있다.</strong> 반복 패턴으로 적을 만큼 일관된다. 자기 개선판이 graph8·graph9에서 더 느리다는 불리한 결과를 보고서에 그대로 썼고(로그와 일치), MinGW에서 <code>to_string</code>이 없어 직접 구현했다는 사실을 주석으로 남겼고, "다른 학생들에 비해서 편법을 사용하는 것 같은 느낌을 받았다"고 ICPC 경험에서 온 유리함을 자백했다. 결함의 대부분은 은폐가 아니라 미숙에서 온다.</div></li>
+    </ol>
+  </section>
+
+  <!-- ============ 권고 ============ -->
+  <section>
+    <h2>지금 손본다면</h2>
+    <ol class="rank">
+      <li><div><strong>MCMF의 실패 경로를 값이 아니라 상태로 표현한다.</strong> <code>return 0</code>을 <code>return -1</code>(또는 <code>{achieved_flow, cost}</code> 쌍)로 바꾸고 <code>main</code>에서 "요청 유량 미달" 메시지를 찍는다. 세 파일에서 두 줄씩, 총 6줄. 이것만 해도 벤치마크 10개 중 7개가 무효라는 사실이 로그 첫 실행에서 드러난다. 비용 대비 효과가 압도적으로 크다.</div></li>
+      <li><div><strong>벤치마크 데이터셋을 M=9로 실현 가능한 그래프로 교체한다.</strong> 현재 유효한 비교 대상은 graph0·graph2·graph3 셋뿐이다. 최대 유량이 9 이상인 그래프를 더 만들거나, 각 그래프별로 그 그래프의 최대 유량을 M으로 주도록 <code>main</code>을 고친다(<code>Problem2.cc:143</code>의 <code>int flow = 9;</code>가 하드코딩 지점이다). 그래야 보고서 Analysis 절의 결론이 성립한다.</div></li>
+      <li><div><strong>Problem2i의 큐 정렬 키를 뒤집는다.</strong> <code>qu.push({t, dist[t]})</code>를 <code>qu.push({-dist[t], t})</code>로 바꾸고 settled 배열을 추가하면 비로소 보고서가 설명한 Dijkstra가 된다. 그 상태에서 Problem2ii와 다시 비교해야 "PQ Dijkstra 대 배열 Dijkstra"라는, 저자가 하려던 진짜 실험이 성립한다.</div></li>
+      <li><div><strong>파서에 <code>if (!is) break;</code> 한 줄과 정점 범위 검사를 넣는다.</strong> <code>graph.h:33</code> 직후다. graph2의 간선 수 오류를 즉시 드러내고, 잘못된 정점 번호로 인한 범위 밖 쓰기도 막는다. 같은 김에 <code>#pragma once</code>를 추가하고 <code>vector&lt;edge&gt;</code>로 바꿔 <code>new</code>를 없앤다.</div></li>
+      <li><div><strong><code>.gitignore</code>에 <code>*.exe</code>를 추가하고 이력에서 걷어낸다.</strong> 추적 바이트의 44%가 사라진다. <code>measure.h</code>의 <code>malloc</code>을 <code>vector&lt;double&gt;</code>로 바꾸는 것도 같은 정리 묶음에 넣는다.</div></li>
+      <li><div><strong>보고서에서 실제로 한 최적화를 다시 쓴다.</strong> Problem1i는 "포화 간선 확정"이 아니라 "인접행렬을 인접 리스트로 바꾸고 BFS 한 번에 복수 경로를 흘린다"이고, Problem2ii는 "2i에 중복 제거를 더한 것"이 아니라 "2i의 PQ를 빼고 배열 선형 탐색으로 돌아간 것"이다. 측정 단위도 10000회로 통일한다. 성능 수치는 이미 정직하므로 인과 설명만 바로잡으면 문서 전체의 신뢰도가 올라간다.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>평가 대상: <code>github.com/jiunbae/MAT2003</code> · 추적 파일 37개 · 커밋 16개 · 2015-11-02 ~ 2015-12-04 · 브랜치는 <code>master</code> 단일(원격에도 다른 브랜치 없음)</p>
+    <p>검증 방식: <code>*.cc</code> 5개와 <code>headers/*.h</code> 4개 전문 정독(894행). <code>선형대수 프로젝트 보고서.docx</code>를 <code>word/document.xml</code>에서 추출해 전문 대조(<code>pdftotext</code>는 환경에 없어 PDF 3종의 내용 대조는 못 함 — <code>LinearAlgebra/report.pdf</code>가 초안이라는 것은 md5·크기 차이에 근거한 추정이다). 원본 소스는 백슬래시 include 때문에 빌드 실패를 확인했고, 스크래치 사본에서 구분자만 슬래시로 바꿔 <code>g++ -std=c++14 -Wall -Wextra -O2</code>로 5개 전부 빌드해 10개 그래프에 실행, 커밋된 <code>*.out</code>과 결과가 전부 일치함을 확인. <code>-fsanitize=address,undefined</code>로 <code>Problem1i</code>를 graph0에 실행(무경고). <code>data/zerocost</code>·<code>data/infeas</code> 두 입력을 직접 작성해 반환값 모호성을 재현. <code>graph0</code>의 최소 비용 109는 필자가 파이썬으로 작성한 독립 SPFA-MCMF로 교차 검증. <code>graph2</code>의 유령 간선은 저자의 <code>graph.h</code>를 그대로 링크한 프로브 프로그램으로 확인. 인용한 행 번호는 모두 <code>cat -n</code>으로 확인한 실제 위치다. 레포 파일은 수정하지 않았다.</p>
+  </footer>
+
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

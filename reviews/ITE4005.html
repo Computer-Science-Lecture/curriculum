@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITE4005 데이터 사이언스</title>
+<meta name="description" content="ITE4005 데이터 사이언스 코드 감사 보고서 — 근거 기반 평가와 등급">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="home" href="../index.html">CS 커리큘럼 감사</a>
+  <span class="crumb">ITE4005</span>
+  <a class="ext" href="https://github.com/jiunbae/ITE4005" target="_blank" rel="noopener">저장소 &#8599;</a>
+</nav>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="code">ITE4005 · HANYANG UNIV · 2018 SPRING</div>
+    <h1>데이터 사이언스</h1>
+    <p class="sub">네 개의 데이터 마이닝 알고리즘이 모두 동작하고 세 개는 정답과 대조한 흔적이 남아 있다. 문제는 코드가 아니라 코드에 대한 설명이다.</p>
+    <div class="headrow">
+      <div class="stats">
+        <div class="stat"><span class="lbl">파일</span><b>98</b></div>
+        <div class="stat"><span class="lbl">커밋</span><b>90</b></div>
+        <div class="stat"><span class="lbl">기간</span><b>2018.03–06</b></div>
+        <div class="stat"><span class="lbl">코드</span><b>866 LOC</b></div>
+      </div>
+      <div class="grade"><b>B</b><span class="lbl">종합</span></div>
+    </div>
+  </header>
+
+  <!-- ============ 총평 ============ -->
+  <section>
+    <h2>총평</h2>
+    <div class="prose stack">
+      <p>Apriori, Decision Tree, DBSCAN, SVD 기반 추천 네 과제다. 네 개 모두 실제로 돌아간다. 나는 네 개를 전부 실행했고, 세 개는 레포에 들어 있는 정답 파일과 직접 대조했다. Apriori는 커밋된 출력 파일 두 개를 (집합 원소 순서를 정규화한 뒤) 한 줄도 틀리지 않고 재현했고, DBSCAN은 <code>input3</code>에서 정답 클러스터와 Jaccard 1.0000, Decision Tree는 346행 테스트셋에서 95.09% (다수결 베이스라인 67.92%), SVD는 u1에서 RMSE 0.9542를 냈다. 학부 과제로서 알고리즘 이해도는 분명히 증명됐다.</p>
+      <p>가장 잘한 것은 assignment4다. train/test가 과제에서 제공된 분리 파일이라 누수가 구조적으로 불가능한데, 그 위에서 <strong>cold-start를 실제로 구현</strong>했다. u1.test 20,000행 중 32행이 학습에 없던 아이템인데, <code>factorization.pyx:96-108</code>이 이를 감지해 전역 평균 + 사용자 편향으로 폴백한다. 학부 과제에서 이걸 빼먹고 KeyError로 죽는 경우가 훨씬 흔하다.</p>
+      <p>가장 치명적인 것은 <code>assignment2/dt.py:43</code>의 <code>calssifier</code> 오타다. README가 두 번째 문단 전체를 할애해 자랑하는 random forest 기능이, 2018-05-19 커밋 <code>909cdbe</code> 이후 <strong>아무것도 하지 않는다</strong>. 더 나쁜 것은 그 커밋 이전에는 인라인으로 작성된 forest 분기가 실제로 동작했다는 점이다. 리팩터링이 동작하던 기능을 조용히 죽였고, 아무도 알아채지 못한 채 제출됐다.</p>
+      <p>반복되는 패턴은 명확하다. <strong>코드는 문서보다 뒤처져 있고, 커밋된 결과 파일은 커밋된 코드로 재현되지 않는다.</strong> README는 존재하지 않는 gain ratio 메트릭을 광고하고, 기본 메트릭을 gini라고 적어두고 코드는 entropy를 쓰며, 보고서 문서의 모든 수식 이미지는 <code>C:\Users\maybe\...</code> 로컬 경로를 가리킨다. 결정적으로 <code>data/dt_result.txt</code>는 <code>yes</code>가 <code>ye</code>로 잘린 채 커밋돼 있다 — 같은 커밋에 들어간 <code>test/dt_result.txt</code>는 멀쩡하다.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>과제</th><th>주제</th><th>핵심 판정</th><th>등급</th></tr></thead>
+        <tbody>
+          <tr><td class="num">A1</td><td>Apriori</td><td>출력 정확·재현됨. 단 downward closure 가지치기가 없어 join 단계만 구현됨 (k=4에서 후보 455개 중 23개만 유효)</td><td class="g g-hi">B+</td></tr>
+          <tr><td class="num">A2</td><td>Decision Tree</td><td>트리 자체는 95% 정확. 그러나 random forest는 오타로 죽었고, min_gain 의미가 문서와 반대이며, 커밋된 결과 파일이 손상됨</td><td class="g g-lo">C+</td></tr>
+          <tr><td class="num">A3</td><td>DBSCAN</td><td>core/border/noise 판정 정확, 정답과 Jaccard 0.97–1.00. 이웃 탐색은 순수 파이썬 O(n²) (8,000점에 86초), 노이즈 없는 입력에서 KeyError</td><td class="g g-mid">B</td></tr>
+          <tr><td class="num">A4</td><td>Recommender (SVD)</td><td>누수 없음, cold-start 처리 검증됨, RMSE 재현됨. 그러나 베이스라인 비교가 없고 setup.py에 Surprise 라이브러리 흔적이 그대로 남음</td><td class="g g-mid">B</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ A1 ============ -->
+  <section>
+    <h2>Assignment 1 — Apriori</h2>
+    <p class="prose">500개 트랜잭션에서 최소 지지도 이상의 빈발 항목집합을 찾고 연관 규칙과 confidence를 출력한다. 외부 의존성 없이 60줄 순수 파이썬으로 작성됐고, 최소 지지도 5%에서 0.2초 만에 1,066개 규칙을 뽑는다. 커밋된 <code>outputRsupport5.txt</code>·<code>outputRsupport4.txt</code> 두 파일을 모두 재현했다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>Apriori의 가지치기 단계가 없다. join만 하고 downward closure 검사를 건너뛴다</h3></header>
+        <div class="prose">
+          <p>Apriori 알고리즘의 핵심은 두 단계다. (1) 빈발 (k-1)-항목집합을 조인해 k-후보를 만들고, (2) 그 후보의 <em>모든</em> (k-1)-부분집합이 빈발한지 확인해 아닌 것을 버린다. 이 코드에는 (1)만 있다. 두 개의 빈발 (k-1)-집합의 합집합이 크기 k이기만 하면 무조건 후보가 된다.</p>
+          <p>공짜로 얻는 성질이 아니다. 실제 <code>input.txt</code>에 최소 지지도 5%를 적용해 계측한 결과, 전체 후보 1,905개 중 <strong>552개(29%)</strong>가 가지치기로 제거 가능했다. k=4에서는 생성된 455개 중 <strong>23개만</strong> 모든 3-부분집합이 빈발했다 — 즉 95%가 낭비된 스캔이다. k=5에서는 120개 후보 전부가 무효였다. 입력이 작아 체감되지 않을 뿐, 이건 "Apriori를 구현했다"와 "brute-force에 조인 최적화를 얹었다"의 차이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment1/apriori.py#L29-L33" target="_blank" rel="noopener"><b>assignment1/apriori.py</b></a><span>:29–33</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment1/apriori.py" data-start="29" data-end="33">전체 맥락</button></div><pre>    while candidates:
+        filtered = scan()
+        result[k - 1] = filtered
+        candidates = <span class="hl">{i.union(j) for i in filtered for j in filtered if len(i.union(j)) == k}</span>
+        k += 1   <span class="cm"># ← 조인만. 부분집합이 전부 빈발한지 검사하는 prune 단계가 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>출력이 실행할 때마다 달라진다</h3></header>
+        <div class="prose">
+          <p><code>frozenset</code> 순회 순서는 파이썬 해시 시드에 의존한다. <code>','.join(item)</code>이 그 순서를 그대로 찍기 때문에 같은 입력·같은 코드로 두 번 돌리면 <code>{16,8}</code>과 <code>{8,16}</code>처럼 다른 파일이 나온다. 실제로 확인했다 — 두 번 실행한 1,066줄 출력에서 <strong>908줄이 서로 다른 텍스트</strong>였다. 규칙 집합 자체는 동일하다(원소 순서를 정렬하면 완전 일치). 그래서 채점 스크립트가 파싱하지 않고 diff를 뜨면 0점이 나온다.</p>
+          <p>커밋된 <code>outputRsupport5.txt</code>도 마찬가지 이유로 내 실행 결과와 텍스트로는 570줄이 달랐다. <code>sorted(item)</code> 한 번이면 끝날 문제였다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment1/apriori.py#L60" target="_blank" rel="noopener"><b>assignment1/apriori.py</b></a><span>:60</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment1/apriori.py" data-start="60" data-end="60">전체 맥락</button></div><pre>f.write('{{{}}}\t{{{}}}\t{:.2f}\t{:.2f}\n'.format(<span class="hl">','.join(item)</span>, <span class="hl">','.join(asso)</span>, sup, conf))
+<span class="cm">#                                                  ↑ frozenset 순회 순서 = 실행마다 달라짐</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>define()</code>의 <code>transactions</code> 인자는 한 번도 쓰이지 않는다</h3></header>
+        <div class="prose">
+          <p><code>apriori.py:37</code>에서 선언되고 <code>:56</code>에서 전달되지만 함수 본문 어디에도 등장하지 않는다. support가 이미 <code>freq</code>에 비율로 저장돼 있어 원본 트랜잭션이 필요 없어진 뒤 지우지 않은 잔재다. 노트북 프로토타입(<code>Apriori.ipynb</code>)에서도 같은 시그니처가 그대로 남아 있다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>규칙 생성에서 자기 자신을 포함하는 규칙을 제대로 제외한다. <code>:43</code>이 크기 1..len(item)의 모든 부분집합을 만든 뒤 <code>:45</code>의 <code>if not remain: continue</code>가 element == item인 경우를 걸러낸다. 실제 출력 1,066줄 전수 검사에서 좌변·우변이 겹치는 규칙은 0건, confidence &gt; 100%인 규칙도 0건이었다. 그리고 <code>getcontext().rounding=ROUND_HALF_UP</code>(<code>:16</code>)은 파이썬 기본 반올림이 banker's rounding이라는 걸 알고 대응한 것으로, 커밋 로그의 "Fix floating point error"(2018-03-26)와 맞아떨어진다.</p>
+    </div>
+  </section>
+
+  <!-- ============ A2 ============ -->
+  <section>
+    <h2>Assignment 2 — Decision Tree</h2>
+    <p class="prose">범주형 속성만 있는 분류 데이터(car evaluation, 1,382행 학습 / 346행 테스트)에 대해 결정 트리를 학습하고 예측 결과를 파일로 쓴다. 나는 entropy·gini·error 세 메트릭을 모두 돌려 정답 파일과 대조했다: <strong>entropy 95.09%</strong>, gini 89.02%, error 67.92% (다수결 베이스라인이 정확히 67.92%). 트리 자체는 제대로 동작한다. 문제는 그 주변 전부다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>오타 하나로 random forest가 통째로 죽었다 — 그것도 동작하던 코드를 갈아엎으면서</h3></header>
+        <div class="prose">
+          <p><code>calssifier</code>는 <code>classifier</code>의 오타다. 파이썬은 이 줄에서 새 지역 변수를 만들 뿐 에러를 내지 않는다. 따라서 <code>--forest N</code>을 주면 RandomForest 객체가 생성되고 즉시 버려지며, 바로 아래 <code>:46</code>은 <code>:41</code>에서 만든 단일 DecisionTree를 학습시킨다. <code>lib/forest.py</code> 54줄 전체가 도달 불가능한 죽은 코드다.</p>
+          <p>검증했다. <code>--forest 5</code>로 돌린 출력과 인자 없이 돌린 출력이 <strong>바이트 단위로 동일</strong>했다 (둘 다 95.09%). README의 두 번째 문단 전체 — "Divide learning data randomly, learn each tree, make several weak classifiers, and give the final result through voting" — 는 실행되지 않는 코드에 대한 설명이다.</p>
+          <p>더 아픈 것은 git 이력이다. <code>git log -S'calssifier'</code>로 추적하면 오타는 2018-05-19 커밋 <code>909cdbe "Update randomforest"</code>에서 들어왔다. 그 직전 리비전(<code>13dcdd5</code>)의 <code>dt.py</code>에는 <code>if args.forest == 1: ... else:</code> 분기가 있었고, else 쪽에서 실제로 트리 리스트를 만들고 <code>np.array_split</code>으로 데이터를 나눠 학습한 뒤 <code>Counter(y).most_common()[0][0]</code>으로 투표까지 했다. <strong>동작하던 기능을 클래스로 추출하는 리팩터링 중에 배선을 놓쳤고, 그 상태로 3주 뒤 학기가 끝났다.</strong></p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment2/dt.py#L41-L46" target="_blank" rel="noopener"><b>assignment2/dt.py</b></a><span>:41–46</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment2/dt.py" data-start="41" data-end="46">전체 맥락</button></div><pre>    classifier = DecisionTree(METRICS[args.metric], args.feature)
+    if args.forest &gt; 1:
+        <span class="hl">calssifier</span> = RandomForest(DecisionTree, args.forest, METRICS[args.metric], args.feature)
+                                  <span class="cm"># ↑ 오타. 이 객체는 아래에서 쓰이지 않고 버려진다</span>
+
+    # fit train data to classifier
+    classifier.fit(x_train, y_train, args.depth, args.minsize, args.mingain)</pre></div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3><code>min_gain</code>은 information gain이 아니라 불순도다 — 의미가 문서와 정반대고, 기본값 0.3이 error 메트릭을 무력화한다</h3></header>
+        <div class="prose">
+          <p><code>_gain</code>은 이름과 달리 <strong>가중 불순도의 부호를 뒤집은 값</strong>이다. 분할 선택에서는 이게 맞다(argmax = 불순도 최소). 그런데 <code>:68</code>의 조기 종료 조건은 <code>-_gain([left,right])</code>, 즉 자식 노드의 가중 불순도를 <code>min_gain</code>과 비교한다. 부모 불순도에서 빼는 과정이 없으므로 이건 information gain이 아니다.</p>
+          <p>README는 이렇게 적는다: <em>"by setting min_gain, you can avoid branching if you do not exceed the minimum information gain"</em>. 실제 동작은 반대다 — 자식이 <em>충분히 순수해지면</em> 분할을 멈춘다. 스케일도 메트릭마다 다르다. entropy는 0~log2(k) 범위이고 classification error는 0~1 범위인데, 기본값 <code>--mingain 0.3</code>(<code>dt.py:68</code>) 하나를 공유한다.</p>
+          <p>결과를 측정했다. <code>--metric error</code>로 돌리면 정확도가 <strong>67.92%</strong>로, 다수결 베이스라인(235/346 = 67.92%)과 소수점까지 일치한다. 즉 루트 분할 직후 불순도가 0.3 아래로 떨어져 트리가 단일 리프로 붕괴한다. 저자 본인의 보고서(<code>docs/Decision Tree.md:75</code>)에 이 67.92%가 "Error 메트릭의 성능"으로 적혀 있지만, 그건 메트릭의 성능이 아니라 트리가 만들어지지 않았다는 뜻이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment2/lib/tree.py#L47" target="_blank" rel="noopener"><b>assignment2/lib/tree.py</b></a><span>:47, 68</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment2/lib/tree.py" data-start="47" data-end="47">전체 맥락</button></div><pre>_gain = lambda gs: <span class="hl">-sum([self.metric(g) * len(g) / len(list(chain(*gs))) for g in gs])</span>
+                   <span class="cm"># ↑ 부모 불순도를 빼지 않음 = gain이 아니라 -(가중 불순도)</span>
+...
+elif depth &gt;= self.max_depth or <span class="hl">-_gain([left, right]) &lt; self.min_gain</span>:
+    node['left'], node['right'] = _t(left), _t(right)
+    <span class="cm"># ↑ "불순도가 임계값보다 낮으면 멈춘다". 문서가 설명하는 것과 반대 방향</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>제출된 결과 파일이 손상돼 있다 — <code>yes</code>가 <code>ye</code>로 잘렸다</h3></header>
+        <div class="prose">
+          <p><code>assignment2/data/dt_result.txt</code>의 3~5행 클래스 값이 <code>ye</code>다. 줄바꿈 문제가 아니다. 헥스 덤프로 확인했다: <code>66 61 69 72 09 79 65 0a</code> = <code>"fair\tye\n"</code>. 문자 하나가 실제로 없다.</p>
+          <p>같은 커밋(<code>13dcdd5</code>)에 들어간 <code>assignment2/test/dt_result.txt</code>는 <code>yes</code>로 정상이다. 두 파일이 같은 커밋에 함께 들어갔는데 하나만 깨져 있다는 것은, 결과를 커밋하기 전에 아무도 열어보지 않았다는 뜻이다. 현재 코드로 같은 명령을 돌리면 정답과 5/5 일치하는 정상 출력이 나온다 — 즉 손상은 과거 버전의 산물이고, 그 뒤로 갱신되지 않은 채 남아 있다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment2/data/dt_result.txt#L3" target="_blank" rel="noopener"><b>assignment2/data/dt_result.txt</b></a><span>:3 (vs test/dt_answer.txt:3)</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment2/data/dt_result.txt" data-start="3" data-end="3">전체 맥락</button></div><pre>커밋된 결과 : &lt;=30	medium	yes	fair	<span class="hl">ye</span>
+정 답      : &lt;=30	medium	yes	fair	yes
+현재 코드 실행 : &lt;=30	medium	yes	fair	yes   <span class="cm">← 지금 돌리면 정상</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>보고서의 95.66%는 커밋된 코드로 재현되지 않는다. 노트북 프로토타입의 숫자다</h3></header>
+        <div class="prose">
+          <p><code>docs/Decision Tree.md:75</code>는 dataset1에서 Entropy 95.66%를 보고한다. 커밋된 <code>data/dt_result1.txt</code>를 정답과 대조하면 정확히 331/346 = 95.66%가 나온다. 그런데 같은 디렉터리의 <code>test/dt_result1.txt</code>는 327/346 = <strong>94.51%</strong>이고, 현재 <code>dt.py</code>를 기본 인자로 돌리면 329/346 = <strong>95.09%</strong>다. 같은 입력에 대해 세 개의 서로 다른 결과가 레포에 공존한다.</p>
+          <p>원인은 <code>assignment2/Assignment.ipynb</code>에 있다. 이 노트북이 <code>./data/dt_result1.txt</code>를 직접 쓰는데, 거기서는 <code>DecisionTree(0)</code>(메트릭 자리에 정수 0)에 <code>fit(x_train, y_train, 16, 0)</code> — 즉 depth=16, min_gain 인자 없음 — 으로 학습한다. <code>dt.py</code>의 기본값(depth=32, mingain=0.3)과 다르다. 보고서의 대표 수치가 제출 코드가 아니라 프로토타입에서 나왔고, 그 사실이 어디에도 적혀 있지 않다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>미지의 속성값은 죽지는 않지만, 항상 오른쪽으로 간다</h3></header>
+        <div class="prose">
+          <p>이 부분은 걱정한 것만큼 나쁘지 않았다. <code>dt.py:31-33</code>이 train과 test를 <code>pd.concat</code>한 뒤 함께 <code>factorize</code>하기 때문에, 학습셋에 없던 범주값도 코드가 부여되어 KeyError가 나지 않는다. 실제로 <code>buying=ULTRA</code>, <code>safety=EXTREME</code>이라는 존재하지 않는 값을 넣어 돌려봤고, 예외 없이 <code>unacc</code>로 분류됐다.</p>
+          <p>다만 대가가 있다. 미지 값은 학습셋의 모든 코드보다 큰 정수를 받으므로 <code>_predict</code>의 <code>x[node['index']] &lt; node['value']</code>가 모든 노드에서 거짓이 되어 <strong>항상 오른쪽 자식으로만 내려간다.</strong> 이는 결정이 아니라 인코딩 부작용이다. 또한 인코딩이 테스트셋에 의존한다는 것은 모델이 학습 데이터만의 함수가 아니라는 뜻이다 — 다만 이 데이터셋에서는 모든 범주가 학습셋에 등장하므로 실제 영향은 없었다(테스트 파일 행 순서를 뒤집어 다시 돌렸을 때 346행 중 예측이 바뀐 행은 0건).</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment2/lib/tree.py#L77" target="_blank" rel="noopener"><b>assignment2/lib/tree.py</b></a><span>:77</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment2/lib/tree.py" data-start="77" data-end="77">전체 맥락</button></div><pre>tar = node['left'] if <span class="hl">x[node['index']] &lt; node['value']</span> else node['right']
+<span class="cm"># 미지 값은 최대 코드보다 큼 → 조건이 언제나 거짓 → 항상 right</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>README가 없는 기능을 광고하고, 기본값을 잘못 적고, 이미지를 로컬 경로로 링크한다</h3></header>
+        <div class="prose">
+          <p>세 건이다. (1) <code>README.md:43</code>은 <em>"Implement several metrics, gini, information gain and gain ratio"</em>라고 적지만 <code>lib/metric.py:74-78</code>의 <code>METRICS</code>에는 entropy·error·gini뿐이고 gain ratio는 구현되지 않았다. (2) <code>README.md:7</code>은 기본 메트릭이 gini라고 하지만 <code>dt.py:62</code>는 <code>default='entropy'</code>다 (클래스 기본값 <code>tree.py:27</code>만 Gini). (3) 제출용 보고서 <code>docs/Decision Tree.md:47-51</code>의 수식 이미지 세 개가 <code>C:\Users\maybe\Documents\Workspace\...</code>를 가리킨다. README 쪽 사본은 교내 GitLab <code>hconnect.hanyang.ac.kr</code> URL이라 외부에서는 역시 깨진다. 즉 <strong>모든 보고서의 모든 수식 이미지가 채점자에게 보이지 않았을 가능성이 높다.</strong></p>
+          <p>덧붙여 <code>tree.py:40-41</code>의 생성자 기본값 <code>self.min_gain = 0; self.min_size = .005</code>는 <code>fit()</code> 시그니처(<code>:84-85</code>)의 <code>min_size=0, min_gain=.005</code>와 서로 뒤바뀌어 있다. 동작에는 영향이 없지만(항상 <code>fit</code>이 덮어씀) 두 값을 헷갈리고 있었다는 증거다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>Assignment.ipynb</code> 마지막 셀이 <code>sum(test[y_label] == answer[y_label]), len(test[y_label])</code>다. 정답 파일과 실제로 대조했다는 명시적 증거다 — 많은 학부 과제가 "돌아가니까 됐다"에서 멈추는데 여기서는 수치를 봤다. <code>lib/metric.py</code>의 Metric 추상 클래스 + 3종 구현 + <code>METRICS</code> 레지스트리로 <code>--metric</code> 플래그를 연결한 구조도 과제 요구사항을 넘어서는 설계였다(비록 그 중 하나가 기본값 때문에 무력화됐지만).</p>
+    </div>
+  </section>
+
+  <!-- ============ A3 ============ -->
+  <section>
+    <h2>Assignment 3 — DBSCAN</h2>
+    <p class="prose">2D 좌표 데이터(2,000–8,000점)를 DBSCAN으로 군집화하고 상위 n개 클러스터를 파일로 쓴다. 세 입력을 모두 실행해 <code>test/*_ideal.txt</code>와 Jaccard로 대조했다: <code>input3</code>는 네 클러스터 중 셋이 <strong>Jaccard 1.0000</strong>, 나머지 하나가 0.9980. <code>input1</code>은 상위 여섯 클러스터가 0.87–0.99다. 알고리즘 본체는 교과서대로 정확하다. (파라미터는 레포에 기록이 없어 내가 추정한 값이므로, 낮게 나온 클러스터는 구현 결함이 아니라 내 파라미터 탓일 수 있다.)</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>이웃 탐색이 전수 스캔이다. 8,000점에 86초</h3></header>
+        <div class="prose">
+          <p><code>_neighbor</code>는 호출될 때마다 전체 데이터셋을 순회하며 파이썬 레벨에서 <code>np.linalg.norm</code>을 한 점씩 부른다. 공간 인덱스(KD-tree, grid)도, 벡터화된 거리 행렬도 없다. 게다가 core point마다 다시 호출되므로 호출 횟수가 O(n)이고 전체는 O(n²) 파이썬 연산이다.</p>
+          <p>측정했다: <code>input2</code>(2,000점) 5.7초, <code>input3</code>(2,100점) 6.4초, <code>input1</code>(8,000점) <strong>86초</strong>. 점 개수 4배에 시간 15배 — O(n²)가 그대로 드러난다. <code>self.data</code> 전체와의 거리를 <code>np.linalg.norm(self.data - self.data[index], axis=1)</code> 한 줄로 벡터화하는 것만으로도 수십 배가 빨라진다.</p>
+          <p>추가로 <code>:35</code>의 <code>neighbors += sub_neighbors</code>는 중복 제거 없이 시드 리스트를 늘린다. 이미 라벨이 붙은 점은 <code>:29-31</code>에서 걸러지지만, 같은 인덱스가 리스트에 여러 번 들어가 메모리와 순회 길이가 불필요하게 커진다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment3/lib/clustering.py#L37-L39" target="_blank" rel="noopener"><b>assignment3/lib/clustering.py</b></a><span>:37–39</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment3/lib/clustering.py" data-start="37" data-end="39">전체 맥락</button></div><pre>def _neighbor(self, index):
+    condition = lambda pos: np.linalg.norm(self.data[index] - pos) &lt;= self.eps
+    return <span class="hl">[i for i, pos in enumerate(self.data) if condition(pos)]</span>
+    <span class="cm"># ↑ 점 하나당 전체 데이터 순회 + 파이썬 루프 안에서 norm 호출</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>노이즈가 하나도 없는 입력에서 KeyError로 죽는다</h3></header>
+        <div class="prose">
+          <p><code>self._clusters</code>는 <code>defaultdict(list)</code>지만, <code>defaultdict</code>는 <code>__getitem__</code>에서만 키를 자동 생성한다. <code>__delitem__</code>은 일반 dict와 똑같이 KeyError를 낸다. 모든 점이 어떤 클러스터에 속하면 라벨 -1이 존재하지 않으므로 이 줄에서 크래시한다.</p>
+          <p>재현했다. 5개 점이 서로 eps 안에 몰려 있는 입력(<code>eps=5, minpts=3</code>)으로 돌리자 <code>KeyError: -1</code>로 종료했다. 밀집된 소규모 데이터나 넉넉한 eps를 쓰는 채점 케이스에서 충분히 발생할 수 있다. <code>clusters.pop(-1, None)</code>이면 끝이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment3/clustering.py#L25" target="_blank" rel="noopener"><b>assignment3/clustering.py</b></a><span>:25</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment3/clustering.py" data-start="25" data-end="25">전체 맥락</button></div><pre>    del clusters[-1] # delete outliers
+    <span class="cm"># → KeyError: -1   (noise가 0개일 때)</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>시간 측정 모듈이 아무것도 재지 않는다</h3></header>
+        <div class="prose">
+          <p><code>begin()</code>이 모듈 전역 <code>flag</code>가 아니라 <strong>지역 변수</strong>에 대입한다. <code>global flag</code> 선언이 없다. 따라서 <code>flag</code>는 영원히 0이고, <code>end()</code>는 구간 소요 시간이 아니라 <strong>인터프리터 시작 이후 누적 CPU 시간</strong>을 반환한다.</p>
+          <p>직접 확인했다: <code>begin()</code> 호출 후 0.14초짜리 작업을 하고 <code>end()</code>를 부르면 값이 나오지만 <code>timer.flag</code>는 여전히 0이다. 그래서 출력되는 숫자는 pandas/numpy import 시간까지 전부 포함한다 — <code>input2</code>에서 "7.825488"이 찍혔지만 실제 벽시계 시간은 5.7초였다. 커밋 <code>d91182f "Update lib.timer for time delta"</code>(2018-05-19)가 이 문제를 고치려던 시도로 보이는데, 고쳐지지 않았다. 같은 파일이 <code>assignment4/lib/timer.py</code>에 그대로 복사돼 있어 A4의 성능 수치에도 같은 오차가 실린다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment3/lib/timer.py#L3-L9" target="_blank" rel="noopener"><b>assignment3/lib/timer.py</b></a><span>:3–9 (assignment4/lib/timer.py 동일)</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment3/lib/timer.py" data-start="3" data-end="9">전체 맥락</button></div><pre>flag = 0
+
+def begin():
+    <span class="hl">flag = process_time()</span>   <span class="cm"># ← 지역 변수. global 선언 없음</span>
+
+def end():
+    return process_time() - flag   <span class="cm"># ← flag는 항상 0</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>eps</code>가 정수로 강제된다. 출력 디렉터리도 만들어주지 않는다</h3></header>
+        <div class="prose">
+          <p><code>clustering.py:50</code>이 <code>eps</code>를 <code>type=int</code>로 파싱한다. DBSCAN의 반경은 본질적으로 실수이고 좌표 스케일에 따라 0.5나 1.7 같은 값이 필요할 수 있는데 그런 입력은 argparse 단계에서 거부된다. 이 데이터셋의 좌표 범위가 커서 문제가 드러나지 않았을 뿐이다.</p>
+          <p>또한 <code>--output</code>으로 존재하지 않는 디렉터리를 주면 군집화를 다 끝낸 뒤(<code>input1</code>이면 86초 후) <code>FileNotFoundError</code>로 죽는다. <code>os.makedirs(exist_ok=True)</code> 한 줄이 없다. 실제로 겪었다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p>DBSCAN에서 가장 자주 틀리는 부분 — <strong>경계점(border point) 처리</strong> — 이 정확하다. <code>lib/clustering.py:29-30</code>이 이미 noise(-1)로 표시된 점을 현재 클러스터로 승격시키고, <code>:31-35</code>는 <em>core point인 이웃에서만</em> 시드를 확장한다(<code>len(sub_neighbors) &gt;= minpts</code> 검사). 경계점은 클러스터에 포함되되 확장의 출발점이 되지 않는다 — 교과서 정의 그대로다. 또 <code>_dbscan</code>의 <code>if self.labels[index]: continue</code>는 이미 라벨이 붙은 점을 새 시드로 삼지 않는데, noise로 판정된 점은 정의상 core가 될 수 없으므로 이 스킵도 옳다. 경계점 소속 모호성(먼저 도달한 클러스터가 가져감)은 DBSCAN 자체의 성질이지 구현 버그가 아니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ A4 ============ -->
+  <section>
+    <h2>Assignment 4 — Recommender (SVD)</h2>
+    <p class="prose">MovieLens 100K의 5-fold 분할(u1–u5.base/.test)에 대해 편향 항이 붙은 행렬 분해(FunkSVD/Koren 계열)를 SGD로 학습하고 테스트 평점을 예측한다. Cython 확장을 직접 빌드해 u1에 대해 기본 설정(factors=100, epochs=20)으로 실행했고 <strong>RMSE 0.9542</strong>를 얻었다. README가 보고하는 0.957과 일치하는 범위다. 네 과제 중 가장 잘 쓰인 모듈이다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>베이스라인 비교가 없다. 100차원 잠재 인수가 사주는 것은 2.7%다</h3></header>
+        <div class="prose">
+          <p>README와 보고서에 RMSE 다섯 개(0.957 / 0.943 / 0.936 / 0.933 / 0.933)가 표로 실려 있지만 비교 대상이 없다. 이 숫자가 좋은지 나쁜지 판단할 근거가 보고서 안에 없다.</p>
+          <p>내가 직접 계산했다. 같은 u1 분할에서 전역 평균만 쓰면 RMSE <strong>1.1537</strong>, 사용자 평균 편향 + 아이템 평균 편향이라는 세 줄짜리 베이스라인은 <strong>0.9802</strong>다. 즉 100차원 × 20 epoch SGD가 사주는 개선은 0.9802 → 0.9542, <strong>2.7%</strong>다. 나쁜 결과는 아니지만, 보고서가 이 맥락을 제공하지 않는 탓에 독자는 모델이 실제로 무엇을 기여했는지 알 수 없다. 이 계산은 10초면 끝나는 것이었다.</p>
+          <p>덧붙여 <code>random_state</code>가 있는데 <code>recommender.py</code>가 한 번도 전달하지 않는다(<code>factorization.pyx:12</code>는 <code>np.random.mtrand._rand</code>로 폴백). 같은 명령을 두 번 돌린 결과가 0.9542와 0.9527로 달랐다. 보고된 소수점 셋째 자리는 재현되지 않는 숫자다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>SGD 갱신이 표준형과 다르다. 그리고 그 사실을 저자도 알고 있었던 흔적이 있다</h3></header>
+        <div class="prose">
+          <p>행렬 분해 SGD의 표준형은 사용자 인수와 아이템 인수를 <em>같은 시점의 값</em>으로 동시에 갱신한다. 그러려면 갱신 전 값을 임시 변수에 담아야 한다. 이 코드는 <code>:69</code>에서 <code>param_user[u, f]</code>를 먼저 갱신한 뒤 <code>:70</code>에서 <strong>이미 갱신된 값</strong>으로 아이템 인수를 갱신한다. 비대칭이다.</p>
+          <p>결정적인 증거는 <code>:39</code>다. <code>cdef double r, err, dot, param_userf, param_itemf</code> — <code>param_userf</code>와 <code>param_itemf</code>는 선언만 되고 파일 어디에서도 <strong>한 번도 사용되지 않는다.</strong> 이 두 변수의 유일한 용도가 바로 "갱신 전 값 보관"이다. 즉 올바른 구조를 알고 변수까지 만들어놓고 본문에서 쓰지 않았다.</p>
+          <p>다만 영향은 정직하게 보고한다. 내가 <code>.pyx</code>를 표준형으로 고쳐 다시 빌드해 돌린 결과 RMSE는 0.9531 / 0.9525로, <strong>원본의 실행 간 편차(0.9542~0.9527) 안에 들어간다.</strong> lr=0.005에서는 실측 차이가 없다. 정확성 결함이지만 성능 결함은 아니다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment4/lib/algorithms/factorization.pyx#L39" target="_blank" rel="noopener"><b>assignment4/lib/algorithms/factorization.pyx</b></a><span>:39, 68–70</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment4/lib/algorithms/factorization.pyx" data-start="39" data-end="39">전체 맥락</button></div><pre>cdef double r, err, dot, <span class="hl">param_userf, param_itemf</span>   <span class="cm"># ← 선언만, 미사용</span>
+...
+for f in range(self.factors):
+    param_user[u, f] += lr * (err * param_item[i, f] - reg * param_user[u, f])
+    param_item[i, f] += lr * (err * <span class="hl">param_user[u, f]</span> - reg * param_item[i, f])
+                                    <span class="cm"># ↑ 바로 윗줄에서 갱신된 값을 사용</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>setup.py</code>에 Surprise 라이브러리의 흔적이 그대로 남아 있고, 출처 표기가 없다</h3></header>
+        <div class="prose">
+          <p><code>setup.py:76</code>의 console_scripts 항목이 <code>'surprise = surprise.__main__:main'</code>이다. 이 프로젝트에는 <code>surprise</code>라는 패키지도 모듈도 없다. 오픈소스 추천 라이브러리 <strong>scikit-surprise</strong>의 <code>setup.py</code>에서 그대로 복사된 줄이다.</p>
+          <p>이것만으로 단정하지는 않겠다. 하지만 정황이 겹친다 — (1) 알고리즘 구조가 Surprise의 <code>matrix_factorization.pyx</code>(편향 항 + 잠재 인수, memoryview, 동일한 갱신식 배치)와 같고, (2) 앞서 지적한 미사용 임시 변수 <code>param_userf/param_itemf</code>가 Surprise의 <code>puf/qif</code>와 정확히 같은 역할이며, (3) README·보고서 어디에도 Surprise 언급이 없다. <strong>참고한 것 자체는 문제가 아니지만, 출처를 적지 않은 것은 문제다.</strong> 한 줄이면 됐다.</p>
+          <p>라이선스도 세 갈래로 어긋난다. 레포 루트 <code>LICENSE</code>는 LGPL-3.0, <code>setup.py:59</code>는 <code>license='GPLv3+'</code>, 바로 아래 <code>:63</code>의 classifier는 <code>'License :: OSI Approved :: BSD License'</code>다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE4005/blob/HEAD/assignment4/setup.py#L75-L76" target="_blank" rel="noopener"><b>assignment4/setup.py</b></a><span>:75–76</span><button class="expand" type="button" data-repo="ITE4005" data-path="assignment4/setup.py" data-start="75" data-end="76">전체 맥락</button></div><pre>entry_points={'console_scripts':
+              [<span class="hl">'surprise = surprise.__main__:main'</span>]},
+              <span class="cm"># ↑ 이 레포에 surprise 패키지는 존재하지 않는다</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>Cython을 썼지만 뜨거운 루프가 파이썬 객체를 붙잡고 있다</h3></header>
+        <div class="prose">
+          <p>README는 <em>"matrix operation takes too long, so increase the calculation efficiency using Cython"</em>이라고 한다. 그런데 <code>SVD</code>는 <code>cdef class</code>가 아니라 평범한 <code>class</code>이고, 가장 안쪽 루프가 파이썬 호출로 가득하다. <code>:56-57</code>의 <code>np.where(unique_user == u)[0][0]</code>은 평점 × epoch마다 전체 사용자 배열을 선형 스캔한다 — 해시 맵 한 번이면 O(1)인 것을 O(n)으로 푼다. <code>:60</code>의 <code>sum(... for f in range(self.factors))</code>는 제너레이터 식이라 C 루프로 내려가지 않고, 빌드할 때 Cython이 직접 경고한다: <code>factorization.pyx:60:40: Index should be typed for more efficient access</code>.</p>
+          <p>그럼에도 u1 전체 학습이 10초에 끝나긴 한다(1 epoch 1.8초). 즉 "Cython으로 가속했다"는 서술이 틀린 것은 아니지만, 남은 성능의 대부분은 여전히 파이썬 쪽에 있다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>예측값을 평점 범위로 자르지 않는다. 그리고 지금은 빌드 자체가 안 된다</h3></header>
+        <div class="prose">
+          <p>u1.test 20,000건 중 <strong>115건</strong>이 [1, 5] 범위를 벗어난다(최소 -0.111, 최대 5.488). 평점이 1~5인 것은 도메인 상수이므로 클리핑은 공짜 개선이다 — 다만 실측 효과는 RMSE 0.9527 → 0.9523으로 작다. 과제 요구사항을 어기는 것은 아니지만, "-0.11점을 준 추천"은 제출물로서 어색하다.</p>
+          <p>또한 <code>:34, :87-88</code>의 <code>np.long_t</code>는 최신 numpy의 Cython 선언에서 제거되어, 지금 환경에서 <code>python setup.py build_ext</code>가 <code>Invalid type</code>으로 실패한다. 내가 <code>np.int64_t</code>로 바꿔야 빌드가 됐다. 2018년 기준으로는 정상이므로 감점 요소는 아니고, 재현성 관점의 기록으로만 남긴다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><strong>cold-start를 실제로 구현했고, 그것이 실제로 발동한다.</strong> <code>factorization.pyx:96-108</code>은 사용자와 아이템의 존재 여부를 따로 검사해서, 사용자만 알면 전역 평균+사용자 편향, 둘 다 알아야 잠재 인수 내적을 더한다. u1.test에는 학습셋에 없는 아이템이 참조되는 행이 <strong>32건</strong> 있는데(사용자 미지는 0건), 이 분기가 없었다면 인덱싱 예외로 죽었을 것이다. 검증했다. 그리고 train/test는 과제가 제공한 분리 파일을 각각 따로 읽으므로(<code>recommender.py:21-22</code>) 데이터 누수의 경로 자체가 없다 — <code>fit</code>은 <code>train.values</code>만, <code>predict</code>는 <code>test.values[:, :2]</code>만 본다. A2가 train+test를 concat해 인코딩한 것과 대비된다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 반복 패턴 ============ -->
+  <section>
+    <h2>반복되는 패턴</h2>
+    <ol class="rank">
+      <li><div><strong>문서가 코드보다 앞서간다.</strong> A2의 random forest(오타로 죽음), A2의 gain ratio 메트릭(미구현), A2의 "default gini"(실제로는 entropy), A2의 "min_gain = information gain"(실제로는 불순도 임계값), A4의 "Cython으로 가속"(뜨거운 루프는 여전히 파이썬). 네 과제 중 두 개에서 README의 핵심 주장이 코드로 뒷받침되지 않는다.</div></li>
+      <li><div><strong>결과 파일을 커밋하되 다시 열어보지 않는다.</strong> <code>data/dt_result.txt</code>는 <code>yes</code>가 <code>ye</code>로 잘린 채, <code>data/dt_result1.txt</code>·<code>test/dt_result1.txt</code>는 서로 다른 정확도(95.66% / 94.51%)로, 그리고 둘 다 현재 코드의 출력(95.09%)과 다른 채로 남아 있다. 결과를 생성한 코드와 커밋된 코드가 일치하는지 확인하는 단계가 없다.</div></li>
+      <li><div><strong>복사한 파일의 헤더를 고치지 않는다.</strong> <code>assignment4/lib/recommender.py:2-7</code>의 docstring은 "Decision tree / assignment#2 / This module implement decision tree"다. 추천 시스템 파일이다. 같은 파일의 <code>self.metric = (algorithm or SVD)(...)</code>도 결정 트리에서 가져온 이름이다. <code>setup.py</code>의 <code>surprise</code> entry point도 같은 습관의 산물이다.</div></li>
+      <li><div><strong>고치려 시도했으나 검증하지 않는다.</strong> 커밋 <code>d91182f "Update lib.timer for time delta"</code>는 타이머 버그를 고치려던 것으로 보이나 <code>global</code> 선언이 빠져 여전히 고쳐지지 않았고, 그 상태로 두 과제에 복사됐다. 커밋 <code>909cdbe "Update randomforest"</code>는 동작하던 기능을 리팩터링하면서 오타로 죽였다. 두 경우 모두 커밋 후 한 번만 돌려봤으면 발견됐다.</div></li>
+      <li><div><strong>성능 주장에 비교 대상이 없다.</strong> A2의 정확도 표에도 다수결 베이스라인이 없고(그래서 error 메트릭 67.92%가 "트리가 안 만들어졌다"는 신호인 걸 놓쳤다), A4의 RMSE 표에도 전역 평균이나 편향 베이스라인이 없다. 숫자는 성실하게 모았는데 그 숫자를 해석할 기준선을 만들지 않았다.</div></li>
+      <li><div><strong>레포 위생.</strong> Windows PE32 실행 파일 네 개(<code>assignment1/PA1.exe</code>, <code>assignment2/test/dt_test.exe</code>, <code>assignment3/test/PA3.exe</code>, <code>assignment4/test/PA4.exe</code>)가 커밋돼 있다. 조교가 배포한 검증 도구로 보이지만, 바이너리는 소스 저장소에 들어갈 것이 아니다. 추적 파일 98개 중 18개가 바이너리(exe/png/pdf)이고, <code>assignment4/data</code>의 MovieLens 원본 9.4MB도 그대로 들어 있다.</div></li>
+    </ol>
+  </section>
+
+  <!-- ============ 권고 ============ -->
+  <section>
+    <h2>지금 손본다면</h2>
+    <ol class="rank">
+      <li><div><strong><code>dt.py:43</code>의 <code>calssifier</code>를 <code>classifier</code>로 고친다.</strong> 한 글자. README가 자랑하는 기능이 살아난다. 그리고 이 사건이 정확히 린터가 잡아내는 부류(할당 후 미사용 지역 변수)라는 점을 기억할 것.</div></li>
+      <li><div><strong><code>lib/timer.py</code>의 <code>begin()</code>에 <code>global flag</code>를 추가한다.</strong> 한 줄. 두 과제의 모든 성능 수치가 그제서야 의미를 갖는다.</div></li>
+      <li><div><strong><code>min_gain</code>의 이름을 <code>max_impurity</code>로 바꾸거나, 진짜 information gain(부모 불순도 − 가중 자식 불순도)을 계산한다.</strong> 후자가 맞다. 그러면 <code>--metric error</code>가 다수결로 붕괴하지 않고, 임계값 0.3을 메트릭마다 다시 정할 필요도 없어진다.</div></li>
+      <li><div><strong>Apriori에 prune 단계를 넣는다.</strong> <code>candidates = {c for c in joined if all(frozenset(s) in prev_frequent for s in combinations(c, k-1))}</code> 한 줄이다. 측정한 입력에서 29%, k=4에서는 95%의 후보 스캔이 사라진다. 알고리즘 이름값을 하게 된다.</div></li>
+      <li><div><strong>DBSCAN의 <code>_neighbor</code>를 벡터화한다.</strong> <code>np.where(np.linalg.norm(self.data - self.data[index], axis=1) &lt;= self.eps)[0]</code>. <code>input1</code>의 86초가 수 초로 줄어든다. 그 다음이 KD-tree다.</div></li>
+      <li><div><strong>보고서마다 베이스라인 한 줄을 추가한다.</strong> A2는 다수결 정확도(67.92%), A4는 전역 평균 RMSE(1.1537)와 편향 베이스라인(0.9802). 계산에 각각 10초가 든다. 이게 있었다면 A2의 error 메트릭 붕괴를 본인이 먼저 발견했을 것이다.</div></li>
+      <li><div><strong><code>setup.py:76</code>의 surprise entry point를 지우고, README에 참고 구현을 명시한다.</strong> 그리고 라이선스를 하나로 통일한다(LICENSE=LGPL-3.0 / setup.py=GPLv3+ / classifier=BSD).</div></li>
+      <li><div><strong>결과 파일을 다시 생성하고 git에서 바이너리를 뺀다.</strong> <code>data/dt_result*.txt</code>는 현재 코드로 재생성하고, <code>*.exe</code> 네 개는 <code>.gitignore</code>로 보낸다.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>평가 대상: <code>github.com/jiunbae/ITE4005</code> · 커밋 90개 · 2018-03-19 ~ 2018-06-15 (HEAD <code>1bb6fd1</code>) · 추적 파일 98개 · Python 866 LOC · 브랜치 <code>add-license-1/2</code>는 라이선스 추가분 외에 구현이 없음을 확인</p>
+    <p>검증 방식: 네 과제의 모든 소스(<code>apriori.py</code>, <code>dt.py</code>+<code>lib/</code>, <code>clustering.py</code>+<code>lib/</code>, <code>recommender.py</code>+<code>lib/</code>+<code>factorization.pyx</code>)와 README·보고서 마크다운 전량 정독. 인용한 행 번호와 코드는 모두 실제 파일에서 확인.</p>
+    <p>실행: (1) Apriori를 지지도 5%·4%·1%로 실행해 커밋된 출력 두 개를 재현하고, 두 번 실행해 출력 비결정성을 확인했으며, 가지치기 손실을 별도 스크립트로 계측. (2) Decision Tree를 entropy/gini/error 및 <code>--forest 5</code>/<code>--mingain 0</code>으로 실행해 정답 파일과 대조(<code>pandas.get_values()</code>가 최신 pandas에서 제거되어 사본에서 해당 호출만 제거). 미지 속성값 입력을 합성해 동작 확인. (3) DBSCAN을 input1/2/3에 대해 실행해 <code>*_ideal.txt</code>와 Jaccard 대조(파라미터는 레포에 기록이 없어 추정값 사용), 노이즈 0개 입력으로 KeyError 재현, 타이머 버그를 별도 스크립트로 증명. (4) Cython 확장을 <code>np.long_t</code>→<code>np.int64_t</code>로 수정해 빌드한 뒤 u1 전체를 학습·평가하고, SGD 갱신식을 표준형으로 고친 사본과 RMSE를 비교. 베이스라인 RMSE와 cold-start 건수는 직접 계산. 레포 파일은 일절 수정하지 않았고 모든 실행은 사본에서 수행.</p>
+  </footer>
+
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

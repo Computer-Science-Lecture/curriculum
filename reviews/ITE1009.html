@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITE1009 C 프로그래밍</title>
+<meta name="description" content="ITE1009 C 프로그래밍 코드 감사 보고서 — 근거 기반 평가와 등급">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="home" href="../index.html">CS 커리큘럼 감사</a>
+  <span class="crumb">ITE1009</span>
+  <a class="ext" href="https://github.com/jiunbae/ITE1009" target="_blank" rel="noopener">저장소 &#8599;</a>
+</nav>
+<div class="wrap">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="code">ITE1009 · HANYANG UNIV · 2015 FALL</div>
+    <h1>C 프로그래밍</h1>
+    <p class="sub">두 개의 레포가 한 디렉터리에 섞여 있다. 하나는 남의 책을 베껴 쓴 학습 기록이고, 다른 하나는 1학년이 혼자 만든 1,500줄짜리 Win32 음악 리스트 앱이다. 평가받아야 할 것은 후자뿐이다.</p>
+    <div class="headrow">
+      <div class="stats">
+        <div class="stat"><span class="lbl">추적 파일</span><b>196</b></div>
+        <div class="stat"><span class="lbl">커밋</span><b>34</b></div>
+        <div class="stat"><span class="lbl">기간</span><b>2015.10–2016.01</b></div>
+        <div class="stat"><span class="lbl">스택</span><b>C / C++ Win32</b></div>
+      </div>
+      <div class="grade"><b>C+</b><span class="lbl">종합</span></div>
+    </div>
+  </header>
+
+  <!-- ============ 총평 ============ -->
+  <section>
+    <h2>총평</h2>
+    <div class="prose stack">
+      <p>레포는 두 덩어리다. <code>15-10-6</code>부터 <code>15-11-25</code>까지의 날짜 디렉터리는 Zed Shaw의 <em>Learn C the Hard Way</em>를 따라 친 기록이고, <code>Assignment#3</code>·<code>Assignment#4</code>는 Win32 API로 만든 음악 리스트 GUI 애플리케이션이다. 앞쪽은 과제 산출물이 아니라 연습 기록이므로 저자의 실력으로 평가할 수 없다. 뒤쪽은 전부 저자가 쓴 코드이고, 1학년 1학기 C 수업 과제로서는 놀랄 만큼 야심 차다 — 템플릿 컨테이너, 가상 상속 기반 도형 계층, 더블 버퍼링, 접두사 역인덱스 검색까지 들어 있다.</p>
+      <p>가장 잘한 것: <code>Assignment#4/musicList/musicList.cpp:31–63</code>의 <code>tableInsert</code>. 곡 제목을 공백·슬래시·하이픈으로 쪼갠 뒤 각 단어의 모든 접두사를 <code>unordered_map&lt;string, vector&lt;size_t&gt;&gt;</code>에 등록한다. 즉 타이핑 한 글자마다 O(1) 조회로 증분 검색이 되게 만들어 뒀다. 1학년이 자력으로 역인덱스를 설계해 붙였다는 건 그 자체로 가산점이다.</p>
+      <p>가장 치명적인 것: Assignment#4의 유일한 변경분이 "저장 포맷을 XML로 바꾸기"인데, 그 XML 라이터가 <strong>모든 닫는 태그를 <code>&lt;/name&gt;</code>으로 쓴다.</strong> 레포에 커밋된 <code>list.xml</code>, <code>list2.xml</code>, <code>list3.xml</code> 세 개 모두 XML 파서를 통과하지 못한다(아래에서 <code>xmllint</code> 출력으로 증명). 자기가 쓴 리더가 태그 이름을 보지 않도록 짜여 있어서 앱 안에서는 왕복이 되고, 그래서 이 버그는 저자에게 끝내 보이지 않았다.</p>
+      <p>덧붙여, 날짜 디렉터리 약 4,000줄 중 저자가 쓴 것은 <code>15-11-09/LinkedList/</code>와 <code>15-11-03</code>·<code>15-11-25</code>의 C++ 변환 시도뿐이다. 나머지는 Zed Shaw와 Paul Hsieh의 코드이고, <strong>출처 표기는 <code>bstrlib.c</code>가 원본에 달고 있던 헤더 하나가 전부다.</strong> README는 59바이트이며 아무것도 설명하지 않는다.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>구획</th><th>내용</th><th>핵심 판정</th><th>등급</th></tr></thead>
+        <tbody>
+          <tr><td class="num">15-10-6 ~ 15-11-09</td><td>LCTHW ex1–ex22, list/darray/hashmap</td><td>거의 전부 책 필사. 출처 표기 없음. 평가 대상 아님</td><td class="g g-lo">—</td></tr>
+          <tr><td class="num">15-11-09/LinkedList</td><td>단일 연결 리스트 (저자 작성)</td><td>컴파일·동작함. <code>find_index</code> 반환값 모호, 입력 검증 없어 segfault 재현</td><td class="g g-mid">C+</td></tr>
+          <tr><td class="num">15-11-03 / 15-11-25</td><td>List의 C++ 클래스 변환 (저자 작성)</td><td>컴파일 자체가 안 됨. 3주 뒤 한 글자도 안 고치고 재커밋</td><td class="g g-lo">F</td></tr>
+          <tr><td class="num">Assignment#3</td><td>musicList — Win32 GUI, 줄 단위 저장</td><td>설계 야심적. 메모리·UB 결함 다수지만 기능은 성립</td><td class="g g-mid">B-</td></tr>
+          <tr><td class="num">Assignment#4</td><td>musicList — 저장 포맷을 XML로 교체</td><td>과제의 전부인 XML이 XML이 아님. 커밋된 데이터 3개 전부 파싱 실패</td><td class="g g-lo">C</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 코드 출처 ============ -->
+  <section>
+    <h2>먼저: 어디까지가 저자의 코드인가</h2>
+    <p class="prose">이 레포를 평가하기 전에 반드시 갈라야 하는 선이다. 날짜 디렉터리의 파일 헤더와 내용을 직접 대조한 결과는 다음과 같다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>날짜 디렉터리의 C 코드는 대부분 Learn C the Hard Way 예제이며, 출처가 어디에도 적혀 있지 않다</h3></header>
+        <div class="prose">
+          <p><code>ex1.c</code>부터 <code>ex22_main.c</code>까지가 책의 예제 번호를 그대로 쓴다. 내용도 그대로다 — <code>ex7.c</code>는 저자 이름 자리에 "Zed" "Shaw"를 넣어 출력하고, <code>ex12.c</code>는 <code>"Zed A. Shaw"</code>를 문자열로 들고 있으며, <code>ex22_main.c:3</code>은 <code>const char *MY_NAME = "Zed A. Shaw";</code>다. <code>ex17.c:117</code>에는 책이 독자에게 남긴 지시문까지 그대로 따라와 있다.</p>
+          <p><code>list.c</code>, <code>list_algo.c</code>, <code>darray.c</code>, <code>hashmap.c</code>, <code>dbg.h</code>, <code>minunit.h</code>도 전부 같은 출처다. 헤더 가드가 <code>lcthw_List_h</code>, <code>_lcthw_Hashmap_h</code>, <code>lcthw_List_algos_h</code>로 되어 있다 — 책의 <code>liblcthw</code> 소스 트리에서 그대로 가져온 흔적이다. 함수 사이 공백이 <code>printf( "..." ) ;</code>, <code>who-&gt; name</code>처럼 뭉개져 있는 것은 책 PDF에서 붙여넣었을 때 생기는 전형적인 패턴이다.</p>
+          <p>결정적 증거는 <code>hashmap_algos.c</code>다. 같은 디렉터리에 <code>hashmap_algos.h</code>가 있는데도 include 경로가 책 저장소 기준 그대로 남아 있어, 커밋된 상태로는 컴파일 자체가 불가능하다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-09/hashmap_algos.c#L1-L2" target="_blank" rel="noopener"><b>15-11-09/hashmap_algos.c</b></a><span>:1–2</span><span>· gcc -std=c99 -Wall 실행 결과</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-09/hashmap_algos.c" data-start="1" data-end="2">전체 맥락</button></div><pre><span class="hl">#include &lt;lcthw/hashmap_algos.h&gt;</span>
+#include &lt;lcthw/bstrlib.h&gt;
+
+<span class="cm">hashmap_algos.c:1:10: fatal error: 'lcthw/hashmap_algos.h' file not found</span>
+<span class="cm">    1 | #include &lt;lcthw/hashmap_algos.h&gt;</span>
+<span class="cm">      |          ^~~~~~~~~~~~~~~~~~~~~~~</span></pre></div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-10-20/ex17.c#L117-L118" target="_blank" rel="noopener"><b>15-10-20/ex17.c</b></a><span>:117–118</span><span>· 책의 지시문까지 그대로</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-10-20/ex17.c" data-start="117" data-end="118">전체 맥락</button></div><pre> addr-&gt; set = 1;
+ <span class="hl">// WARNING: bug, read the "How To Break It" and fix this</span>
+ char *res = strncpy( addr-&gt; name, name, MAX_DATA) ;</pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>단, 원본 저작권 헤더를 지운 흔적은 없다</h3></header>
+        <div class="prose">
+          <p>공정하게 짚으면, 저자가 남의 저작권 표기를 <em>삭제한</em> 정황은 없다. <code>bstrlib.c</code>와 <code>bstrlib.h</code>는 Paul Hsieh의 BSD/GPL 헤더를 온전히 달고 있다. 나머지 파일들(<code>list.c</code>, <code>darray.c</code>, <code>dbg.h</code> 등)은 <em>원본에도</em> 헤더 주석이 없는 파일들이다. 즉 이것은 표기를 뜯어낸 표절이 아니라, 새로 붙였어야 할 표기를 붙이지 않은 것이다.</p>
+          <p>그래도 지적은 유효하다. 날짜 디렉터리가 과제 제출물이 아닌 개인 학습 기록이라는 점을 감안해 "치명적"이 아닌 "레포 위생"으로 다루더라도, 59바이트짜리 README에 "이 디렉터리는 LCTHW 따라 치기"라는 한 줄이 없다는 것은 10년 뒤 이 레포를 보는 사람이 <strong>저자가 쓴 코드와 책 코드를 구분할 수 없게 만든다.</strong> 실제로 채점자인 나는 이 구분을 하기 위해 파일별로 헤더 가드와 문자열 리터럴을 대조해야 했다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-09/bstrlib.c#L1-L6" target="_blank" rel="noopener"><b>15-11-09/bstrlib.c</b></a><span>:1–6</span><span>· 보존된 유일한 출처 표기</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-09/bstrlib.c" data-start="1" data-end="6">전체 맥락</button></div><pre>/*
+ * This source file is part of the bstring string library.  This code was
+ * <span class="hl">written by Paul Hsieh in 2002-2008</span>, and is covered by the BSD open source
+ * license and the GPL. Refer to the accompanying documentation for details
+ * on usage and license.
+ */</pre></div>
+      </article>
+
+    </div>
+    <div class="note" style="margin-top:22px">
+      <span class="lbl">판정</span>
+      <p>따라서 이하의 품질 평가는 <code>15-11-09/LinkedList/</code>, <code>15-11-03</code>·<code>15-11-25</code>의 <code>list.cc</code>/<code>list.h</code>, 그리고 <code>Assignment#3</code>·<code>Assignment#4</code>에만 적용한다. 이 세 덩어리가 저자가 직접 쓴 전부다.</p>
+    </div>
+  </section>
+
+  <!-- ============ Assignment 4 ============ -->
+  <section>
+    <h2>Assignment#3 / #4 — musicList (Win32 GUI)</h2>
+    <p class="prose">곡 목록을 불러와 이름/장르/앨범 세 가지 뷰로 보여주고, 증분 검색·추가·삭제·파일 저장을 지원하는 400×600 Win32 애플리케이션이다. 두 과제의 소스는 <code>main.cpp</code> 하나만 다르고 나머지는 동일하다 — <code>diff</code>로 확인한 변경분은 50줄이며, 전부 <strong>저장 포맷을 줄 단위 텍스트에서 XML로 바꾸는 작업</strong>이다. 즉 Assignment#4의 채점 대상은 사실상 그 50줄이다. macOS 환경이라 Win32 빌드는 하지 못했으므로, 아래 지적은 정독과 이식 가능한 부분의 부분 컴파일·데이터 파일 검증에 근거한다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>XML 라이터가 닫는 태그를 전부 <code>&lt;/name&gt;</code>으로 쓴다 — 레포에 커밋된 데이터 파일 3개 전부가 XML이 아니다</h3></header>
+        <div class="prose">
+          <p><code>musicListSave</code>는 <code>&lt;name&gt;</code>만 제대로 닫고, <code>&lt;album&gt;</code>·<code>&lt;artist&gt;</code>·<code>&lt;genre&gt;</code> 세 줄은 복사·붙여넣기 상태 그대로 <code>&lt;/name&gt;</code>으로 닫는다. 파일 첫 줄에는 <code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code>를 당당히 박아 놓는다.</p>
+          <p>이 버그가 살아남은 이유가 더 나쁘다. 같은 커밋에서 작성된 리더(<code>main.cpp:239</code>)는 <strong>여는 태그의 접두사만 보고, 값은 "첫 <code>&gt;</code>와 마지막 <code>&lt;</code> 사이"로 잘라낸다.</strong> 닫는 태그 이름을 아예 검사하지 않는다. 그래서 앱은 자기가 뱉은 깨진 파일을 멀쩡히 다시 읽고, 저자에게는 아무 증상이 보이지 않는다. 이 포맷은 자기 자신하고만 왕복한다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L280-L283" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:280–283</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="280" data-end="283">전체 맥락</button></div><pre>out &lt;&lt; "\t\t&lt;name&gt;"   &lt;&lt; info.name   &lt;&lt; "&lt;/name&gt;"   &lt;&lt; endl;
+out &lt;&lt; "\t\t&lt;album&gt;"  &lt;&lt; info.album  &lt;&lt; <span class="hl">"&lt;/name&gt;"</span>   &lt;&lt; endl;
+out &lt;&lt; "\t\t&lt;artist&gt;" &lt;&lt; info.artist &lt;&lt; <span class="hl">"&lt;/name&gt;"</span>   &lt;&lt; endl;
+out &lt;&lt; "\t\t&lt;genre&gt;"  &lt;&lt; info.genre  &lt;&lt; <span class="hl">"&lt;/name&gt;"</span>   &lt;&lt; endl;</pre></div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/list.xml#L5-L7" target="_blank" rel="noopener"><b>Assignment#4/musicList/list.xml</b></a><span>:5–7</span><span>· xmllint --noout 실행 결과</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/list.xml" data-start="5" data-end="7">전체 맥락</button></div><pre><span class="cm">list.xml:5: parser error : Opening and ending tag mismatch: album line 5 and name</span>
+		&lt;album&gt;Roman&lt;/name&gt;
+		                   ^
+<span class="cm">list.xml:6: parser error : Opening and ending tag mismatch: artist line 6 and name</span>
+		&lt;artist&gt;Sound Horizon&lt;/name&gt;
+<span class="cm">list.xml:7: parser error : Opening and ending tag mismatch: genre line 7 and name</span>
+		&lt;genre&gt;111&lt;/name&gt;</pre></div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L239" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:239</span><span>· 닫는 태그를 검사하지 않는 리더</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="239" data-end="239">전체 맥락</button></div><pre>args.push_back(temp.substr(temp.find_first_of('&gt;') + 1,
+    <span class="hl">temp.find_last_of('&lt;')</span> - temp.find_first_of('&gt;') - 1));</pre></div>
+      </article>
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>장르 뷰의 필드 순서가 "불러오기/삭제"와 "추가"에서 서로 다르다</h3></header>
+        <div class="prose">
+          <p><code>genreList</code>는 별도 타입을 만들지 않고 <code>musicInfo</code>의 필드 자리를 바꿔 끼워 재사용한다. 파일에서 읽을 때(<code>:232</code>)는 <code>(name, genre, album, artist)</code> 순으로 섞어 넣고, 삭제할 때(<code>:438</code>, <code>:567</code>)도 같은 순서로 섞어 찾는다. 여기까지는 일관적이다.</p>
+          <p>그런데 다이얼로그로 곡을 <em>추가</em>하는 두 경로(<code>:459</code>, <code>:549</code>)는 <strong>섞지 않은 <code>inputed</code>를 그대로 넣는다.</strong> 결과적으로 앱 실행 중에 추가한 곡은 장르 뷰에서 앨범 자리에 원래 앨범이 들어가 그룹 헤더가 어긋나고, 같은 곡을 다시 지우려 하면 섞인 키로 찾기 때문에 <code>genreList</code>에서만 삭제에 실패한다. 파일에서 불러온 곡과 방금 추가한 곡이 서로 다른 규칙으로 저장되는 상태다.</p>
+          <p>근본 원인은 필드 셔플이라는 발상 자체다. 뷰마다 정렬 키가 다르다면 정렬 비교자를 바꿨어야 했다 — <code>listElements::sort()</code>(<code>musicList.cpp:72–85</code>)에 이미 람다 비교자 두 개가 들어 있으니 세 번째를 추가하면 끝날 일이었다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L230-L232" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:230–232 (불러오기) vs :457–459 (추가)</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="230" data-end="232">전체 맥락</button></div><pre><span class="cm">// 불러오기 — 장르 뷰만 필드를 섞어 넣는다</span>
+musicList.insert(createInfo(args[0], args[1], args[2], args[3]));
+albumList.insert(createInfo(args[0], args[1], args[2], args[3]));
+genreList.insert(createInfo(<span class="hl">args[0], args[3], args[1], args[2]</span>));
+
+<span class="cm">// 추가 — 섞지 않는다</span>
+size_t idx = musicList.insert(inputed);
+albumList.insert(inputed);
+genreList.insert(<span class="hl">inputed</span>);</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>table&lt;T&gt;::remove</code>는 문법적으로 컴파일되지 않는 코드다 — 아무도 호출하지 않아서 들키지 않았다</h3></header>
+        <div class="prose">
+          <p><code>table.h:106–109</code>의 본문은 세미콜론도 <code>return</code>도 없고, 멤버 함수 <code>find</code>를 호출하지 않고 이름만 값으로 넘긴다. 템플릿이라 실체화되기 전까지는 파싱만 통과한다. <code>remove(size_t)</code>가 이것을 호출하지만 <code>remove(size_t)</code> 자체를 프로젝트 어디서도 부르지 않는다 — <code>grep</code>으로 확인한 유일한 호출 지점은 <code>table.h:103</code>, 즉 자기 자신뿐이다.</p>
+          <p>즉 이 프로젝트는 "죽은 코드가 있어서" 빌드되는 것이다. 저자가 언젠가 테이블에서 아이템 하나를 지우려고 손을 대는 순간 빌드가 깨진다. 확인을 위해 <code>object.h</code>만 스텁으로 치환한 뒤 명시적으로 실체화해 보았다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/table.h#L100-L109" target="_blank" rel="noopener"><b>Assignment#4/musicList/table.h</b></a><span>:100–109</span><span>· g++ -std=c++11 -fsyntax-only</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/table.h" data-start="100" data-end="109">전체 맥락</button></div><pre>template &lt;typename T&gt;
+bool table&lt;T&gt;::remove(size_t index)
+{
+	return this-&gt;remove(this-&gt;find(index));
+}
+template &lt;typename T&gt;
+bool table&lt;T&gt;::remove(T object)
+{
+	<span class="hl">this-&gt;indexTable.erase(this-&gt;find)</span>
+}
+
+<span class="cm">./table.h:108:31: error: reference to non-static member function must be called</span>
+<span class="cm">./table.h:108:36: error: expected ';' after expression</span>
+<span class="cm">2 errors generated.</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>indexTable</code>은 <code>vector</code> 내부를 가리키는 댕글링 포인터 맵이다</h3></header>
+        <div class="prose">
+          <p>생성자와 <code>insert</code>가 <code>&amp;(this-&gt;raw.back())</code>, 즉 <code>vector&lt;T&gt;</code> 원소의 주소를 <code>unordered_map&lt;size_t, T*&gt;</code>에 저장한다. <code>push_back</code>은 용량 초과 시 버퍼를 재할당하므로, 두 번째 <code>insert</code>부터 이전에 저장한 포인터가 전부 무효가 된다. <code>WM_CREATE</code>에서 <code>topIcon</code>·<code>botIcon</code>에 각각 4개씩 넣으므로 재할당은 실제로 일어난다.</p>
+          <p>지금 프로그램이 안 죽는 이유는 <code>indexTable</code>을 <em>읽는</em> 코드가 없기 때문이다 — 조회는 전부 <code>raw.at(index)</code>로 한다. 쓰기만 하고 읽지 않는 필드가 UB의 뇌관으로 남아 있는 상태다. 인덱스 → 원소 매핑이 필요했다면 <code>vector</code>의 첨자가 이미 그 매핑이고, 애초에 이 맵이 존재할 이유가 없다.</p>
+          <p>덧붙여 <code>table&lt;T&gt;</code>의 <code>bool visible;</code>은 생성자(<code>:44–51</code>)에서 초기화되지 않는다. <code>main.cpp</code>는 <code>topBar</code>, <code>botBar</code>, <code>topIcon</code>, <code>botIcon</code> 네 개에만 <code>setVisible</code>을 부르고 <strong><code>topBarText</code>에는 부르지 않는다.</strong> <code>FOREACH_TABLE</code>(<code>table.h:11</code>)이 <code>getVisible()</code>로 순회 시작 위치를 정하므로, 매 <code>WM_PAINT</code>마다 초기화되지 않은 <code>bool</code>을 읽는다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/table.h#L44-L51" target="_blank" rel="noopener"><b>Assignment#4/musicList/table.h</b></a><span>:44–51, :80</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/table.h" data-start="44" data-end="51">전체 맥락</button></div><pre>template &lt;typename  T&gt;
+table&lt;T&gt;::table()
+{
+	T temp;
+	this-&gt;raw.push_back(temp);
+	this-&gt;indexTable.insert({ raw.size() - 1, <span class="hl">&amp;(this-&gt;raw.back())</span> });
+	this-&gt;type = temp.type;
+	this-&gt;nullity = temp;
+}   <span class="cm">// ← bool visible; 는 여기서 초기화되지 않는다</span>
+
+<span class="cm">// insert() 도 같은 방식 — push_back 재할당 시 위 포인터는 전부 무효</span>
+	this-&gt;indexTable.insert({ this-&gt;raw.size() - 1, <span class="hl">&amp;(this-&gt;raw.back())</span> });</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>괄호 없는 <code>abs</code> 매크로 때문에 스크롤 감속이 한쪽 방향에서만 동작한다</h3></header>
+        <div class="prose">
+          <p><code>main.cpp:7</code>이 표준 라이브러리 이름 <code>abs</code>를 삼항 연산자 매크로로 덮어쓴다. 전체를 감싸는 괄호가 없다. <code>main.cpp:128</code>에서 <code>abs(X) / 10</code>으로 쓰는 순간 <code>/ 10</code>이 삼항의 <em>거짓 가지에만</em> 결합한다.</p>
+          <p>결과적으로 <code>X &gt; 0</code>일 때는 <code>X</code> 전체가, <code>X ≤ 0</code>일 때는 <code>X/10</code>만 <code>y</code>에 더해진다. 10ms 타이머로 도는 감속 애니메이션이 한쪽 방향에서는 10배 튄다. 같은 매크로를 쓴 <code>:120</code>은 우연히 <code>(abs(...)) / 10</code>처럼 한 겹 더 싸여 있어 정상 동작한다 — 같은 함수 안에서 두 줄이 서로 다르게 동작하는 셈이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L7" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:7, :120, :128</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="7" data-end="7">전체 맥락</button></div><pre>#define abs(x) <span class="hl">(x) &gt; 0 ? (x) : (-(x))</span>   <span class="cm">// 전체를 감싸는 괄호 없음</span>
+
+nList-&gt;y -= <span class="hl">(</span>abs(nList-&gt;y)<span class="hl">)</span> / 10;                          <span class="cm">// :120  우연히 정상</span>
+nList-&gt;y += (abs(nList-&gt;y - SIZEW + nList-&gt;maxY())<span class="hl">/ 10</span>);  <span class="cm">// :128  /10 이 거짓 가지에만 붙음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>메시지 루프가 <code>PeekMessage</code>로 CPU 코어 하나를 계속 태운다</h3></header>
+        <div class="prose">
+          <p>애니메이션은 전부 <code>SetTimer</code>/<code>WM_TIMER</code>로 돌아가므로 게임 루프가 필요 없다. 그런데 <code>WinMain</code>은 <code>GetMessage</code> 대신 <code>PeekMessage(PM_REMOVE)</code>를 조건 없이 반복한다. 메시지가 없어도 루프가 멈추지 않으므로 유휴 상태에서 코어 하나를 100% 점유한다. 한 글자 수정(<code>while (GetMessage(&amp;messages, NULL, 0, 0)) { ... }</code>)으로 해결되는 문제다.</p>
+          <p>바로 위 <code>:55</code>의 <code>SetProcessWorkingSetSize(hwnd, -1, -1)</code>도 잘못된 호출이다. 이 API의 첫 인자는 프로세스 <code>HANDLE</code>인데 윈도우 <code>HWND</code>를 넘기고 있다. 반환값을 검사하지 않아 실패가 조용히 묻힌다. 워킹셋을 줄이려던 의도로 보이지만 실제로는 아무 일도 일어나지 않는다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L55" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:55, :61–68</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="55" data-end="55">전체 맥락</button></div><pre>SetProcessWorkingSetSize(<span class="hl">hwnd</span>, -1, -1);   <span class="cm">// HANDLE 자리에 HWND</span>
+...
+while (messages.message != WM_QUIT)
+{
+	<span class="hl">if (PeekMessage(&amp;messages, NULL, 0, 0, PM_REMOVE))</span>   <span class="cm">// 메시지 없어도 계속 회전</span>
+	{
+		TranslateMessage(&amp;messages);
+		DispatchMessage(&amp;messages);
+	}
+}</pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>파일 다이얼로그를 열 때마다 객체가 새고, 파서 버퍼도 해제되지 않는다</h3></header>
+        <div class="prose">
+          <p><code>new OpenFileDialog()</code> / <code>new SaveFileDialog()</code>가 네 곳(<code>:476</code>, <code>:493</code>, <code>:572</code>, <code>:618</code>)에 있고 대응하는 <code>delete</code>가 하나도 없다. <code>grep</code>으로 확인한 <code>main.cpp</code> 전체의 <code>delete</code> 개수는 0이다. 더구나 두 클래스의 생성자는 각각 <code>FileName = new TCHAR[MAX_PATH]</code>를 또 할당하므로 다이얼로그 한 번당 두 덩이가 샌다. 이 객체들은 스택에 두면 될 것들이라 <code>new</code> 자체가 불필요했다.</p>
+          <p><code>musicListOpen</code>의 <code>malloc(257)</code>도 마찬가지로 해제되지 않는다. 이 함수는 <code>WM_CREATE</code>와 파일 열기 때마다 호출된다. 참고로 <code>sizeof(char) * 257</code>을 할당하고 <code>getline(buffer, 256)</code>으로 읽는데, <code>istream::getline</code>은 두 번째 인자에 널 종료를 포함한 크기를 받으므로 257은 그냥 근거 없는 여유분이다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L217-L218" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:217–218</span><span>· grep "delete" main.cpp → 0건</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="217" data-end="218">전체 맥락</button></div><pre>char * buffer = (char*)<span class="hl">malloc</span>(sizeof(char) * 257);
+while (in.getline(buffer, 256))
+{ ... }
+<span class="cm">// 함수 끝(:267)까지 free(buffer) 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>파일이 조금만 어긋나면 <code>args[0..3]</code>이 범위 밖을 읽는다</h3></header>
+        <div class="prose">
+          <p><code>&lt;/music&gt;</code>을 만나면 무조건 <code>args[0]</code>부터 <code>args[3]</code>까지 접근한다. <code>args</code>의 크기를 한 번도 확인하지 않는다. <code>&lt;music&gt;</code> 블록 안에 필드가 세 개만 있거나, 파일이 중간에 잘렸거나, 사용자가 필드 하나를 지운 XML을 열면 <code>vector::operator[]</code>가 경계 밖을 읽는다 — <code>at()</code>이 아니므로 예외도 던지지 않는다.</p>
+          <p>같은 클래스의 다른 코드에서는 <code>raw.at(idx)</code>처럼 <code>at()</code>을 쓰고 있어, 저자가 <code>at()</code>의 존재를 모르는 것은 아니다. 외부에서 들어오는 데이터를 다루는 딱 이 지점에서만 검사가 빠졌다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L228-L234" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:228–234</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="228" data-end="234">전체 맥락</button></div><pre>else if (temp == "&lt;/music&gt;")
+{
+	musicList.insert(createInfo(<span class="hl">args[0], args[1], args[2], args[3]</span>));
+	albumList.insert(createInfo(args[0], args[1], args[2], args[3]));
+	genreList.insert(createInfo(args[0], args[3], args[1], args[2]));
+	args.clear();
+}   <span class="cm">// args.size() 검사 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>operator&lt;</code>의 마지막 항이 <code>this-&gt;genre</code>다 — 복사·붙여넣기 오타</h3></header>
+        <div class="prose">
+          <p>좌변과 우변을 같은 모양으로 이어 붙이다가 마지막 항만 <code>info.genre</code> 대신 <code>this-&gt;genre</code>가 되었다. 양변에 같은 값이 들어가므로 genre는 비교에 아무 영향을 주지 않는다. 이 연산자는 바로 아래 <code>std::less&lt;musicInfo&gt;</code> 특수화(<code>:42–48</code>)가 그대로 위임받아 쓴다.</p>
+          <p>실제 피해는 제한적이다 — <code>keySearch</code>의 <code>sort</code>/<code>unique</code>(<code>main.cpp:158–159</code>)에서 검색 결과 중복 제거에만 쓰이고, name·album·artist가 전부 같고 genre만 다른 곡은 드물기 때문이다. 그래도 문자열을 연결해서 비교하는 방식 자체가 취약하다. <code>std::tie(name, album, artist, genre) &lt; std::tie(...)</code> 한 줄이면 오타도 나지 않고 (a="x", b="y")와 (a="xy", b="")를 혼동하지도 않는다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/musicList.h#L20-L22" target="_blank" rel="noopener"><b>Assignment#4/musicList/musicList.h</b></a><span>:20–22</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/musicList.h" data-start="20" data-end="22">전체 맥락</button></div><pre>bool operator&lt; (const MusicInfo&amp; info) const {
+	return (this-&gt;name + this-&gt;album + this-&gt;artist + this-&gt;genre)
+	     &lt; (info.name + info.album + info.artist + <span class="hl">this-&gt;genre</span>);
+}</pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>XOR 스왑, 중복된 <code>drawProc</code>, 매 프레임 테이블 복사</h3></header>
+        <div class="prose">
+          <p><code>drawing.cpp:94</code>의 <code>preC ^= posC ^= preC ^= posC;</code>는 한 표현식 안에서 <code>preC</code>를 두 번 수정하므로 C++14 이전 기준 미정의 동작이다. 같은 줄을 <code>std::swap(preC, posC)</code>로 쓰면 UB도 없고 의도도 드러난다.</p>
+          <p><code>:99–100</code>은 완전히 동일한 <code>drawProc</code> 호출이 두 번 연속이다. 매 행마다 같은 사각형을 두 번 그린다.</p>
+          <p><code>draw_loop_text</code>(<code>drawing.cpp:59</code>)와 <code>draw_loop_blt</code>·<code>draw_loop_proc</code>(<code>drawing.h:29</code>, <code>:42</code>)이 <code>table&lt;T&gt;</code>를 <strong>값으로</strong> 받는다. <code>WM_PAINT</code>마다 <code>vector</code>와 <code>unordered_map</code>이 통째로 복사된다. 게다가 복사본의 <code>indexTable</code>은 원본 <code>vector</code>를 가리키는 포인터를 그대로 들고 온다 — 위에서 지적한 댕글링 문제가 여기서 한 겹 더 꼬인다. <code>const table&lt;T&gt;&amp;</code>로 받았어야 한다. 바로 옆의 <code>draw_loop_list</code>는 실제로 <code>listElements&amp;</code>로 참조를 받고 있어서, 저자가 참조를 모르는 게 아니라 템플릿 쪽에서만 놓친 것으로 보인다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/drawing.cpp#L94" target="_blank" rel="noopener"><b>Assignment#4/musicList/drawing.cpp</b></a><span>:94, :99–100</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/drawing.cpp" data-start="94" data-end="94">전체 맥락</button></div><pre><span class="hl">preC ^= posC ^= preC ^= posC;</span>   <span class="cm">// 한 표현식에서 preC 2회 수정</span>
+...
+drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);
+drawProc(dc, 0, yy + 1, SIZEW, list.margin, 1, 0, posC, 0, Rectangle);  <span class="cm">// ← 동일 호출 중복</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>한글 음악 앱인데 검색창에 한글을 입력할 수 없다</h3></header>
+        <div class="prose">
+          <p>검색 입력을 <code>WM_KEYDOWN</code>에서 가상 키 코드로 직접 처리하는데, 받아들이는 범위가 <code>'A'–'Z'</code>와 <code>'0'–'9'</code>뿐이다. IME를 거치는 한글은 <code>WM_KEYDOWN</code>으로 오지 않으므로 한 글자도 입력되지 않는다. <code>WM_CHAR</code>(또는 <code>WM_IME_CHAR</code>)를 받았어야 한다. 저장된 <code>list3.xml</code>의 곡 제목이 모두 영문이라 테스트에서도 드러나지 않았을 것이다.</p>
+          <p>같은 맥락에서 <code>musicList.h:78</code>의 <code>transform(..., toupper)</code>도 위험하다. <code>char</code>를 그대로 <code>toupper</code>에 넘기는데 CP949 한글 바이트는 음수라 UB다. 인덱스 구축 경로(<code>tableInsertString</code>)에도 같은 호출이 있어, 한글 곡명은 검색 인덱스 자체가 어떻게 만들어질지 보장되지 않는다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/Assignment#4/musicList/main.cpp#L394-L404" target="_blank" rel="noopener"><b>Assignment#4/musicList/main.cpp</b></a><span>:394–404</span><button class="expand" type="button" data-repo="ITE1009" data-path="Assignment#4/musicList/main.cpp" data-start="394" data-end="404">전체 맥락</button></div><pre>default:
+	if (<span class="hl">wParam &gt;= 'A' &amp;&amp; wParam &lt;= 'Z'</span>)
+	{
+		topBarText.find(2).text += (char)(wParam - 'A' + 'a');
+		keySearch(topBarText.find(2).text, hwnd);
+	}
+	else if (<span class="hl">wParam &gt;= '0' &amp;&amp; wParam &lt;= '9'</span>)
+	{ ... }
+	break;   <span class="cm">// 한글 경로 없음</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3>다이얼로그를 취소해도 곡이 추가된다</h3></header>
+        <div class="prose">
+          <p><code>musicInputProc</code>은 <code>INPUT_OK</code>를 눌렀을 때만 전역 <code>inputed</code>를 채운다(<code>:93–101</code>). 하지만 X 버튼으로 닫아도 <code>WM_CLOSE → DestroyWindow → WM_DESTROY → PostQuitMessage</code> 경로를 타고 내부 메시지 루프가 빠져나온 뒤, 호출부(<code>:457</code>, <code>:547</code>)는 성공/취소 구분 없이 무조건 <code>musicList.insert(inputed)</code>를 실행한다. <code>inputed</code>는 전역이므로 첫 취소에는 빈 곡이, 이후 취소에는 <strong>직전에 입력했던 곡이 다시</strong> 들어간다.</p>
+          <p>다이얼로그 프로시저는 이미 <code>bool musicInput</code>이라는 전역 플래그를 쓰고 있으니, <code>INPUT_OK</code> 분기에서 성공 여부를 따로 세팅하고 호출부에서 검사하면 세 줄로 끝난다.</p>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>default:</code> 블록 안에 <code>case</code> 레이블을 숨겨 놓았다</h3></header>
+        <div class="prose">
+          <p><code>WM_KEYDOWN</code> 처리의 <code>switch</code>에서 <code>default:</code>가 블록을 열고, 그 안에 <code>case 'O'</code>, <code>case 'S'</code>, <code>case 'F'</code>가 들어 있다(<code>:472–517</code>). C++ 문법상 유효하고 실제로 동작하지만(Duff's device와 같은 원리), <code>default</code>가 나머지 case보다 <em>위에</em> 있는 형태라 읽는 사람은 이 세 단축키가 죽은 코드라고 오해하기 쉽다. 그냥 <code>default</code>를 맨 아래로 내리면 될 일이다.</p>
+          <p>같은 함수 <code>:639–641</code>에는 <code>default: break; break;</code>로 도달 불가능한 <code>break</code>가 하나 더 있다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>musicList.cpp:31–63</code> <code>tableInsert</code>는 곡 제목을 <code>" /-"</code> 구분자로 토큰화한 뒤 각 토큰의 모든 접두사를 해시 맵에 등록해, 한 글자 입력마다 O(1) 조회로 증분 검색이 되게 만들었다. <code>:52–53</code>에서 <code>sort</code>+<code>unique</code>로 중복 토큰을 걷어내는 것까지 되어 있다. 1학년 1학기 C 수업 과제에서 자력으로 역인덱스를 설계해 붙인 것은 명백한 가산점이다. 같은 파일 <code>:72–85</code>의 <code>sort()</code>가 람다 비교자로 1차·2차 정렬 키를 분리한 것도 제대로 된 선택이다 — 이 도구를 이미 손에 쥐고 있었기 때문에, 위에서 지적한 "필드 셔플" 결함이 더 아쉽다.</p>
+    </div>
+  </section>
+
+  <!-- ============ LinkedList ============ -->
+  <section>
+    <h2>15-11-09/LinkedList — 저자가 직접 쓴 연결 리스트</h2>
+    <p class="prose">날짜 디렉터리에서 유일하게 저자가 처음부터 쓴 C 코드다. 한글 주석이 함수마다 달려 있고, 동봉된 <code>option.txt</code>에는 빌드 커맨드(<code>gcc list_test.c list.c -std=c99 -o list</code>)가 적혀 있다. 그 커맨드에 <code>-Wall -Wextra</code>를 붙여 실제로 빌드하고 실행했다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3><code>find_index</code>가 "없음"과 "0번째"를 같은 값으로 반환한다 — 없는 값을 찾으면 "1번째에 있음"이라고 답한다</h3></header>
+        <div class="prose">
+          <p><code>find_index</code>는 찾으면 인덱스를, 못 찾으면 <code>0</code>을 반환한다(<code>list.c:31</code>). 첫 번째 원소의 인덱스도 <code>0</code>이므로 두 경우를 구별할 수 없다. 호출부는 이 값을 그대로 <code>1 + find_index(...)</code>로 출력한다.</p>
+          <p>실행으로 재현했다. 리스트에 <code>5</code>만 넣고 <code>77</code>을 검색하면 존재하지 않는 값에 대해 위치를 단언한다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-09/LinkedList/list.c#L24-L32" target="_blank" rel="noopener"><b>15-11-09/LinkedList/list.c</b></a><span>:24–32</span><span>· list_test.c:42</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-09/LinkedList/list.c" data-start="24" data-end="32">전체 맥락</button></div><pre>int find_index(list * head, int value)
+{
+	int result = 0;
+	for (list * iter = head-&gt;next; iter != NULL; iter = iter-&gt;next, result++)
+		if (iter-&gt;value == value)
+			return result;
+	<span class="hl">return 0;</span>   <span class="cm">// ← 0번째와 구분 불가</span>
+}
+
+<span class="cm">// list_test.c:42</span>
+printf("%d는 %d번째에 있음\n", input, 1 + find_index(List, input));</pre></div>
+        <div class="ev">
+          <div class="ev-head"><b>실행 결과</b><span>· printf 'i\n0 5\nf\n77\nq\n' | ./list</span></div>
+<pre>어디에 무엇을 삽입할것인가?: 5 -&gt;
+무엇을 할 것인가?: 무엇을 찾을것인가?: <span class="hl">77는 1번째에 있음</span>
+5 -&gt;</pre>
+        </div>
+      </article>
+
+      <article class="finding" data-sev="major">
+        <header><span class="tier">중대</span><h3>존재하지 않는 노드 뒤에 삽입하면 즉시 SIGSEGV — 재현됨</h3></header>
+        <div class="prose">
+          <p><code>list_test.c:24</code>는 <code>find</code>의 결과를 검사 없이 <code>insert_next</code>에 넘긴다. <code>find</code>는 못 찾으면 <code>NULL</code>을 반환하고, <code>insert_next</code>는 첫 줄부터 <code>node-&gt;next</code>를 역참조한다(<code>list.c:83</code>). 존재하지 않는 위치를 지정해 삽입하면 바로 죽는다.</p>
+          <p>대화형 입력과 직접 호출 두 경로 모두에서 종료 코드 <code>139</code>(SIGSEGV)를 확인했다. 근본 원인은 <code>scanf</code>의 반환값을 한 번도 확인하지 않는 것과 같은 뿌리다 — <code>list_test.c:19</code>, <code>:31</code>, <code>:40</code> 세 곳 모두 반환값을 버리므로, 숫자가 아닌 입력이 들어오면 <code>arg</code>/<code>input</code>은 <code>:14</code>에서 초기화되지 않은 채 그대로 쓰인다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-09/LinkedList/list_test.c#L19-L24" target="_blank" rel="noopener"><b>15-11-09/LinkedList/list_test.c</b></a><span>:19–24</span><span>· 실행 종료 코드 139</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-09/LinkedList/list_test.c" data-start="19" data-end="24">전체 맥락</button></div><pre>int arg, input;                       <span class="cm">// :14 초기화 없음</span>
+...
+scanf("%d %d", &amp;arg, &amp;input);         <span class="cm">// :19 반환값 미검사</span>
+
+if (!list_length(List))
+	insert(List, input);
+else if (!exist(List, input))
+	insert_next(input, <span class="hl">find(List, arg)</span>);   <span class="cm">// NULL 가능 → list.c:83 에서 역참조</span>
+
+<span class="cm">$ printf 'i\n0 5\ni\n99 7\nq\n' | ./list ; echo $?</span>
+<span class="cm">139</span></pre></div>
+      </article>
+
+      <article class="finding" data-sev="minor">
+        <header><span class="tier">경미</span><h3><code>malloc</code> 검사 없음, 도달 불가능한 방어 코드, 전체 누수</h3></header>
+        <div class="prose">
+          <p><code>create()</code>(<code>list.c:9–15</code>)는 <code>malloc</code> 반환값을 확인하지 않고 바로 <code>result-&gt;next</code>에 쓴다. <code>value</code> 필드는 초기화하지 않는다 — 헤드 노드가 쓰레기 값을 들고 다니지만 순회가 <code>head-&gt;next</code>부터 시작하도록 일관되게 짜여 있어 증상은 나지 않는다.</p>
+          <p><code>remove_node</code>(<code>:64–65</code>)의 <code>if (prev == NULL) return 0;</code>은 도달할 수 없다. <code>find_front_of</code>는 최소한 <code>head</code>를 반환하므로 절대 <code>NULL</code>이 아니다. 주석("prev가 없으면 삭제할 수 없고 0을 반환합니다")까지 붙어 있어 저자가 이 사실을 몰랐음을 보여준다. 반대로 정말 필요한 방어 — <code>node</code>가 이 리스트에 속하지 않을 때 <code>find_front_of</code>의 <code>while</code>이 리스트 끝을 넘어가는 것 — 은 빠져 있다.</p>
+          <p>프로그램 종료 시 노드를 해제하는 코드가 없다. 다만 이 구조에서 <code>free</code>가 <em>있는</em> 곳(<code>remove_node:73</code>)의 짝은 맞다.</p>
+        </div>
+      </article>
+
+    </div>
+    <div class="note good" style="margin-top:22px">
+      <span class="lbl">잘한 것</span>
+      <p><code>-Wall -Wextra</code>로 빌드했을 때 경고가 <code>unused parameter 'argc'/'argv'</code> 두 개뿐이다. 같은 레포의 다른 파일(책에서 베껴 온 <code>15-10-20/ex11.c:10</code>은 <code>non-void function does not return a value</code>)보다 오히려 깨끗하다. 그리고 헤더(<code>list.h</code>)에 함수마다 한 줄씩 한글로 계약을 적어 두었다 — 무엇을 반환하고 없을 때 무엇을 주는지까지 명시되어 있다. 1학년 1학기에 헤더를 문서로 쓰는 습관이 잡혀 있는 것은 드물다.</p>
+    </div>
+  </section>
+
+  <!-- ============ list.cc ============ -->
+  <section>
+    <h2>15-11-03 / 15-11-25 — C++ 변환 시도</h2>
+    <p class="prose">책의 C 연결 리스트를 C++ 클래스로 다시 쓰려는 시도다. 저자의 순수 창작물이지만, 컴파일이 되지 않는다. 그리고 레포에서 가장 마지막 날짜 디렉터리가 바로 이 파일이다.</p>
+    <div class="stack-lg">
+
+      <article class="finding" data-sev="critical">
+        <header><span class="tier">치명적</span><h3>한 번도 컴파일되지 않은 파일이 3주 간격으로 두 번 커밋됐다 — 두 사본은 바이트 단위로 동일하다</h3></header>
+        <div class="prose">
+          <p><code>15-11-03/list.cc</code>와 <code>15-11-25/list.cc</code>를 <code>diff</code>로 비교하면 차이가 없다. <code>list.h</code>도 동일하다. 2015-11-03에 커밋된 파일이 2015-11-25 커밋("<code>2015-11-25</code>")에서 한 글자도 수정되지 않은 채 새 디렉터리로 복사됐다. 이 두 커밋이 레포의 마지막 실습 기록이다.</p>
+          <p><code>g++ -std=c++11</code>로 빌드하면 첫 오류가 <code>list.h:11</code>에서 나온다. 문제가 한두 개가 아니다 — 아래는 확인한 것 전부다.</p>
+          <ul>
+            <li><code>list.h:11–12</code> — <code>List</code>가 선언되기 전에 <code>ListNode</code>의 생성자 인자로 쓰인다(<code>unknown type name 'List'</code>). 전방 선언한 것은 <code>ListNode</code> 자기 자신이다.</li>
+            <li><code>list.h:11</code> — 게다가 <code>ListNode(List* next, List* prev)</code>는 타입이 잘못됐다. 멤버 <code>next_</code>/<code>prev_</code>는 <code>ListNode*</code>다.</li>
+            <li><code>list.h:29–30</code> — <code>List()</code>, <code>~List()</code> 뒤에 세미콜론이 없다.</li>
+            <li><code>list.h:52</code> — <code>L-&gt;frist()</code> 오타. <code>first</code>다.</li>
+            <li><code>list.cc:56</code> — <code>~List::List()</code>. 올바른 문법은 <code>List::~List()</code>.</li>
+            <li><code>list.cc:75</code> — <code>neww ListNode(...)</code> 오타.</li>
+            <li><code>list.cc:64, 76</code> — <code>this-&gt;last_-&gt;next = node</code>. <code>next</code>는 멤버 함수이고 필드 이름은 <code>next_</code>이며 <code>private</code>다. 바로 위에 <code>setNext</code>를 정의해 놓고 쓰지 않는다.</li>
+            <li><code>list.cc:24</code> — <code>delete(this-&gt;value_)</code>. <code>void*</code>를 <code>delete</code>하는 것은 미정의 동작이다.</li>
+            <li><code>list.cc:84–87</code> — <code>List_remove</code>가 <code>void*</code>를 선언해 놓고 아무것도 반환하지 않는다.</li>
+            <li>헤더는 <code>List_push(List*, void*)</code>로 선언하고 정의는 <code>List::List_push(void*)</code>다. 선언과 정의가 하나도 맞지 않는다. 애초에 멤버 함수에 <code>List*</code> 인자가 남아 있는 것 자체가 C 코드를 기계적으로 옮기다 만 흔적이다.</li>
+          </ul>
+          <p>정직하게 말하면 이것은 "실패한 연습"이지 "제출한 과제"가 아니다. 하지만 <strong>컴파일 한 번만 돌려봤으면 즉시 알 수 있는 상태로 3주를 방치한 뒤 그대로 재커밋했다</strong>는 점은 그 자체가 습관의 문제다. 같은 시기 <code>15-11-04</code>와 <code>15-11-09</code>의 <code>list.c</code>도 바이트 단위로 동일하게 중복 커밋되어 있다.</p>
+        </div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-25/list.h#L11" target="_blank" rel="noopener"><b>15-11-25/list.h</b></a><span>:11, :29–30, :52</span><span>· g++ -std=c++11 -c</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-25/list.h" data-start="11" data-end="11">전체 맥락</button></div><pre>	ListNode(<span class="hl">List</span>* next, <span class="hl">List</span>* prev);            <span class="cm">// List 미선언 + 타입도 틀림</span>
+	...
+	<span class="hl">List()</span>                                    <span class="cm">// 세미콜론 없음</span>
+	<span class="hl">~List()</span>
+	...
+#define LIST_FOREACH(L, B, C) ... for(c = L-&gt;<span class="hl">frist</span>(); ...)   <span class="cm">// first 오타</span>
+
+<span class="cm">./list.h:11:11: error: unknown type name 'List'</span>
+<span class="cm">./list.h:29:8: error: expected ';' at end of declaration list</span>
+<span class="cm">list.cc:8:11: error: out-of-line definition of 'ListNode' does not match any declaration</span></pre></div>
+        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE1009/blob/HEAD/15-11-25/list.cc#L56" target="_blank" rel="noopener"><b>15-11-25/list.cc</b></a><span>:56, :64, :75</span><button class="expand" type="button" data-repo="ITE1009" data-path="15-11-25/list.cc" data-start="56" data-end="56">전체 맥락</button></div><pre><span class="hl">~List::List()</span>                       <span class="cm">// List::~List() 이어야 함</span>
+{
+}
+void List::List_push(void * value)
+{
+	ListNode* node = new ListNode(this-&gt;last_, NULL, value);
+	this-&gt;last_-&gt;<span class="hl">next</span> = node;             <span class="cm">// next 는 함수, 필드는 private next_</span>
+}
+void List::List_unshift(void *value)
+{
+	ListNode* node = <span class="hl">neww</span> ListNode(NULL, this-&gt;first_, value);</pre></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 커밋 패턴 ============ -->
+  <section>
+    <h2>커밋 패턴과 꾸준함</h2>
+    <div class="prose stack">
+      <p>커밋 34개, 2015-10-07부터 2016-01-06까지 3개월. 브랜치는 <code>master</code> 하나뿐이고 숨겨진 구현은 없다. 밀도는 명확하게 두 국면으로 갈린다.</p>
+      <p><strong>10-07 ~ 11-08 (책 따라 치기, 14커밋):</strong> 수업 날짜에 맞춰 주 1–2회씩 규칙적으로 올라온다. 커밋 메시지는 <code>15-10-20</code>, <code>11-03</code>처럼 날짜 그 자체다 — 무엇을 했는지가 아니라 언제 했는지를 기록하고 있다. 학습 기록으로서는 정직하지만 메시지로서는 정보가 0이다.</p>
+      <p><strong>11-08 ~ 11-15 (musicList, 12커밋):</strong> 8일 동안 12개. <code>table created!</code> → <code>object fixed! table fixed!</code> → <code>list Created!</code> → <code>find_button created!</code> → <code>finsh_fix classes</code> → <code>FINISH</code> → <code>Finished</code> → <code>class diagram fixed</code> → <code>sorted!commited!</code> → <code>fix color</code> → <code>quick setting</code> → <code>quick key setting added</code>. 느낌표가 붙기 시작하고, 기능 단위로 쪼개지고, <code>FINISH</code> 이후에도 네 번 더 손을 댄다. 과제 마감 직전에 몰아친 스프린트지만 <strong>커밋이 기능 단위로 끊겨 있고 완료 선언 후에도 다듬고 있다</strong> — 이건 좋은 신호다.</p>
+      <p>그 뒤 11-25에 실패한 <code>list.cc</code>를 재커밋하고, 12-12 <code>last commit</code>, 이듬해 1월에 프로젝트 이름과 README를 고치며 끝난다. 즉 <strong>수업이 끝나자 레포도 끝났다.</strong> 스스로 이어 붙인 흔적은 없다.</p>
+      <p><code>git log</code> 전체에서 "버그를 발견해 고쳤다"고 읽을 수 있는 커밋은 <code>object fixed! table fixed!</code>와 <code>fix color</code> 정도다. 무엇이 왜 틀렸는지 적은 메시지는 하나도 없다. 이 보고서가 지적한 결함 중 커밋 히스토리에서 스스로 잡아낸 것은 확인되지 않는다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 반복 패턴 ============ -->
+  <section>
+    <h2>반복되는 패턴</h2>
+    <ol class="rank">
+      <li><div><strong>검증 루프를 닫지 않는다.</strong> XML 라이터의 <code>&lt;/name&gt;</code> 버그는 리더가 태그 이름을 안 보기 때문에 살아남았고, <code>table&lt;T&gt;::remove</code>의 문법 오류는 아무도 호출하지 않아서 살아남았고, <code>list.cc</code>의 컴파일 오류 11개는 컴파일을 한 번도 안 돌려서 살아남았다. 셋 다 "코드를 실제로 실행/빌드해서 결과를 확인한다"는 한 동작이 빠져서 생긴 것이다. 반대로 실제로 빌드하고 실행한 <code>LinkedList</code>는 <code>-Wall -Wextra</code>에서 경고 두 개로 깨끗하다.</div></li>
+      <li><div><strong>외부에서 들어오는 데이터를 검사하지 않는다.</strong> <code>args[0..3]</code>에 <code>size()</code> 검사 없음(<code>main.cpp:230</code>), <code>find()</code>의 <code>NULL</code> 검사 없음(<code>list_test.c:24</code>, SIGSEGV로 재현), <code>scanf</code> 반환값 검사 없음(3곳), <code>malloc</code> 반환값 검사 없음, <code>SetProcessWorkingSetSize</code> 반환값 검사 없음. 내부 로직에서는 <code>at()</code>과 경계 체크를 쓸 줄 알면서, 경계를 넘어오는 지점에서만 일관되게 빠진다.</div></li>
+      <li><div><strong>손이 닿지 않는 곳에 자원을 놓아둔다.</strong> <code>delete</code> 0개에 <code>new</code> 4개, <code>free</code> 0개에 <code>malloc</code> 1개(<code>main.cpp</code>). 반면 <code>LinkedList</code>처럼 자기가 자료구조를 직접 설계한 곳에서는 <code>malloc</code>/<code>free</code>의 짝이 맞는다. 소유권 개념이 없는 게 아니라, API 호출 주변에서만 놓친다.</div></li>
+      <li><div><strong>자료구조를 재해석해서 재사용한다.</strong> <code>musicInfo</code>의 필드 자리를 바꿔 <code>genreList</code>로 쓰는 방식이 대표적이다. 새 타입이나 새 비교자를 만드는 대신 기존 것의 의미를 비틀어 끼우고, 그 비틀림을 코드 세 군데에서 각각 되돌려야 한다 — 그리고 실제로 한 군데(<code>:459</code>)에서 되돌리는 걸 잊었다. <code>table&lt;T&gt;</code>의 <code>indexTable</code>도 같은 성격이다: <code>vector</code> 첨자가 이미 하는 일을 포인터 맵으로 한 번 더 한다.</div></li>
+      <li><div><strong>레포를 설명하지 않는다.</strong> 59바이트 README, 날짜뿐인 커밋 메시지, 출처 표기 없음. 빌드 산출물 <code>.exe</code>/<code>.o</code> 17개와 이미지 85개를 포함해 바이너리 102개가 196개 추적 파일 중 절반 이상을 차지하고, 팩 크기가 19.14 MiB다. 커밋된 <code>.gitignore</code>는 Visual Studio 표준 템플릿 그대로여서 <code>*.exe</code>·<code>*.o</code>를 무시하지 않는다 — 템플릿을 가져다 놓고 자기 프로젝트에 맞게 읽어보지는 않은 것이다.</div></li>
+    </ol>
+  </section>
+
+  <!-- ============ 권고 ============ -->
+  <section>
+    <h2>지금 손본다면</h2>
+    <ol class="rank">
+      <li><div><strong>README에 세 줄 추가.</strong> "날짜 디렉터리는 <em>Learn C the Hard Way</em> (Zed A. Shaw) 예제 따라 치기, <code>bstrlib</code>은 Paul Hsieh, <code>Assignment#3/#4</code>가 직접 작성한 과제". 비용 5분. 이 레포를 보는 사람이 저자의 실력을 오판하지 않게 만드는, 가장 효과가 큰 한 수다. 지금 상태로는 채용 담당자가 <code>bstrlib.c</code> 2,962줄을 저자의 것으로 셀 수도, 반대로 <code>musicList</code>까지 베낀 것으로 의심할 수도 있다.</div></li>
+      <li><div><strong><code>main.cpp:281–283</code>의 <code>&lt;/name&gt;</code> 세 개를 고친다.</strong> 비용 3문자. 그리고 리더가 닫는 태그를 실제로 검사하도록 바꾼다 — 그래야 다음번에 같은 버그가 났을 때 앱이 스스로 알려준다. 검증은 <code>xmllint --noout list.xml</code> 한 줄이면 된다.</div></li>
+      <li><div><strong><code>main.cpp:459</code>와 <code>:549</code>를 <code>genreList.insert(createInfo(inputed.name, inputed.genre, inputed.album, inputed.artist))</code>로 맞춘다.</strong> 비용 2줄. 더 나은 수정은 필드 셔플을 없애고 <code>listElements::sort()</code>에 장르 기준 비교자를 하나 더 추가하는 것이다 — 그러면 <code>:232</code>, <code>:438</code>, <code>:567</code>의 셔플 세 군데가 모두 사라진다.</div></li>
+      <li><div><strong><code>PeekMessage</code> 루프를 <code>GetMessage</code>로 바꾸고, <code>abs</code> 매크로를 지운다.</strong> 비용 2줄. 앞의 것은 유휴 CPU 100%를 0%로 만들고, 뒤의 것은 <code>&lt;cstdlib&gt;</code>의 <code>std::abs</code>로 대체하면 <code>:128</code>의 연산자 우선순위 버그가 함께 사라진다.</div></li>
+      <li><div><strong><code>table&lt;T&gt;</code>에서 <code>indexTable</code>과 <code>remove</code>를 통째로 삭제한다.</strong> 비용: 삭제뿐. 읽히지 않는 댕글링 포인터 맵과 컴파일 불가능한 함수를 동시에 없앤다. 남는 것은 <code>vector&lt;T&gt; raw</code>와 그 첨자뿐이고, 그것으로 충분하다. 같은 김에 <code>bool visible</code>을 <code>bool visible = false;</code>로 초기화하면 <code>topBarText</code>의 미초기화 읽기도 닫힌다.</div></li>
+      <li><div><strong>빌드 산출물을 추적에서 제거한다.</strong> <code>.gitignore</code>에 <code>*.exe</code>, <code>*.o</code>를 추가하고 <code>git rm --cached</code>. 커밋된 <code>.exe</code> 17개는 그 자체로 이 레포에서 가장 오래된 보안·위생 부채다.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>평가 대상: <code>github.com/jiunbae/ITE1009</code> · 커밋 34개 (2015-10-07 ~ 2016-01-06) · 브랜치 <code>master</code> 단일 · 추적 파일 196개 (바이너리 102개) · 팩 19.14 MiB</p>
+    <p>실제 검증한 것: (1) <code>gcc -std=c99 -Wall -Wextra</code>로 <code>15-11-09/LinkedList</code>를 빌드하고 실행해 <code>find_index</code> 오답과 SIGSEGV(종료 코드 139)를 재현. (2) <code>g++ -std=c++11</code>로 <code>15-11-25/list.cc</code> 컴파일 → 오류, 로그 인용. (3) <code>table.h</code>를 스텁 타입으로 명시 실체화해 <code>table&lt;T&gt;::remove</code> 문법 오류 확인. (4) <code>xmllint --noout</code>로 <code>Assignment#4/musicList/list.xml</code> 파싱 실패 확인. (5) <code>gcc</code>로 <code>15-11-09/hashmap_algos.c</code> 컴파일 → include 경로 오류 확인. (6) <code>python3</code>로 <code>15-11-09/ex37.py</code> 실행 → <code>IndentationError</code>. (7) <code>15-11-03</code>/<code>15-11-25</code>, <code>15-11-04</code>/<code>15-11-09</code>, <code>Assignment#3</code>/<code>#4</code>를 <code>diff</code>로 대조.</p>
+    <p>미검증: <code>Assignment#3</code>·<code>#4</code>의 Win32 빌드와 실행 (macOS 환경, MSVC v140 / <code>Windows.h</code> 부재). 해당 부분 지적은 전체 소스 정독과 이식 가능한 템플릿·데이터 파일의 부분 검증에 근거한다.</p>
+  </footer>
+
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
