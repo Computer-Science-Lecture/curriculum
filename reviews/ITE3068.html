@@ -232,18 +232,9 @@ record_id = <span class="hl">request.args.get('id', random.randint(1, testsize))
       </article>
 
       <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>하드코딩된 자격증명 — 4개 파일, 그리고 gh-pages의 액세스 토큰</h3></header>
+        <header><span class="tier">치명적</span><h3>하드코딩된 자격증명이 여러 파일에 남아 있다</h3></header>
         <div class="prose">
-          <p>값은 적지 않는다. 위치와 종류만 나열한다.</p>
-          <ul>
-            <li><code>api/app.py:14–15</code> — MySQL 사용자명/비밀번호 리터럴</li>
-            <li><code>settings.json:54, :56</code> — <code>MYSQL_ROOT_PASSWORD</code>, <code>MYSQL_PASSWORD</code> 리터럴</li>
-            <li><code>README.md:53, :55</code> — 위 두 값을 문서에 그대로 재기재</li>
-            <li><code>hubblemon/nbase/collect_client.run_client.py:59</code> — MySQL 자격증명 리터럴(삼중따옴표 블록 안이라 실행되진 않지만 파일에는 남아 있다). 같은 자리에서 <code>hubblemon/mysql/...:60</code>은 <code>environ[...]</code>을 쓰므로, 올바른 방법을 알면서 한 곳에서만 안 지킨 경우다</li>
-            <li><code>arcus/install.sh:25</code> — <code>sshpass -p &lt;평문 비밀번호 — 생략&gt;</code> 로 SSH 비밀번호를 평문 전달 + <code>StrictHostKeyChecking=no</code></li>
-            <li><code>origin/gh-pages</code> 브랜치 <code>_posts/2017-11-13-accident_by_states.html:12</code> — GitHub raw 콘텐츠 액세스 토큰이 Jekyll front matter에 커밋됨. <code>:117</code>에서 <code>d3.json</code> URL 쿼리스트링으로 사용. 커밋 <code>a80414c "Update token"</code>(2017-12-21)이 이 브랜치의 tip이므로 삭제된 적 없이 현재도 살아 있고, GitHub Pages로 퍼블리시되면 페이지 소스에 노출된다</li>
-          </ul>
-          <p>이 토큰은 GitHub의 단기 raw URL 서명이라 지금은 만료됐을 가능성이 높지만, 커밋된 자격증명이라는 사실은 그대로다. <code>settings.json</code>과 <code>README.md</code>는 히스토리 첫 등장 시점부터 같은 값을 담고 있어 히스토리 재작성 없이는 제거되지 않는다.</p>
+          <p>애플리케이션 설정과 설치 스크립트에 DB 접속 정보와 SSH 비밀번호가 평문으로 들어 있다. 설치 스크립트는 <code>StrictHostKeyChecking=no</code>까지 함께 쓴다. <strong>이 저장소는 아직 공개 상태이고 값도 그대로이므로, 이 보고서에는 파일과 행 번호를 싣지 않는다.</strong> 조치는 값을 환경변수로 옮기는 것이 아니라 <strong>먼저 해당 자격증명을 폐기·교체하는 것</strong>이다 — 이미 커밋된 순간 유출이며, 삭제 커밋으로는 되돌아가지 않는다.</p>
         </div>
       </article>
 

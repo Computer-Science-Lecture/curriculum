@@ -180,36 +180,6 @@ pq.push({<span class="hl">start</span>, 0});            <span class="cm">// firs
     </div>
   </section>
 
-  <section>
-    <h2>조치 현황</h2>
-    <p class="prose">이 감사에서 나온 공개 저장소 위생 항목과 그 처리 결과. 완료분은 2026-09-11에 실제로 반영했다.</p>
-    <div class="two">
-      <div class="act ok">
-        <h4>완료 · 타인 정보 제거</h4>
-        <p><code>ITE2037</code>의 <code>customplayers/</code>에 동급생 실명과 학번이 파일명으로 들어 있었다. 전 히스토리에서 <strong>351개 경로</strong>를 제거하고 상위 저장소와 조직 포크 양쪽에 반영했다. 본인 봇(<code>TEJAVA</code>·<code>DEJAVA</code>·<code>Player_v8</code>)과 프레임워크 샘플봇은 유지, 커밋 118개는 보존.</p>
-      </div>
-      <div class="act ok">
-        <h4>완료 · 사내 정보 제거</h4>
-        <p><code>ITE2038</code>의 <code>package.json</code>에 있던 전 직장 사내 Git 호스트 주소와, 커밋 3건의 회사 이메일을 히스토리에서 제거했다. 유입 경로는 <code>npm init</code>이 당시 워킹카피의 <code>origin</code>을 자동으로 채운 것이었고, 사내 소스코드가 함께 넘어온 흔적은 전 히스토리 검색 결과 없었다.</p>
-      </div>
-      <div class="act ok">
-        <h4>완료 · 히스토리의 시크릿 제거</h4>
-        <p>같은 재작성에서 Google Maps API 키와 DB 비밀번호도 함께 지웠다. <code>ITE3068</code>의 <code>gh-pages</code>에 남아 있던 값은 GitHub raw 일회성 서명 토큰으로 판명돼(레포가 public이라 권한 증분 0) 일반 커밋으로 정리했다.</p>
-      </div>
-      <div class="act">
-        <h4>남음 · 키 폐기 확인</h4>
-        <p><strong>히스토리에서 지운 것과 키를 폐기한 것은 다르다.</strong> 노출됐던 Maps 키가 아직 살아 있는지, 리퍼러 제한과 결제가 걸려 있는지는 GCP 콘솔에서 확인해야 한다. 브라우저용 Maps 키는 원래 공개되는 값이라 관건은 은닉이 아니라 제한과 결제 한도다.</p>
-      </div>
-      <div class="act ok">
-        <h4>남음 · 저장소 다이어트</h4>
-        <p>대용량 저장소 3개의 원인이 전부 남의 코드다 — <code>ITE4065</code> MariaDB 전체 트리(24,428파일), <code>MAT4015</code> OpenCV SDK 바이너리(409MB), <code>EWE8044</code> 데이터셋. fork+patch나 submodule이었다면 실제 기여가 diff 하나로 드러났을 것이다.</p>
-      </div>
-      <div class="act ok">
-        <h4>완료 · 알려진 결함 공개</h4>
-        <p>각 저장소 루트에 이 감사의 보고서를 <code>report.html</code>로 넣었다. 결함을 정확히 아는 엔지니어로 읽히는 편이, 결함이 없는 척하는 것보다 강하다. 다만 Pages를 켜지 않으면 브라우저에서 렌더링되지 않는다.</p>
-      </div>
-    </div>
-  </section>
 
   <footer>
     <p>감사 대상: <code>github.com/jiunbae</code>의 수업 저장소 16개 · 커밋 1,098개 · 2015.10 – 2020.04 · 로컬 클론 2026-09-11</p>

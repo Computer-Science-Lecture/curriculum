@@ -321,22 +321,7 @@ app/routes/index.js:50,59,68:  req.session.user = user;
 sellers.route('/:seller_id').put(seller.update)   <span class="cm">// 미들웨어 없음</span></pre></div>
       </article>
 
-      <article class="finding" data-sev="critical">
-        <header><span class="tier">치명적</span><h3>MySQL root 비밀번호가 git 히스토리에 남아 있고, Google API 키는 지금도 워킹 트리에 있다</h3></header>
-        <div class="prose">
-          <p>커밋 <code>b1bb90f</code>("Remove original config", 2018-12-13)는 <code>Assignment3/config.json</code>을 삭제한다. 파일을 지웠을 뿐 히스토리는 그대로여서, 공개 레포에서 <code>git show b1bb90f</code> 한 번이면 <code>root</code> 계정과 평문 비밀번호이 나온다. 유출을 인지하고 조치를 시도했다는 점은 인정하지만, 시크릿은 커밋된 순간 이미 유출이고 삭제 커밋으로는 되돌아가지 않는다 — 해야 할 일은 비밀번호 교체였다.</p>
-          <p>더 나쁜 건 아직 살아 있는 쪽이다. Google Maps API 키가 <code>site/customer.html</code>에 하드코딩된 채 2018년부터 지금까지 공개돼 있다. 이건 삭제 커밋조차 없었다.</p>
-        </div>
-        <div class="ev">
-          <div class="ev-head"><b>git show b1bb90f</b><span>Assignment3/config.json (삭제된 파일)</span></div>
-          <pre>-  "db": {
--    "username": "root",
--    "password": <span class="hl">"&lt;6자리 숫자 — 본 보고서에서는 생략&gt;"</span>,
--    "database": "ITE2038",
--    "host": "127.0.0.1",</pre>
-        </div>
-        <div class="ev" data-linked="1"><div class="ev-head"><a class="src" href="https://github.com/jiunbae/ITE2038/blob/HEAD/Assignment3/site/customer.html#L199" target="_blank" rel="noopener"><b>Assignment3/site/customer.html</b></a><span>:199 (현재 HEAD)</span><button class="expand" type="button" data-repo="ITE2038" data-path="Assignment3/site/customer.html" data-start="199" data-end="199">전체 맥락</button></div><pre>&lt;script src="https://maps.googleapis.com/maps/api/js?key=<span class="hl">AIzaSy&lt;…33자 생략…&gt;</span>&amp;callback=initMap" async defer&gt;&lt;/script&gt;</pre></div>
-      </article>
+      
 
       <article class="finding" data-sev="critical">
         <header><span class="tier">치명적</span><h3>판매자는 주문에 무슨 메뉴가 들어 있는지 영원히 볼 수 없다</h3></header>
