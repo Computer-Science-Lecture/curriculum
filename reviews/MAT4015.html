@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">MAT4015</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/MAT4015" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -398,6 +399,14 @@ void Tracker::cvMeanShift(Mat&amp; img, const Mat&amp; backproj, <span class="hl
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/MAT4015</code> · 커밋 32개(2016-04-10 ~ 2016-06-23, 이후 2021-08-09 GitHub 계정명 변경 커밋 1건) · 브랜치는 <code>master</code> 단일 · 저자 코드 646줄(<code>cv_tracker.cc</code> 348 + <code>main.cc</code> 180 + <code>cv_tracker.h</code> 118), 별도로 <code>example/open.c</code> 355줄</p>
     <p>검증 방식: <strong>빌드하지 않았다.</strong> Visual Studio 솔루션에 <code>&lt;Windows.h&gt;</code>·<code>GetOpenFileName</code>·역슬래시 include 경로 의존이 있어 macOS에서 컴파일이 불가능하다. 대신 (1) 저자 코드 646줄과 <code>example/open.c</code> 355줄 전체 정독, (2) <code>cv_tracker.cc:42–91</code>의 산술을 Python으로 그대로 포팅해 합성 프레임에서 20프레임 실행 — 보고서의 좌표 어긋남·정지 화면 드리프트·<code>search_range</code> 하한 고착 수치는 모두 그 실행 결과, (3) 인덱스 상한 계산으로 <code>hist_bins≠16</code>에서의 배열 밖 접근 확인, (4) <code>docs/object_tracking.pptx</code> 18장 및 두 강의자료 PDF(46쪽·39쪽) 텍스트 추출, (5) <code>TESTED/tested.gif</code> 240프레임 중 40·90번 프레임을 <code>ffmpeg</code>으로 추출해 육안 확인 — 빨간 박스 고착의 근거, (6) <code>git rev-list --objects</code>로 전체 blob 크기 집계. 모든 인용은 실제 파일과 행 번호를 <code>grep -n</code>으로 대조했다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">확률·확률과정 과목인데 제출물은 OpenCV 객체 추적이다. 핵심 질문 둘: (1) 구현이 mean-shift의 확률적 근거(히스토그램 역투영, 커널 밀도 추정, 수렴 조건)를 이해하고 작성된 것인가, 아니면 OpenCV API 호출을 나열한 것인가. (2) 과목의 확률론적 내용이 코드/문서에 실제로 반영되어 있는가. Visual Studio 솔루션이라 macOS에서 빌드 불가이니 명시하고 정독으로 판단하되, 플랫폼 종속성은 이식성 항목으로 지적하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

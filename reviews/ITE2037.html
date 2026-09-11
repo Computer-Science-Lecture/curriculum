@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ITE2037</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ITE2037" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -559,6 +560,14 @@ case w:  return Double.toString(<span class="hl">radius_x * 2</span>);          
     <p>평가 대상: <code>github.com/jiunbae/ITE2037</code> · 커밋 117개(배지운 90개, 이영수 23개, 기타 4개) · 2016-03-04 ~ 2016-07-10 · 브랜치는 <code>master</code> 하나</p>
     <p>검증 방식: 저자가 쓴 <code>.java</code> 76개 약 5,500줄 전량 정독. 인용한 경로·행 번호·코드는 모두 실제 파일 내용이며 <code>grep -n</code>으로 재확인했다. CP949로 인코딩된 파일은 <code>iconv</code>로 변환해 읽었다.</p>
     <p>실행 검증: <strong>컴파일하지 못했다.</strong> 이 환경에는 JDK가 없다(<code>javac -version</code> → <code>Unable to locate a Java Runtime</code>, <code>/usr/libexec/java_home -V</code> 동일, <code>/Library/Java/JavaVirtualMachines/</code> 비어 있음). 따라서 컴파일 오류 유무와 런타임 동작은 미검증이며, 위의 모든 실행 관련 주장은 코드 정독에 근거한다. 다만 순수 수치 주장 세 건은 동일 로직을 Python으로 재현해 확인했다 — <code>Window.isIn</code>의 π 추정치 3.2304(정정 시 3.1393), <code>PiCalculator</code>의 3.1373, <code>Assignment1_2.Say</code>의 100 → "십십" / 110 → 인덱스 초과. git 히스토리 주장(<code>5d8f226</code>의 정상 <code>Update()</code>, <code>da4cfe1</code>의 주석 처리)은 <code>git show</code>로 직접 확인했다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">추적 파일이 1,727개지만 대부분 저자의 코드가 아니다. _by_TA 폴더, Eclipse .metadata, 동급생 customplayers를 먼저 분리하고 저자가 쓴 .java만 정독하라. git log의 저자 목록으로 공동 작업 여부를 확인하고 본인 기여만 평가 대상으로 삼아라. OOP 과목이므로 상속/인터페이스/다형성을 실제로 활용했는지, 아니면 절차적 코드를 클래스로 감쌌을 뿐인지 판정하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

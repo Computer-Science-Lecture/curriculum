@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ITE4005</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ITE4005" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -337,6 +338,14 @@ for f in range(self.factors):
     <p>평가 대상: <code>github.com/jiunbae/ITE4005</code> · 커밋 90개 · 2018-03-19 ~ 2018-06-15 (HEAD <code>1bb6fd1</code>) · 추적 파일 98개 · Python 866 LOC · 브랜치 <code>add-license-1/2</code>는 라이선스 추가분 외에 구현이 없음을 확인</p>
     <p>검증 방식: 네 과제의 모든 소스(<code>apriori.py</code>, <code>dt.py</code>+<code>lib/</code>, <code>clustering.py</code>+<code>lib/</code>, <code>recommender.py</code>+<code>lib/</code>+<code>factorization.pyx</code>)와 README·보고서 마크다운 전량 정독. 인용한 행 번호와 코드는 모두 실제 파일에서 확인.</p>
     <p>실행: (1) Apriori를 지지도 5%·4%·1%로 실행해 커밋된 출력 두 개를 재현하고, 두 번 실행해 출력 비결정성을 확인했으며, 가지치기 손실을 별도 스크립트로 계측. (2) Decision Tree를 entropy/gini/error 및 <code>--forest 5</code>/<code>--mingain 0</code>으로 실행해 정답 파일과 대조(<code>pandas.get_values()</code>가 최신 pandas에서 제거되어 사본에서 해당 호출만 제거). 미지 속성값 입력을 합성해 동작 확인. (3) DBSCAN을 input1/2/3에 대해 실행해 <code>*_ideal.txt</code>와 Jaccard 대조(파라미터는 레포에 기록이 없어 추정값 사용), 노이즈 0개 입력으로 KeyError 재현, 타이머 버그를 별도 스크립트로 증명. (4) Cython 확장을 <code>np.long_t</code>→<code>np.int64_t</code>로 수정해 빌드한 뒤 u1 전체를 학습·평가하고, SGD 갱신식을 표준형으로 고친 사본과 RMSE를 비교. 베이스라인 RMSE와 cold-start 건수는 직접 계산. 레포 파일은 일절 수정하지 않았고 모든 실행은 사본에서 수행.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">Apriori는 후보 생성/가지치기(downward closure)가 실제로 구현됐는지, Decision Tree는 분할 기준 수식과 미지의 속성값 처리, DBSCAN은 core/border/noise 판정과 경계점 모호성, Recommender는 train/test 분리와 데이터 누수·베이스라인 비교. 입력이 작으면 python3로 직접 실행해 실제 출력을 증거로 인용하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

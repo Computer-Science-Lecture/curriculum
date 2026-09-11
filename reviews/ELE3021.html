@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ELE3021</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ELE3021" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -413,6 +414,14 @@ usertest.c:33:2: error: use of undeclared identifier 'close'</pre></div>
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/ELE3021</code> · 추적 파일 35개 · 커밋 12개(코드를 담은 것 5개) · 브랜치 <code>master</code>, <code>2018</code> · 마지막 코드 커밋 2017-06-20 · 마지막 푸시 2021-08-09(GitHub 계정명 변경, README 1줄).</p>
     <p>검증 방식: C/C++ 소스 9개(<code>driver/</code> 3, <code>mutex/</code> 3, <code>message_queue/</code> 3) 및 <code>memory/manage.cc</code>, <code>linux/kernel/get_task_info.c</code>, 두 syscall 테이블, <code>README.md</code> 전문 정독. 유저스페이스 코드는 macOS에서 <code>g++ -std=c++11 -Wall -Wextra</code>로 컴파일했고, 인용한 경고는 모두 실제 출력이다. <code>mutex/dining.cpp</code>와 <code>memory/manage.cc</code>는 빌드 후 실행해 출력을 기록했다 — 단 macOS의 <code>sem_init</code>은 <code>ENOSYS</code>를 반환하므로 <code>dining</code> 실행은 동기화를 검증하지 못했고, 해당 판정은 코드 독해에 근거한다. <code>message_queue/*</code>는 <code>&lt;linux/unistd.h&gt;</code> 부재로 컴파일되지 않았다(<code>receiver.cpp</code> 제외). 커널 모듈과 4.1 커널은 macOS에서 빌드할 수 없어 <strong>미검증</strong>이며, 드라이버·시스템 콜 관련 지적은 전부 정독과 커널 API 계약에 근거한다. 인용한 행 번호는 <code>grep -n</code>과 <code>cat -n</code>으로 확인했다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">커널 모듈은 copy_to_user/copy_from_user 사용 여부(직접 포인터 역참조는 심각한 결함), 반환값 검사, 에러 경로 자원 해제, 모듈 언로드 정리, 동시 접근 보호. mutex/dining은 데드락 회피 전략과 기아 상태, message_queue는 IPC 자원 생성/삭제 짝. README가 링크하는 실습 명세와 실제 구현 범위의 일치 여부. macOS에서는 커널 모듈을 빌드할 수 없으니 유저스페이스 코드만 컴파일하고 나머지는 정독으로 판단하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

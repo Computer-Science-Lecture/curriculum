@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ITE4053</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ITE4053" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -383,6 +384,14 @@ save method.   <span class="cm">← dB 수치, 베이스라인, Set5 평균 그 
     <p>평가 대상: <code>github.com/jiunbae/ITE4053</code> · 커밋 42개(master 단독, 다른 브랜치 없음) · 실질 작업 2019-03-15 ~ 2020-06-08 · 마지막 푸시 2021-08-09(계정명 변경 커밋) · 파이썬 2,441줄</p>
     <p>검증 방식: 세 프로젝트의 전체 파이썬 소스와 노트북 정독. <code>NumpyNeuralNetwork</code>는 numpy 2.4.6 환경에서 실제 실행 — 역전파 수치 미분 대조(최대 상대오차 1.86e-07), README 비교표 NNN 행 7개 설정 전량 재현(7/7 일치), Adam 크래시 재현, BCE NaN 20시드 스윕, <code>parameters.npz</code>와 README 파라미터 표 대조. <code>SuperResolution</code> RNN의 <code>_preprocess</code> 텐서 변형은 numpy로 동일 연산 재현해 검증. <code>model.hdf5</code>는 내부 config 문자열을 직접 확인.</p>
     <p>미검증: TensorFlow가 설치되지 않은 환경이라 <code>--mode tf</code> 경로, <code>SuperResolution</code>/<code>ImageDenoising</code>의 실제 학습, 콜백 실행은 돌리지 않았다(브리프의 대용량 학습 금지 조항에도 해당). 해당 부분 지적은 모두 정적 분석과 저장소에 남은 산출물에 근거한다. <code>data/91</code>·<code>291</code>·<code>Set5</code>는 저장소에 없어 중복 여부는 확인하지 못했다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">딥러닝 과목이므로 특히: NumpyNeuralNetwork는 역전파 수식이 실제로 맞는지 직접 미분 검증, 수치 안정성(log(0), softmax overflow), 가중치 초기화, 그래디언트 체크 유무. ImageDenoising/SuperResolution은 train/test 분리와 데이터 누수, 평가지표(PSNR/SSIM) 계산의 정확성, 베이스라인 비교 유무, 결과 수치의 재현 가능성(seed/환경 기록). 실험 결과 주장과 실제 코드/로그의 일치 여부. 무거운 학습은 절대 실행하지 마라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

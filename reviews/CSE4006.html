@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">CSE4006</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/CSE4006" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -532,6 +533,14 @@ Insert and Search ratio 1:9, 100000 numbers takes <span class="hl">111ms</span>
     <p>평가 대상: <code>github.com/jiunbae/CSE4006</code> · 브랜치 <code>master</code> 1개 · 커밋 131개 (2017-09-11 ~ 2017-12-27, 이후 2021-08-09 계정 rename 커밋 1개) · 추적 파일 279개 (Java 76, <code>.class</code> 114)</p>
     <p>검증 방식: <code>hw0</code>·<code>LF_LL</code>·<code>ParBST</code>의 전체 소스 정독, <code>VirutalWorld</code>는 <code>Actionable</code>·AI·skeleton 변경분 정독. 과제 명세 <code>hw0.pdf</code>·<code>hw2.pdf</code>·<code>hw3.pdf</code> 텍스트 추출(hw3는 폰트 서브셋 인코딩을 치환 복원), 제출 보고서 <code>report.docx</code> 2편 전문 확인, 레포에 커밋된 성능 테스트 결과 HTML·CSV 대조, <code>git log --all</code> 및 커밋 단위 diff 확인.</p>
     <p><strong>미검증:</strong> 이 머신에 JDK가 없어(<code>javac -version</code> → <code>Unable to locate a Java Runtime.</code>) 컴파일과 실행을 전혀 하지 못했다. 위의 모든 지적은 소스 추적과 커밋된 실행 로그에 근거하며, 런타임 확인이 필요한 주장(성능 로그 모순의 정확한 원인)은 본문에 "추정"으로 표시했다. 인용된 행 번호와 코드는 모두 실제 파일 내용이다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">LF_LL/ParBST는 동시성 자료구조다. 이 저자는 동시성 과제에서 원자성을 빠뜨린 전력이 있으니, volatile/AtomicReference/CAS 사용 여부, 논리적 삭제 처리, memory visibility, 그리고 &#x27;lock-free&#x27;라는 이름이 실제 구현과 맞는지(synchronized를 lock-free라 부르고 있지 않은지)를 반드시 확인하라. 소프트웨어공학 과목이므로 테스트 코드 유무, 빌드 구성, 설계 문서와 코드의 일치도 함께 본다.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

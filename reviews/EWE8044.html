@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">EWE8044</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/EWE8044" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -339,6 +340,14 @@ EWE8044.ipynb:<span class="hl">0</span>   EWE8044#3.ipynb:<span class="hl">0</sp
     <p>검증 방식: 노트북 두 권(코드·markdown 셀 81개)과 저장된 출력 전부를 JSON 파싱해 정독. 인용한 행 번호는 모두 <code>.ipynb</code> 파일의 실제 행이며 <code>grep -n</code>으로 확인했다.</p>
     <p>독립 재현(numpy 2.4.6, 학습은 실행하지 않음): (1) seed 8044로 <code>points</code> 생성 후 <code>KL</code> 재실행 → 저장된 출력과 소수점 넷째 자리까지 일치, 음수 확인; (2) int8 절사 편향 −0.5 및 오버플로 여유 측정; (3) shape (2,) 배열의 <code>.mean(0)</code>이 스칼라임을 확인; (4) 압축률 식 187,500 대 280,500 대조; (5) 동일 이미지를 uint8/float로 넣은 PSNR 4.78 dB 측정; (6) <code>np.corrcoef</code>가 2차원 입력에서 (748, 748)을 반환함을 확인. <code>unzip -t</code>로 <code>test1.zip</code> 손상 확인.</p>
     <p>실행하지 않은 것: 노트북 셀 자체(원 환경 skimage/sklearn 미설치), k-means 및 5,000장 전체 순회.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">커밋이 단 1개다. 노트북 정독과 저장된 출력 분석만으로 판단하라(절대 학습을 실행하지 마라). train/validation/test 분리와 데이터 누수, 모델 정의가 직접 작성인지 전이학습인지, 보고된 정확도가 어느 split에서 나온 값인지, 베이스라인 비교와 재현성(seed/환경), execution_count로 셀 실행 순서가 뒤엉켰는지. 대용량 데이터셋 커밋 등 레포 위생이 headline이 될 가능성이 높다.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

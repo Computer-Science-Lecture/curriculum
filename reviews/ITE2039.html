@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ITE2039</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ITE2039" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -295,6 +296,14 @@ allocated by thread T0 here: #1 in main <span class="hl">Counting.cpp:13</span><
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/ITE2039</code> · 추적 파일 13개 · 커밋 12개 · 코드 커밋 기간 2016-09-09 ~ 2016-12-07 · 마지막 푸시 2021-08-09(사용자명 변경, 코드 변경 없음) · 브랜치는 <code>master</code> 단독이며 원격에도 다른 브랜치가 없어 숨은 구현은 없다.</p>
     <p>검증 방식: <code>Assignment/</code>의 <code>.cpp</code> 12개 전문 정독. <code>Apple clang 21.0.0</code>으로 <code>-std=c++14 -Wall -Wextra</code> 전체 컴파일 — <strong>12개 모두 에러 없이 빌드됨</strong>, 경고는 17건(<code>-Wsign-compare</code> 4, <code>-Wunused-parameter</code> 8, <code>-Wunknown-pragmas</code> 2, <code>-Wvla-cxx-extension</code> 2, <code>-Wpragma-once-outside-header</code> 1). 12개 전부를 소규모 입력으로 실행해 출력을 확인했고, MatrixChain(<code>15125</code>)·RodCutting(<code>22</code>, 절단 <code>2 6</code>)·Huffman(<code>224</code>)은 CLRS 예제 정답과 대조했다. <code>Counting</code>·<code>HuffmanCode</code>·<code>Insertion</code>·<code>Selection</code>은 <code>-fsanitize=address</code>로 재빌드해 앞의 셋에서 오류를 재현했다. <code>dijkstra</code>의 큐 정렬 순서는 동일한 타입의 독립 프로그램으로 따로 확인했다. 삭제된 <code>AssemblyLine.cpp</code>는 <code>git show 6aade28</code>로 복원해 읽었다. 저장소 파일은 수정하지 않았다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">주의: 이 레포는 작다(추적 파일 14개). 분량을 억지로 채우지 마라. 각 파일이 교과서 정의대로 맞는지(Heapsort sift-down 경계, Huffman tie-breaking, dijkstra 방문 처리, DP 점화식과 오프바이원), 자료구조 직접 구현인지 STL 위임인지, 복잡도가 이름값을 하는지. g++ -Wall -Wextra로 전부 컴파일하고 작은 입력으로 실행해 정확성을 확인하라. &#x27;과제&#x27;가 아니라 &#x27;수업 따라치기 연습 기록&#x27;이라면 그렇게 정직하게 판정하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">MAT2003</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/MAT2003" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -354,6 +355,14 @@ result: given flow: 4, cost: <span class="hl">80</span>   <span class="cm">// 2,
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/MAT2003</code> · 추적 파일 37개 · 커밋 16개 · 2015-11-02 ~ 2015-12-04 · 브랜치는 <code>master</code> 단일(원격에도 다른 브랜치 없음)</p>
     <p>검증 방식: <code>*.cc</code> 5개와 <code>headers/*.h</code> 4개 전문 정독(894행). <code>선형대수 프로젝트 보고서.docx</code>를 <code>word/document.xml</code>에서 추출해 전문 대조(<code>pdftotext</code>는 환경에 없어 PDF 3종의 내용 대조는 못 함 — <code>LinearAlgebra/report.pdf</code>가 초안이라는 것은 md5·크기 차이에 근거한 추정이다). 원본 소스는 백슬래시 include 때문에 빌드 실패를 확인했고, 스크래치 사본에서 구분자만 슬래시로 바꿔 <code>g++ -std=c++14 -Wall -Wextra -O2</code>로 5개 전부 빌드해 10개 그래프에 실행, 커밋된 <code>*.out</code>과 결과가 전부 일치함을 확인. <code>-fsanitize=address,undefined</code>로 <code>Problem1i</code>를 graph0에 실행(무경고). <code>data/zerocost</code>·<code>data/infeas</code> 두 입력을 직접 작성해 반환값 모호성을 재현. <code>graph0</code>의 최소 비용 109는 필자가 파이썬으로 작성한 독립 SPFA-MCMF로 교차 검증. <code>graph2</code>의 유령 간선은 저자의 <code>graph.h</code>를 그대로 링크한 프로브 프로그램으로 확인. 인용한 행 번호는 모두 <code>cat -n</code>으로 확인한 실제 위치다. 레포 파일은 수정하지 않았다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">과제가 실제로 무엇을 요구했는지를 보고서 문서(docx)에서 먼저 확인하라. 수치선형대수 관점에서 피벗팅 여부, 부동소수점 비교, 특이행렬 판정 처리를 보고, 문서의 주장과 코드가 일치하는지가 핵심 평가 포인트다. 1학년 과제이므로 가혹한 절대평가보다 당시 수준에서의 기본기와 정직성을 중심으로 평가하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

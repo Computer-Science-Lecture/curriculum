@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">CSE4020</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/CSE4020" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -344,6 +345,14 @@ assert all(isinstance(it, tuple) for it in obj.<span class="hl">_normals</span>)
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/CSE4020</code> · 추적 파일 74개 · 커밋 62개 · 브랜치 <code>master</code> 하나(다른 브랜치에 숨은 구현 없음) · 작업 기간 2018-03-11 ~ 2018-06-21(2021-08-09 커밋은 GitHub 계정명 변경만).</p>
     <p>검증 방식: <code>assignment1/</code>·<code>assignment2/</code>·<code>assignment3/</code> 전체 소스 정독, <code>labs/</code>는 <code>glMatrixMode</code> 사용 이력 대조 목적으로만 grep. 과제 명세 PDF 2종(<code>Assignment1-MT.pdf</code>, <code>Assignment3-v3.pdf</code>)에서 텍스트를 추출해 README·<code>report.md</code>의 체크박스와 항목별 대조. OpenGL 창이 필요한 코드는 실행하지 않았다. 대신 <code>lib/obj.py</code>의 <code>from OpenGL...</code> 두 줄만 스텁으로 치환하고 Python 3.11 + numpy 1.24.4 환경에서 <code>OBJ.read_obj</code>와 <code>OBJ.trianglize</code>를 직접 호출했다 — 레포의 obj 파일 7종 전부와 합성 케이스 5종(음수 인덱스, <code>f v/vt</code>, 오목 L자 육각형, 기울어진 정오각형, 법선 (0,1,1) 평면 사각형)을 돌려 위의 통과/실패와 스택 트레이스를 얻었다. 법선 붕괴는 <code>sphere-tri.obj</code>의 960개 삼각형에 대해 방출 법선과 참 반지름 법선의 각도 차이를 수치로 측정했다. Bézier 기저와 <code>Mode.get</code>의 falsy 버그도 해당 코드를 그대로 떼어 실행해 확인했다. 조명·행렬 모드 관련 주장은 실행이 아니라 레포 전체 grep(<code>GL_NORMALIZE</code>, <code>GL_RESCALE_NORMAL</code>, <code>glMaterial</code>, <code>GL_SHININESS</code>, <code>glMatrixMode</code> 각 0건 또는 해당 줄)과 고정 파이프라인 규격에 근거한다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">그래픽스 과목이므로: 변환 행렬의 정확성(행/열 우선 혼동, 변환 합성 순서, 동차좌표, 법선 변환에 역전치행렬을 썼는지), 계층적 렌더링의 행렬 스택 push/pop 짝, OBJ 파서의 견고함(1-based 인덱스, 음수 인덱스, f v/vt/vn 변형, n각형 삼각화, 법선 없는 파일), 조명/셰이딩 모델이 주장대로 구현되었는지. OpenGL 창이 필요한 코드는 실행하지 말고 정독으로 판단하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

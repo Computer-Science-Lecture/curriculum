@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">CSE2010</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/CSE2010" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -708,6 +709,14 @@ inline static int modulus(int first, int second, bool state) {
     <p>평가 대상: <code>github.com/jiunbae/CSE2010</code> · 브랜치 <code>master</code>(원격에 다른 브랜치 없음) · 커밋 105개 · 소스 작업 기간 2016-03-04 ~ 2016-06-26 · 마지막 푸시 2017-04-13(<code>4f27adc "Fix typo"</code>, README 수정) · 추적 파일 84개 / C 소스 23개 4,493행.</p>
     <p>검증 방식: C 소스 23개 전량 정독. 23개 모두 <code>gcc -Wall -Wextra -fsanitize=address -g</code>(Apple clang 21.0.0, arm64)로 빌드 시도 — 22개 성공, <code>lab11/p11.c</code> 컴파일 에러. 빌드된 22개 중 커밋된 입력 파일이 있는 것은 전부 실제 실행하고 출력을 확인했다. Lab02의 6개 케이스는 커밋된 기대 출력과 <code>diff</code>로 대조했다(<code>p2_1</code> 2/2 일치, <code>p2_2</code>·<code>p2_3</code> 4/4 불일치). Lab04의 오답은 직접 만든 입력(<code>9-2</code>, <code>8/2</code>, <code>10+5</code>)으로 재현했고, Lab13의 최단거리는 손으로 검산해 대조했으며, Lab12의 위상 정렬은 9개 간선 제약을 하나씩 확인했다. Lab12·13·15는 <code>LINE_CHAR</code>를 10으로 바꾼 사본을 <code>scratchpad</code>에 만들어 별도 실행했다(레포 파일은 수정하지 않았다). 인용된 행 번호와 코드는 모두 <code>grep -n</code>/<code>sed -n</code>으로 확인한 실제 파일 내용이다.</p>
     <p>미검증: <code>lab01/p1_3.c</code>는 <code>scanf</code>로 표준입력을 받는 대화형이라 빌드만 하고 실행하지 않았다. <code>lab10/p10-test.c</code>의 외부 출처 여부는 코드 스타일 정황에 근거한 <strong>추정</strong>이며 원출처를 확인하지 못했다. 과제 명세 PDF/DOCX 30개는 열지 않아, 각 랩의 요구사항 대비 충족도는 README의 주제명·Lab02의 기대 출력·코드 내용만으로 판단했다. 메모리 누수는 코드 정독으로만 식별했다 — macOS ASan은 <code>detect_leaks</code>를 지원하지 않아 LeakSanitizer 수치는 얻지 못했다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">자료구조 과목이므로 특히: 메모리 관리(malloc/free 짝, 누수, 경계), 포인터 오류, 자료구조 불변식, 알고리즘 복잡도가 이름값을 하는지, 입력 파싱의 견고함을 집중 점검하라. C 코드는 gcc -Wall -Wextra -fsanitize=address로 컴파일해보고 경고/에러를 증거로 활용하라. lab01~lab06처럼 여러 과제로 나뉘어 있으면 과제별로 판정하되, 단순 연습이면 그렇게 정직히 판정하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

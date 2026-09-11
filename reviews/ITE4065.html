@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ITE4065</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ITE4065" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -435,6 +436,14 @@ lock_sys-&gt;gclist-&gt;tail = lock_sys-&gt;gclist-&gt;head;</pre></div>
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/ITE4065</code> · 커밋 359개 · 추적 파일 24,565개 · 마지막 푸시 2021-08-08(작업은 2017년 가을학기)</p>
     <p>검증 방식: 네 프로젝트의 전체 소스 정독, <code>origin/multi</code>·<code>origin/single</code> 브랜치 대조, Project 4의 <code>ITE4065</code> 매크로 블록 전수 확인, <code>results/</code>의 sysbench 원본 로그 재집계. Project 2·3은 실제로 컴파일을 시도했고 Project 3은 <code>g++ -O2</code>로 빌드해 4스레드 2초 실행 후 RSS를 측정했다. 인용된 행 번호는 모두 현재 <code>master</code> 기준 실측값이다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">이 저장소는 상위 에이전트가 직접 조사했다. 네 프로젝트(Signal / Two-Phase Locking / Wait-Free Snapshot / Scalable Lock Manager)의 전체 소스를 정독하고, origin/multi·origin/single 브랜치를 대조했으며, project4의 ITE4065 매크로 블록을 전수 확인했다. results/의 sysbench 원본 로그를 재집계하고, Project 3은 g++ -O2로 빌드해 4스레드 2초 실행 후 RSS를 측정했다.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>

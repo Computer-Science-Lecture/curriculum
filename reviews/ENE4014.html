@@ -14,6 +14,7 @@
 <nav class="sitenav">
   <a class="home" href="../index.html">CS 커리큘럼 감사</a>
   <span class="crumb">ENE4014</span>
+  <a class="meth" href="../method.html">방법</a>
   <a class="ext" href="https://github.com/jiunbae/ENE4014" target="_blank" rel="noopener">저장소 &#8599;</a>
 </nav>
 <div class="wrap">
@@ -306,6 +307,14 @@ flatten xs = (\z n -&gt; foldr (\x y -&gt; foldr z y x) n xs) (:) []</pre></div>
   <footer>
     <p>평가 대상: <code>github.com/jiunbae/ENE4014</code> · 커밋 24개 · 2017-05-29 ~ 2017-06-15 · 브랜치는 <code>master</code> 하나뿐(원격 포함), 다른 곳에 숨은 구현 없음</p>
     <p>검증 방식: Homework1은 전체 소스 정독 후 <code>make</code>로 빌드(성공, 경고 없음)하고 <code>data/</code>의 네 파일과 README 예제, 직접 만든 반례 입력으로 실행했다. LR 파서와 정규식 매처의 세그폴트·범위 밖 읽기는 <code>-fsanitize=address</code> 재빌드로 스택 트레이스까지 확인했다. Homework2는 이 환경에 <code>ghc</code>/<code>runghc</code>/<code>stack</code>이 없어 <strong>Haskell 컴파일·실행은 미검증</strong>이며, 세 <code>.hs</code>를 파이썬으로 1:1 전사해 알고리즘 의미만 확인했다(동전 문제는 n=2..10 전수 2046개 입력). 커밋된 <code>sudoku.py</code>·<code>coin.py</code>는 <code>python3</code>로 직접 실행했다. 인용한 코드와 행 번호는 모두 실제 파일에서 확인한 것이다.</p>
+  
+  <details class="prompt">
+    <summary>이 보고서를 만든 프롬프트</summary>
+    <div class="prompt-body">
+      <p>저장소마다 리뷰어 한 명이 아래 지시로 독립 조사했다. 공통 지침은 <a href="../method.html">방법론</a>에 전문이 있다.</p>
+      <pre class="code">Homework1은 C++(FSA/DFA 생성, LR 파서, 정규식→DFA), Homework2는 Haskell이다. README에 문항별 배점이 있으니 요구사항 대비 충족도를 문항별로 판정하라. 특히 부분집합 구성의 정확성, LR 파싱 테이블 구동 루프, 정규식 연산자 범위. 하스켈 과제에 .py가 함께 있는데 프로토타입인지 제출물인지, 하스켈 버전이 명령형 스타일인지 판정하라.</pre>
+    </div>
+  </details>
   </footer>
 
 </div>
